@@ -6,18 +6,26 @@ import createError from "http-errors";
 import path from "path";
 import cookieParser from "cookie-parser";
 import logger from "morgan";
+import session from "express-session";
 
+import { AuthRouter } from "./routes/authRouter";
+import { DashboardRouter } from "./routes/dashboardRouter";
 import { IndexRouter } from "./routes/indexRouter";
 
 export class App {
     private _app: Express;
     private _databaseHelper: DatabaseHelper;
 
+    private _authRouter: AuthRouter;
+    private _dashboardRouter: DashboardRouter;
     private _indexRouter: IndexRouter;
 
     constructor() {
         this._app = express();
         this._databaseHelper = new DatabaseHelper();
+
+        this._authRouter = new AuthRouter();
+        this._dashboardRouter = new DashboardRouter();
         this._indexRouter = new IndexRouter();
     }
 
@@ -37,12 +45,31 @@ export class App {
         this._app.use(express.urlencoded({ extended: false }));
         this._app.use(cookieParser());
         this._app.use(express.static(path.join(process.cwd(), 'public')));
+        this._app.use(session({
+            resave: false, // don't save session if unmodified
+            saveUninitialized: false, // don't create session until something stored
+            secret: 'DEV_SECRET_NEEDS_CHANGING', // TODO: Replace before release
+        }));
+
+        // Session-persisted message middleware
+        this._app.use(function(req, res, next){
+            var err = req.session.error;
+            var msg = req.session.success;
+            delete req.session.error;
+            delete req.session.success;
+            res.locals.message = '';
+            if (err) res.locals.error = err;
+            if (msg) res.locals.message = msg;
+            next();
+        });
 
         this._databaseHelper.Init();
     }
 
     private SetupRoutes() {
         this._app.use('/', this._indexRouter.Route());
+        this._app.use('/auth', this._authRouter.Route());
+        this._app.use('/dashboard', this._dashboardRouter.Route());
     }
 
     private SetupErrors() {

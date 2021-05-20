@@ -7,7 +7,8 @@ export class DatabaseHelper {
             const db = new Database('data.db');
 
             db.serialize(() => {
-                db.run('CREATE TABLE cats (id TEXT UNIQUE, name TEXT)');
+                db.run('CREATE TABLE users (id TEXT UNIQUE, email TEXT, username TEXT, password TEXT, verified BIT, admin BIT, active BIT)');
+
                 db.close();
 
                 console.log("Initialised Database");

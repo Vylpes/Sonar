@@ -15,10 +15,20 @@ html
                     ul.navbar-nav.me-auto.mb-2.mb-lg-0
                         li.nav-item
                             a.nav-link(aria-current="page" href="/") Home
+                        li.nav-item
+                            a.nav-link(href="/dashboard") Dashboard
+                        li.nav-item
+                            a.nav-link(href="/auth/login") Login
+                        li.nav-item
+                            a.nav-link(href="/auth/logout") Logout
                 form.d-flex
                     input.form-control.me-2(type="search" placeholder="Search" aria-label="Search" disabled)
                     button.btn.btn-outline-success.disabled(type="submit") Search
         .container.mt-3
+            if (error)
+                .alert.alert-danger= error
+            if (message)
+                .alert.alert-message= message
             block content
         block scripts
         script(src='/lib/bootstrap/js/bootstrap.min.js')
