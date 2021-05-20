@@ -16,6 +16,10 @@ export class IndexRouter {
     // GET method for /
     private OnGetIndex() {
         this._router.get('/', (req: Request, res: Response) => {
+            if (res.locals.viewData.user.authenticated) {
+                res.redirect('/dashboard');
+            }
+
             res.render('index/index', res.locals.viewData);
         });
     }

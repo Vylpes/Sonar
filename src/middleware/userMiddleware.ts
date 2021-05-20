@@ -64,6 +64,12 @@ export class UserMiddleware {
             return;
         }
 
+        if (password.length <= 7) {
+            req.session.error = "Password must be at least 7 characters long";
+            res.redirect('/auth/login');
+            return;
+        }
+
         const db = new Database("data.db");
 
         db.all(`SELECT * FROM users WHERE email = '${email}' OR username = '${username}'`, (err, rows) => {
@@ -88,7 +94,7 @@ export class UserMiddleware {
                 
                 var stmt = db.prepare('INSERT INTO users VALUES (?, ?, ?, ?, ?, ?, ?)');
 
-                hash(password, 10).then(pwd => {
+                hash(password, 20000).then(pwd => {
                     stmt.run(uuidv4(), email, username, pwd, 0, firstUser ? 1 : 0, 1);
     
                     stmt.finalize();

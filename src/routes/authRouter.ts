@@ -32,6 +32,10 @@ export class AuthRouter {
     // GET method for /auth/login
     private OnGetLogin() {
         this._router.get('/login', (req: Request, res: Response) => {
+            if (res.locals.viewData.user.authenticated) {
+                res.redirect('/dashboard');
+            }
+
             res.render('auth/login', res.locals.viewData);
         })
     }
