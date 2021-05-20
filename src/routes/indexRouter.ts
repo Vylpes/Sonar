@@ -1,7 +1,7 @@
 // Copyright (c) 2021 Vylpes. MIT License.
 
 import { Router, Request, Response } from "express";
-import { SetupCatTable } from "../helpers/catHelper";
+import { SetupCatTable } from "../middleware/catMiddleware";
 
 export class IndexRouter {
     private _router: Router;

@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import { Request, Response, NextFunction } from "express";
 
 export const SetupCatTable = (req: Request, res: Response, next: NextFunction) => {
-    const db = new Database(':memory:');
+    const db = new Database('data.db');
 
     db.serialize(() => {
         db.run('CREATE TABLE cats (id TEXT UNIQUE, name TEXT)');
