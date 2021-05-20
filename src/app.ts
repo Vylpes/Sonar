@@ -1,7 +1,5 @@
-// Copyright (c) 2021 Vylpes. MIT License.
-
 import { Express, Request, Response, NextFunction } from "express";
-import { InitialiseDatabase } from "./helpers/databaseHelper";
+import { DatabaseHelper } from "./helpers/databaseHelper";
 
 import express from "express";
 import createError from "http-errors";
@@ -13,11 +11,13 @@ import { IndexRouter } from "./routes/indexRouter";
 
 export class App {
     private _app: Express;
+    private _databaseHelper: DatabaseHelper;
 
     private _indexRouter: IndexRouter;
 
     constructor() {
         this._app = express();
+        this._databaseHelper = new DatabaseHelper();
         this._indexRouter = new IndexRouter();
     }
 
@@ -38,7 +38,7 @@ export class App {
         this._app.use(cookieParser());
         this._app.use(express.static(path.join(process.cwd(), 'public')));
 
-        InitialiseDatabase();
+        this._databaseHelper.Init();
     }
 
     private SetupRoutes() {
