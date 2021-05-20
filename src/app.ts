@@ -1,5 +1,6 @@
 import { Express, Request, Response, NextFunction } from "express";
 import { DatabaseHelper } from "./helpers/databaseHelper";
+import { PugMiddleware } from "./middleware/pugMiddleware";
 
 import express from "express";
 import createError from "http-errors";
@@ -15,6 +16,7 @@ import { IndexRouter } from "./routes/indexRouter";
 export class App {
     private _app: Express;
     private _databaseHelper: DatabaseHelper;
+    private _pugMiddleware: PugMiddleware;
 
     private _authRouter: AuthRouter;
     private _dashboardRouter: DashboardRouter;
@@ -23,6 +25,7 @@ export class App {
     constructor() {
         this._app = express();
         this._databaseHelper = new DatabaseHelper();
+        this._pugMiddleware = new PugMiddleware();
 
         this._authRouter = new AuthRouter();
         this._dashboardRouter = new DashboardRouter();
@@ -62,6 +65,8 @@ export class App {
             if (msg) res.locals.message = msg;
             next();
         });
+
+        this._app.use(this._pugMiddleware.GetBaseString);
 
         this._databaseHelper.Init();
     }

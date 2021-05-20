@@ -16,7 +16,7 @@ export class IndexRouter {
     // GET method for /
     private OnGetIndex() {
         this._router.get('/', (req: Request, res: Response) => {
-            res.render('index/index', { title: 'Sonar', error: res.locals.error, message: res.locals.message });
+            res.render('index/index', res.locals.viewData);
         });
     }
 }

@@ -32,7 +32,7 @@ export class AuthRouter {
     // GET method for /auth/login
     private OnGetLogin() {
         this._router.get('/login', (req: Request, res: Response) => {
-            res.render('auth/login', { title: 'Login', message: res.locals.message });
+            res.render('auth/login', res.locals.viewData);
         })
     }
 

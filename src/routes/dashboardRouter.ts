@@ -19,7 +19,7 @@ export class DashboardRouter {
     // GET method for /dashboard
     private OnGetIndex() {
         this._router.get('/', this._userMiddleware.Authorise, (req: Request, res: Response) => {
-            res.render('dashboard/index', { title: 'Dashboard' });
+            res.render('dashboard/index', res.locals.viewData);
         });
     }
 }
