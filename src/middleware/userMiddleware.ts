@@ -16,34 +16,31 @@ export class UserMiddleware {
 
         const db = new Database("data.db");
 
-        db.serialize(() => {
-            db.all(`SELECT * FROM users WHERE email = '${email}'`, (err, rows) => {
-                if (rows.length != 1) {
-                    req.session.error = "User does not exist";
+        db.all(`SELECT * FROM users WHERE email = '${email}'`, (err, rows) => {
+            if (rows.length != 1) {
+                req.session.error = "User does not exist";
+                res.redirect('/auth/login');
+                return;
+            }
+
+            const row = rows[0];
+
+            compare(password, row.password, (err, same) => {
+                if (err) throw err;
+
+                if (same) {
+                    res.locals.user = row;
+                    next();
+                    db.close();
+                } else {
+                    req.session.error = "Password is incorrect";
                     res.redirect('/auth/login');
+
+                    db.close();
                     return;
                 }
-
-                const row = rows[0];
-
-                compare(password, row.password, (err, same) => {
-                    if (err) throw err;
-
-                    if (same) {
-                        res.locals.user = row;
-                        next();
-                    } else {
-                        req.session.error = "Password is incorrect";
-                        res.redirect('/auth/login');
-
-                        db.close();
-                        return;
-                    }
-                });
             });
         });
-
-        db.close();
     }
 
     public Register(req: Request, res: Response, next: NextFunction) {
