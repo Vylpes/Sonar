@@ -7,7 +7,7 @@ export class PugMiddleware {
             message: res.locals.message,
             error: res.locals.error,
             user: {
-                authenticated: req.session.id != null,
+                authenticated: req.session.userId != null,
                 username: req.session.userName,
                 email: req.session.userEmail,
             }
