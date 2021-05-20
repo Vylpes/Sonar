@@ -1,15 +1,16 @@
 // Copyright (c) 2021 Vylpes. MIT License.
 
-import express from "express";
+import { Router, Request, Response } from "express";
+import { SetupCatTable } from "../helpers/catHelper";
 
 export class IndexRouter {
-    private _router: express.Router;
+    private _router: Router;
 
     constructor() {
-        this._router = express.Router();
+        this._router = Router();
     }
 
-    public Route(): express.Router {
+    public Route(): Router {
         this.OnGetIndex();
 
         return this._router;
@@ -17,7 +18,9 @@ export class IndexRouter {
 
     // GET method for /
     private OnGetIndex() {
-        this._router.get('/', function(req: express.Request, res: express.Response, next: express.NextFunction) {
+        this._router.get('/', SetupCatTable, (req: Request, res: Response) => {
+            console.log(res.locals.catRows);
+
             res.render('index/index', { title: 'Sonar' });
         });
     }
