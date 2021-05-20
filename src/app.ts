@@ -1,6 +1,7 @@
 // Copyright (c) 2021 Vylpes. MIT License.
 
 import { Express, Request, Response, NextFunction } from "express";
+import { InitialiseDatabase } from "./helpers/databaseHelper";
 
 import express from "express";
 import createError from "http-errors";
@@ -36,6 +37,8 @@ export class App {
         this._app.use(express.urlencoded({ extended: false }));
         this._app.use(cookieParser());
         this._app.use(express.static(path.join(process.cwd(), 'public')));
+
+        InitialiseDatabase();
     }
 
     private SetupRoutes() {

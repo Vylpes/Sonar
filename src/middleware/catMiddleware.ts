@@ -6,8 +6,6 @@ export const SetupCatTable = (req: Request, res: Response, next: NextFunction) =
     const db = new Database('data.db');
 
     db.serialize(() => {
-        db.run('CREATE TABLE cats (id TEXT UNIQUE, name TEXT)');
-
         const stmt = db.prepare('INSERT INTO cats VALUES (?, ?)');
 
         for (let i = 0; i < 10; i++) {
