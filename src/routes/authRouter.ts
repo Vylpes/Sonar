@@ -13,7 +13,6 @@ export class AuthRouter {
     public Route(): Router {
         this.OnGetLogout();
         this.OnGetLogin();
-        this.OnGetRegister();
 
         this.OnPostLogin();
         this.OnPostRegister();
@@ -35,13 +34,6 @@ export class AuthRouter {
         this._router.get('/login', (req: Request, res: Response) => {
             res.render('auth/login', { title: 'Login', message: res.locals.message });
         })
-    }
-
-    // GET method for /auth/register
-    private OnGetRegister() {
-        this._router.get('/register', (req: Request, res: Response) => {
-            res.render('auth/register', { title: 'Register', message: res.locals.message });
-        });
     }
 
     // POST method for /auth/login

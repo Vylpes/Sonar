@@ -54,13 +54,13 @@ export class UserMiddleware {
 
         if (!username || !email || !password || !passwordRepeat) {
             req.session.error = "All fields are required";
-            res.redirect('/auth/register');
+            res.redirect('/auth/login');
             return;
         }
 
         if (password !== passwordRepeat) {
             req.session.error = "Passwords do not match";
-            res.redirect('/auth/register');
+            res.redirect('/auth/login');
             return;
         }
 
@@ -71,7 +71,7 @@ export class UserMiddleware {
 
             if (rows.length > 0) {
                 req.session.error = "User already exists";
-                res.redirect('/auth/register');
+                res.redirect('/auth/login');
                 
                 db.close();
                 return;
