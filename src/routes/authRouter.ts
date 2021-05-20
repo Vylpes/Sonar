@@ -13,8 +13,10 @@ export class AuthRouter {
     public Route(): Router {
         this.OnGetLogout();
         this.OnGetLogin();
+        this.OnGetRegister();
 
         this.OnPostLogin();
+        this.OnPostRegister();
 
         return this._router;
     }
@@ -35,20 +37,33 @@ export class AuthRouter {
         })
     }
 
+    // GET method for /auth/register
+    private OnGetRegister() {
+        this._router.get('/register', (req: Request, res: Response) => {
+            res.render('auth/register', { title: 'Register', message: res.locals.message });
+        });
+    }
+
     // POST method for /auth/login
     private OnPostLogin() {
-        this._router.post('/login', this._userMiddleware.AuthenticateAgainstDatabase, (req: Request, res: Response) => {
+        this._router.post('/login', this._userMiddleware.Login, (req: Request, res: Response) => {
             req.session.regenerate(() => {
                 const user = res.locals.user;
 
-                req.session.user.userId = user.userId;
-                req.session.user.email = user.email;
-                req.session.user.username = user.username;
-                req.session.user.verified = user.verified === 1 ? true : false;
-                req.session.user.admin = user.admin === 1 ? true : false;
+                req.session.userId = user.id;
+                req.session.userEmail = user.email;
+                req.session.userName = user.username;
 
                 res.redirect('/dashboard');
             });
+        });
+    }
+
+    // POST method for /auth/register
+    private OnPostRegister() {
+        this._router.post('/register', this._userMiddleware.Register, (req: Request, res: Response) => {
+            req.session.success = "Successfully registered. You can now login";
+            res.redirect('/auth/login');
         });
     }
 }

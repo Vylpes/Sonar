@@ -20,6 +20,8 @@ html
                         li.nav-item
                             a.nav-link(href="/auth/login") Login
                         li.nav-item
+                            a.nav-link(href="/auth/register") Register
+                        li.nav-item
                             a.nav-link(href="/auth/logout") Logout
                 form.d-flex
                     input.form-control.me-2(type="search" placeholder="Search" aria-label="Search" disabled)
@@ -28,7 +30,7 @@ html
             if (error)
                 .alert.alert-danger= error
             if (message)
-                .alert.alert-message= message
+                .alert.alert-info= message
             block content
         block scripts
         script(src='/lib/bootstrap/js/bootstrap.min.js')

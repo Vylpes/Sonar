@@ -2,13 +2,9 @@ import { Session } from "express-session";
 
 declare module 'express-session' {
     interface Session {
-        user: {
-            userId: string;
-            email: string;
-            username: string;
-            admin: boolean;
-            verified: boolean;
-        }
+        userId?: string;
+        userEmail?: string;
+        userName?: string;
         error?: string;
         success?: string;
     }
