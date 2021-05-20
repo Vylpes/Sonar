@@ -1,5 +1,3 @@
-// Copyright (c) 2021 Vylpes. MIT License.
-
 import { App } from "./app";
 export class Index {
     private _app: App;

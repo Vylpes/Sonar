@@ -1,15 +1,16 @@
-// Copyright (c) 2021 Vylpes. MIT License.
-
-import express from "express";
+import { Router, Request, Response } from "express";
+import { CatMiddleware } from "../middleware/catMiddleware";
 
 export class IndexRouter {
-    private _router: express.Router;
+    private _router: Router;
+    private _catMiddleware: CatMiddleware;
 
     constructor() {
-        this._router = express.Router();
+        this._router = Router();
+        this._catMiddleware = new CatMiddleware();
     }
 
-    public Route(): express.Router {
+    public Route(): Router {
         this.OnGetIndex();
 
         return this._router;
@@ -17,7 +18,9 @@ export class IndexRouter {
 
     // GET method for /
     private OnGetIndex() {
-        this._router.get('/', function(req: express.Request, res: express.Response, next: express.NextFunction) {
+        this._router.get('/', this._catMiddleware.InsertAndGetCat1, (req: Request, res: Response) => {
+            console.log(res.locals.catRows);
+
             res.render('index/index', { title: 'Sonar' });
         });
     }
