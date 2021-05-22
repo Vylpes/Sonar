@@ -1,17 +1,24 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "typeRoots": [
-      "./src/types",
-      "./node_modules/@types"
-    ]
-  }
+      "target": "es2017",
+      "lib": [
+          "esnext"
+      ],
+      "moduleResolution": "node",
+      "module": "commonjs",
+      "noImplicitAny": true,
+      "esModuleInterop": true,
+      "sourceMap": true,
+      "outDir": "./dist",
+      "resolveJsonModule": true,
+      "allowJs": true,
+      "allowSyntheticDefaultImports": true,
+      "skipLibCheck": true
+  },
+  "include": [
+      "./src/**/*"
+  ],
+  "exclude": [
+      "node_modules/"
+  ]
 }

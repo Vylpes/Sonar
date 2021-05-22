@@ -4,7 +4,7 @@ import { existsSync } from "fs";
 export class DatabaseHelper {
     public Init() {
         if (!this.DatabaseExists()) {
-            const db = new Database('data.db');
+            const db = new Database(process.env.SQLITE3_DB);
 
             db.serialize(() => {
                 db.run('CREATE TABLE users (id TEXT UNIQUE, email TEXT, username TEXT, password TEXT, verified BIT, admin BIT, active BIT)');

@@ -8,6 +8,7 @@ import path from "path";
 import cookieParser from "cookie-parser";
 import logger from "morgan";
 import session from "express-session";
+import * as dotenv from "dotenv";
 
 import { AuthRouter } from "./routes/authRouter";
 import { DashboardRouter } from "./routes/dashboardRouter";
@@ -40,6 +41,8 @@ export class App {
     }
 
     private SetupApp() {
+        dotenv.config();
+
         this._app.set('views', path.join(process.cwd(), 'views'));
         this._app.set('view engine', 'pug');
 
@@ -51,7 +54,7 @@ export class App {
         this._app.use(session({
             resave: false, // don't save session if unmodified
             saveUninitialized: false, // don't create session until something stored
-            secret: 'DEV_SECRET_NEEDS_CHANGING', // TODO: Replace before release
+            secret: process.env.EXPRESS_SESSION_SECRET,
         }));
 
         // Session-persisted message middleware
@@ -60,7 +63,6 @@ export class App {
             var msg = req.session.success;
             delete req.session.error;
             delete req.session.success;
-            res.locals.message = '';
             if (err) res.locals.error = err;
             if (msg) res.locals.message = msg;
             next();

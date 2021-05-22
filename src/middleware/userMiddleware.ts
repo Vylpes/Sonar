@@ -9,12 +9,12 @@ export class UserMiddleware {
         const password = req.body.password;
 
         if (!email || !password) {
-            req.session.error = "Email and/or Password were not set";
+            req.session.error = "All fields are required";
             res.redirect('/auth/login');
             return;
         }
 
-        const db = new Database("data.db");
+        const db = new Database(process.env.SQLITE3_DB);
 
         db.all(`SELECT * FROM users WHERE email = '${email}'`, (err, rows) => {
             if (rows.length != 1) {
@@ -61,13 +61,13 @@ export class UserMiddleware {
             return;
         }
 
-        if (password.length <= 7) {
+        if (password.length < 7) {
             req.session.error = "Password must be at least 7 characters long";
             res.redirect('/auth/login');
             return;
         }
 
-        const db = new Database("data.db");
+        const db = new Database(process.env.SQLITE3_DB);
 
         db.all(`SELECT * FROM users WHERE email = '${email}' OR username = '${username}'`, (err, rows) => {
             if (err) throw err;
