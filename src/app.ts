@@ -10,9 +10,10 @@ import logger from "morgan";
 import session from "express-session";
 import * as dotenv from "dotenv";
 
-import { AuthRouter } from "./routes/authRouter";
-import { DashboardRouter } from "./routes/dashboardRouter";
-import { IndexRouter } from "./routes/indexRouter";
+import { AuthRouter } from "./routes/auth";
+import { DashboardRouter } from "./routes/dashboard";
+import { IndexRouter } from "./routes";
+import { ProjectsRouter } from "./routes/projects";
 
 export class App {
     private _app: Express;
@@ -22,6 +23,7 @@ export class App {
     private _authRouter: AuthRouter;
     private _dashboardRouter: DashboardRouter;
     private _indexRouter: IndexRouter;
+    private _projectsRouter: ProjectsRouter;
 
     constructor() {
         this._app = express();
@@ -31,6 +33,7 @@ export class App {
         this._authRouter = new AuthRouter();
         this._dashboardRouter = new DashboardRouter();
         this._indexRouter = new IndexRouter();
+        this._projectsRouter = new ProjectsRouter();
     }
 
     public Start(port: number) {
@@ -77,6 +80,7 @@ export class App {
         this._app.use('/', this._indexRouter.Route());
         this._app.use('/auth', this._authRouter.Route());
         this._app.use('/dashboard', this._dashboardRouter.Route());
+        this._app.use('/projects', this._projectsRouter.Route());
     }
 
     private SetupErrors() {
@@ -86,7 +90,7 @@ export class App {
         });
 
         // Error Handler
-        this._app.use(function(err: any, req: Request, res: Response, next: NextFunction) {
+        this._app.use(function(err: any, req: Request, res: Response) {
             // Set locals, only providing error in development
             res.locals.message = err.message;
             res.locals.error = req.app.get('env') === 'development' ? err : {};

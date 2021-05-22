@@ -1,5 +1,5 @@
 import { Database } from "sqlite3";
-import { existsSync } from "fs";
+import { existsSync, readFileSync } from "fs";
 
 export class DatabaseHelper {
     public Init() {
@@ -7,7 +7,13 @@ export class DatabaseHelper {
             const db = new Database(process.env.SQLITE3_DB);
 
             db.serialize(() => {
-                db.run('CREATE TABLE users (id TEXT UNIQUE, email TEXT, username TEXT, password TEXT, verified BIT, admin BIT, active BIT)');
+                // tables
+                db.run(readFileSync("./data/tables/users.sql").toString());
+                db.run(readFileSync("./data/tables/projects.sql").toString());
+                db.run(readFileSync("./data/tables/projectUsers.sql").toString());
+
+                // views
+                db.run(readFileSync("./data/views/vwProjects.sql").toString());
 
                 db.close();
 
@@ -17,6 +23,6 @@ export class DatabaseHelper {
     }
 
     public DatabaseExists(): Boolean {
-        return existsSync(process.cwd() + "/data.db");
+        return existsSync(process.env.SQLITE3_DB);
     }
 }
