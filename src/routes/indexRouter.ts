@@ -1,26 +1,18 @@
-import { Router, Request, Response } from "express";
+import { Route } from "../contracts/Route";
+import { Router } from "express";
+import { Index } from "./index/index";
 
-export class IndexRouter {
-    private _router: Router;
+export class IndexRouter extends Route {
+    private _index: Index;
 
     constructor() {
-        this._router = Router();
+        super();
+        this._index = new Index(super.router);
     }
 
     public Route(): Router {
-        this.OnGetIndex();
+        this._index.Route();
 
-        return this._router;
-    }
-
-    // GET method for /
-    private OnGetIndex() {
-        this._router.get('/', (req: Request, res: Response) => {
-            if (res.locals.viewData.user.authenticated) {
-                res.redirect('/dashboard');
-            }
-
-            res.render('index/index', res.locals.viewData);
-        });
+        return super.router;
     }
 }

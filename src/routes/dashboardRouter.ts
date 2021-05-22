@@ -1,25 +1,23 @@
 import { Router, Request, Response } from "express";
+import { Route } from "../contracts/Route";
 import { UserMiddleware } from "../middleware/userMiddleware";
+import { Index } from "./dashboard/index";
 
-export class DashboardRouter {
-    private _router: Router;
+export class DashboardRouter extends Route {
     private _userMiddleware: UserMiddleware;
 
+    private _index: Index;
+
     constructor() {
-        this._router = Router();
+        super();
         this._userMiddleware = new UserMiddleware();
+
+        this._index = new Index(super.router, this._userMiddleware);
     }
 
     public Route(): Router {
-        this.OnGetIndex();
+        this._index.Route();
 
-        return this._router;
-    }
-
-    // GET method for /dashboard
-    private OnGetIndex() {
-        this._router.get('/', this._userMiddleware.Authorise, (req: Request, res: Response) => {
-            res.render('dashboard/index', res.locals.viewData);
-        });
+        return super.router;
     }
 }
