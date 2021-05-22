@@ -1,5 +1,15 @@
 extends ../layout
 
 block content
-    h1= title
-    p Welcome to #{title}
+    .row
+        .col-8.m-auto
+            .card
+                .card-header In Development
+                .card-body
+                    h1 This site is currently in development.
+                    ul
+                        li Features will be incomplete
+                        li Features will be buggy
+                    a(href="https://github.com/vylpes/sonar").btn.btn-primary View GitHub
+                    a(href="https://github.com/Vylpes/Sonar/issues/new").btn.btn-outline-primary.ms-2 Report a Bug
+                    a(href="https://discord.gg/UyAhAVp").btn.btn-outline-primary.ms-2 Join Discord

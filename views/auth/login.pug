@@ -1,0 +1,36 @@
+extends ../layout
+
+block content
+    .row
+        .col-6
+            .card
+                .card-header Login
+                .card-body
+                    form(method='post' action='/auth/login')
+                        .form-group.mb-2
+                            label Email
+                            input(type='text' name='email').form-control
+                        .form-group.mb-2
+                            label Password
+                            input(type='password' name='password').form-control
+                        .form-group
+                            input(type='submit' value='Login').btn.btn-primary.w-100
+        .col-6
+            .card
+                .card-header Register
+                .card-body
+                    form(method='post' action='/auth/register')
+                        .form-group.mb-2
+                            label Username
+                            input(type='text' name='username').form-control
+                        .form-group.mb-2
+                            label Email
+                            input(type='text' name='email').form-control
+                        .form-group.mb-2
+                            label Password
+                            input(type='password' name='password').form-control
+                        .form-group.mb-2
+                            label Repeat Password
+                            input(type='password' name='passwordRepeat').form-control
+                        .form-group
+                            input(type='submit' value='Login').btn.btn-primary.w-100
