@@ -3,6 +3,7 @@ html
     head
         title= title
         link(rel='stylesheet', href='/lib/bootstrap/css/bootstrap.min.css')
+        link(rel='stylesheet', href='/lib/datatables/datatables.min.css')
         link(rel='stylesheet', href='/css/style.css')
         block styles
     body
@@ -16,6 +17,8 @@ html
                         ul.navbar-nav.me-auto.mb-2.mb-lg-0
                             li.nav-item
                                 a.nav-link(href="/dashboard") Dashboard
+                            li.nav-item
+                                a.nav-link(href="/projects/list") Projects
                             li.nav-item
                                 a.nav-link(href="/auth/logout") Logout
                         span.navbar-text Logged in as #{user.username}
@@ -39,5 +42,7 @@ html
             if (message)
                 .alert.alert-info= message
             block content
-        block scripts
+        script(src='/lib/jquery/js/jquery.min.js')
         script(src='/lib/bootstrap/js/bootstrap.min.js')
+        script(src='/lib/datatables/datatables.min.js')
+        block scripts

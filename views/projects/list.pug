@@ -1,0 +1,19 @@
+extends ../layout
+
+block content
+    h1 Projects
+    table#project-list-table
+        thead
+            tr
+                th Name
+                th Created By
+                th Created At
+        tbody
+            each row in projects
+                tr
+                    td= row.name
+                    td= row.createdByName
+                    td= row.createdAt
+
+block scripts
+    script(src='/js/project-list.js')
