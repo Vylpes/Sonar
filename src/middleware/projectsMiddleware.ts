@@ -15,6 +15,12 @@ export class ProjectsMiddleware {
 
             const projectUserCount = projectUsers.length;
 
+            if (projectUserCount == 0) {
+                res.locals.projects = projects;
+                next();
+                db.close();
+            }
+
             for (let i = 0; i < projectUserCount; i++) {
                 const projectUser = projectUsers[i];
 
