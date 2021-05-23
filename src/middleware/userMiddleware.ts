@@ -92,7 +92,6 @@ export class UserMiddleware {
                 var stmt = db.prepare('INSERT INTO users VALUES (?, ?, ?, ?, ?, ?, ?)');
 
                 hash(password, 10).then(pwd => {
-                    console.log(pwd);
                     stmt.run(uuidv4(), email, username, pwd, 0, firstUser ? 1 : 0, 1);
     
                     stmt.finalize();
