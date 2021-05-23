@@ -1,7 +1,12 @@
 extends ../layout
 
 block content
-    h1 Projects
+    .row
+        .col
+            h1 Projects
+        .col
+            .d-grid.gap-2.d-md-flex.justify-content-md-end
+                button(data-bs-toggle='modal' data-bs-target='#new-project-modal').btn.btn-primary New
     table#project-list-table
         thead
             tr
@@ -14,6 +19,22 @@ block content
                     td= row.name
                     td= row.createdByName
                     td= row.createdAt
+    form(method='POST' action='/projects/new').modal.fade#new-project-modal
+        .modal-dialog.modal-dialog-scrollable
+            .modal-content
+                .modal-header
+                    h5.modal-title New Project
+                    button(type='button' data-bs-dismiss='modal').btn-close
+                .modal-body
+                    .form-group.mb-3
+                        label Project Name
+                        input(type='text' name='name').form-control
+                    .form-group.mb-3
+                        label Description
+                        input(type='text' name='description').form-control
+                .modal-footer
+                    button(type='button' data-bs-dismiss='modal').btn.btn-secondary Close
+                    button(type='button').btn.btn-primary Create
 
 block scripts
     script(src='/js/project-list.js')
