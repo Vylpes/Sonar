@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import { Database } from "sqlite3";
 import { IProject } from "../models/IProject";
+import { v4 as uuidv4 } from "uuid";
+import { UserProjectRole } from "../constants/UserProjectRole";
 
 export class ProjectsMiddleware {
     public GetAllProjectsByUserId(req: Request, res: Response, next: NextFunction) {
@@ -14,6 +16,12 @@ export class ProjectsMiddleware {
             if (err) throw err;
 
             const projectUserCount = projectUsers.length;
+
+            if (projectUserCount == 0) {
+                res.locals.projects = projects;
+                next();
+                db.close();
+            }
 
             for (let i = 0; i < projectUserCount; i++) {
                 const projectUser = projectUsers[i];
@@ -30,7 +38,7 @@ export class ProjectsMiddleware {
                             description: projectRow.description,
                             createdBy: projectRow.createdBy,
                             createdByName: projectRow.createdByName,
-                            createdAt: projectRow.createdAt,
+                            createdAt: new Date(projectRow.createdAt).toUTCString(),
                             archived: projectRow.archived == 1 ? true : false,
                         }
 
@@ -44,6 +52,35 @@ export class ProjectsMiddleware {
                     }
                 });
             }
+        });
+    }
+
+    public CreateProject(req: Request, res: Response, next: NextFunction) {
+        const projectName = req.body.name;
+        const projectDescription = req.body.description;
+
+        if (!projectName || !projectDescription) {
+            req.session.error = "All fields are required";
+            res.redirect('/projects/list');
+            return;
+        }
+
+        const userId = req.session.userId;
+        const projectId = uuidv4();
+
+        const db = new Database(process.env.SQLITE3_DB);
+
+        db.serialize(() => {
+            const stmt = db.prepare('INSERT INTO projects VALUES (?, ?, ?, ?, ?, ?)');
+            stmt.run(projectId, projectName, projectDescription, userId, new Date(), 0);
+            stmt.finalize();
+
+            const stmt2 = db.prepare('INSERT INTO projectUsers VALUES (?, ?, ?, ?)');
+            stmt2.run(uuidv4(), projectId, userId, UserProjectRole.Admin);
+            stmt2.finalize();
+
+            next();
+            db.close();
         });
     }
 }

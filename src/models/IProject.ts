@@ -4,6 +4,6 @@ export interface IProject {
     description: string;
     createdBy: string;
     createdByName: string;
-    createdAt: Date;
+    createdAt: string;
     archived: boolean;
 }
