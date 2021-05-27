@@ -83,4 +83,66 @@ export class ProjectsMiddleware {
             db.close();
         });
     }
+
+    public GetProjectById(req: Request, res: Response, next: NextFunction) {
+        const userId = req.session.userId;
+        const projectId = req.params.id;
+
+        const db = new Database(process.env.SQLITE3_DB);
+
+        let project: IProject;
+
+        db.all(`SELECT * FROM projectUsers WHERE projectId = '${projectId}'`, (err, projectUsers) => {
+            if (err) throw err;
+
+            const projectUserCount = projectUsers.length;
+
+            if (projectUserCount == 0) {
+                res.status(404);
+                db.close();
+                return;
+            }
+
+            for (let i = 0; i < projectUserCount; i++) {
+                const projectUser = projectUsers[i];
+
+                if (projectUser.userId == userId) {
+                    const role = projectUser.role;
+
+                    db.all(`SELECT * FROM vwProjects WHERE id = '${projectId}'`, (err, projects) => {
+                        if (err) throw err;
+
+                        if (projects.length != 1) {
+                            res.status(404);
+                            db.close();
+                            return;
+                        }
+
+                        const projectRow = projects[0];
+
+                        project = {
+                            projectId: projectRow.id,
+                            name: projectRow.name,
+                            description: projectRow.description,
+                            createdBy: projectRow.createdBy,
+                            createdByName: projectRow.createdByName,
+                            createdAt: projectRow.createdAt,
+                            archived: projectRow.archived == 1 ? true : false,
+                        };
+
+                        res.locals.project = project;
+                        res.locals.userProjectRole = role;
+
+                        next();
+                        db.close();
+                        return;
+                    });
+                }
+            }
+        });
+
+        res.status(404);
+        db.close();
+        return;
+    }
 }

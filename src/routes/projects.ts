@@ -4,6 +4,7 @@ import { UserMiddleware } from "../middleware/userMiddleware";
 import { ProjectsMiddleware } from "../middleware/projectsMiddleware";
 import { List } from "./projects/list";
 import { New } from "./projects/new";
+import { View } from "./projects/view";
 
 export class ProjectsRouter extends Route {
     private _userMiddleware: UserMiddleware;
@@ -11,6 +12,7 @@ export class ProjectsRouter extends Route {
 
     private _list: List;
     private _new: New;
+    private _view: View;
 
     constructor() {
         super();
@@ -19,11 +21,13 @@ export class ProjectsRouter extends Route {
 
         this._list = new List(super.router, this._userMiddleware, this._projectsMiddleware);
         this._new = new New(super.router, this._userMiddleware, this._projectsMiddleware);
+        this._view = new View(super.router, this._userMiddleware, this._projectsMiddleware);
     }
 
     public Route(): Router {
         this._list.Route();
         this._new.Route();
+        this._view.Route();
 
         return super.router;
     }
