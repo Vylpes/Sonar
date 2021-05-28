@@ -7,7 +7,7 @@ block content
                 i.fas.fa-chevron-circle-left
                 span.ms-1 Back to Listing
             h1= project.name
-            if !project.archived
+            if project.archived
                 .badge.rounded-pill.bg-warning.mb-3.me-1
                     i.fas.fa-archive
                     span.ms-1 Archived
