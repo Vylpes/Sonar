@@ -1,4 +1,5 @@
 import { Request, Response, Router } from "express";
+import { resourceLimits } from "worker_threads";
 import { Page } from "../../contracts/Page";
 import { ProjectsMiddleware } from "../../middleware/projectsMiddleware";
 import { UserMiddleware } from "../../middleware/userMiddleware";
@@ -21,6 +22,7 @@ export class View extends Page {
 
         super.router.get('/view/:id', this._userMiddleware.Authorise, this._projectsMiddleware.GetProjectById, (req: Request, res: Response) => {
             res.locals.viewData.project = res.locals.project;
+            res.locals.viewData.projectUsers = res.locals.projectUsers;
             res.locals.viewData.userProjectRole = res.locals.userProjectRole;
 
             res.render('projects/view', res.locals.viewData);

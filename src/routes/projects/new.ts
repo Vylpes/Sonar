@@ -15,7 +15,7 @@ export class New extends Page {
 
     OnPost() {
         super.router.post('/new', this._userMiddleware.Authorise, this._projectsMiddleware.CreateProject, (req: Request, res: Response) => {
-            res.redirect('/projects/list');
+            res.redirect('/projects/view/' + res.locals.projectId);
         });
     }
 }

@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { Database } from "sqlite3";
 import { IProject } from "../models/IProject";
+import { IProjectUser } from "../models/IProjectUser";
 import { v4 as uuidv4 } from "uuid";
 import { UserProjectRole } from "../constants/UserProjectRole";
 
@@ -79,6 +80,8 @@ export class ProjectsMiddleware {
             stmt2.run(uuidv4(), projectId, userId, UserProjectRole.Admin);
             stmt2.finalize();
 
+            res.locals.projectId = projectId;
+
             next();
             db.close();
         });
@@ -92,7 +95,7 @@ export class ProjectsMiddleware {
 
         let project: IProject;
 
-        db.all(`SELECT * FROM projectUsers WHERE projectId = '${projectId}'`, (err, projectUsers) => {
+        db.all(`SELECT * FROM vwProjectUsers WHERE projectId = '${projectId}'`, (err, projectUsers) => {
             if (err) throw err;
 
             const projectUserCount = projectUsers.length;
@@ -132,7 +135,22 @@ export class ProjectsMiddleware {
                             archived: projectRow.archived == 1 ? true : false,
                         };
 
+                        let projectUsersList: IProjectUser[] = [];
+
+                        for (let j = 0; j < projectUserCount; j++) {
+                            const projectUser = projectUsers[j];
+
+                            projectUsersList.push({
+                                projectUserId: projectUser.projectUserId,
+                                projectId: projectUser.projectId,
+                                userId: projectUser.userId,
+                                userName: projectUser.userName,
+                                role: projectUser.role,
+                            });
+                        }
+
                         res.locals.project = project;
+                        res.locals.projectUsers = projectUsersList;
                         res.locals.userProjectRole = role;
 
                         next();
