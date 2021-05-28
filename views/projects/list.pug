@@ -7,18 +7,21 @@ block content
         .col
             .d-grid.gap-2.d-md-flex.justify-content-md-end
                 button(data-bs-toggle='modal' data-bs-target='#new-project-modal').btn.btn-primary New
-    table#project-list-table
+    table.clickable#project-list-table
         thead
             tr
                 th Name
                 th Created By
                 th Created At
+                th Actions
         tbody
             each row in projects
                 tr
                     td= row.name
                     td= row.createdByName
                     td= row.createdAt
+                    td
+                        a(href="/projects/view/" + row.projectId) View
     form(method='POST' action='/projects/new').modal.fade#new-project-modal
         .modal-dialog.modal-dialog-scrollable
             .modal-content

@@ -3,19 +3,21 @@ extends ../layout
 block content
     .row
         .col
-            h1 PROJECT NAME
-            span.badge.rounded-pill.bg-primary Archived
+            a(href="/projects/list") Back to Listing
+            h1= project.name
+            if project.archived
+                span.badge.rounded-pill.bg-warning.mb-3 Archived
     .row
-        .col
+        .col-3
             .card
                 .card-header Details
                 .card-body
-                    .border-bottom
-                        label Description
-                        span DESCRIPTION
-                    .border-bottom
-                        label Created By
-                        span NAME
-                    .border-bottom
-                        label Created At
-                        span DATETIME
+                    .mb-2
+                        p.mb-0.text-secondary Description
+                        p= project.description
+                    .mb-2
+                        p.mb-0.text-secondary Created By
+                        p= project.createdByName
+                    .mb-2
+                        p.mb-0.text-secondary Created At
+                        p= project.createdAt

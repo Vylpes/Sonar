@@ -110,7 +110,7 @@ export class ProjectsMiddleware {
                 if (projectUser.userId == userId) {
                     const role = projectUser.role;
 
-                    db.all(`SELECT * FROM vwProjects WHERE id = '${projectId}'`, (err, projects) => {
+                    db.all(`SELECT * FROM vwProjects WHERE projectId = '${projectId}'`, (err, projects) => {
                         if (err) throw err;
 
                         if (projects.length != 1) {
@@ -128,7 +128,7 @@ export class ProjectsMiddleware {
                             description: projectRow.description,
                             createdBy: projectRow.createdBy,
                             createdByName: projectRow.createdByName,
-                            createdAt: projectRow.createdAt,
+                            createdAt: new Date(projectRow.createdAt).toUTCString(),
                             archived: projectRow.archived == 1 ? true : false,
                         };
 
