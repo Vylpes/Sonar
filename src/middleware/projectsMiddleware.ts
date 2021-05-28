@@ -98,7 +98,8 @@ export class ProjectsMiddleware {
             const projectUserCount = projectUsers.length;
 
             if (projectUserCount == 0) {
-                res.status(404);
+                req.session.error = "Project not found or you are not authorised to see it";
+                res.redirect('/projects/list');
                 db.close();
                 return;
             }
@@ -113,7 +114,8 @@ export class ProjectsMiddleware {
                         if (err) throw err;
 
                         if (projects.length != 1) {
-                            res.status(404);
+                            req.session.error = "Project not found or you are not authorised to see it";
+                            res.redirect('/projects/list');
                             db.close();
                             return;
                         }
@@ -137,12 +139,13 @@ export class ProjectsMiddleware {
                         db.close();
                         return;
                     });
+                } else if (i + 1 == projectUserCount) {
+                    req.session.error = "Project not found or you are not authorised to see it";
+                    res.redirect('/projects/list');
+                    db.close();
+                    return;
                 }
             }
         });
-
-        res.status(404);
-        db.close();
-        return;
     }
 }

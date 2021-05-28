@@ -14,6 +14,11 @@ export class View extends Page {
     }
 
     OnGet() {
+        // No id given, not found
+        super.router.get('/view', this._userMiddleware.Authorise, (req: Request, res: Response) => {
+            res.redirect('/projects/list');
+        });
+
         super.router.get('/view/:id', this._userMiddleware.Authorise, this._projectsMiddleware.GetProjectById, (req: Request, res: Response) => {
             res.locals.viewData.project = res.locals.project;
             res.locals.viewData.userProjectRole = res.locals.userProjectRole;
