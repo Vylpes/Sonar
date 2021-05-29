@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { Database } from "sqlite3";
 import { IProject } from "../models/IProject";
+import { IProjectUser } from "../models/IProjectUser";
 import { v4 as uuidv4 } from "uuid";
 import { UserProjectRole } from "../constants/UserProjectRole";
 
@@ -79,8 +80,90 @@ export class ProjectsMiddleware {
             stmt2.run(uuidv4(), projectId, userId, UserProjectRole.Admin);
             stmt2.finalize();
 
+            res.locals.projectId = projectId;
+
             next();
             db.close();
+        });
+    }
+
+    public GetProjectById(req: Request, res: Response, next: NextFunction) {
+        const userId = req.session.userId;
+        const projectId = req.params.id;
+
+        const db = new Database(process.env.SQLITE3_DB);
+
+        let project: IProject;
+
+        db.all(`SELECT * FROM vwProjectUsers WHERE projectId = '${projectId}'`, (err, projectUsers) => {
+            if (err) throw err;
+
+            const projectUserCount = projectUsers.length;
+
+            if (projectUserCount == 0) {
+                req.session.error = "Project not found or you are not authorised to see it";
+                res.redirect('/projects/list');
+                db.close();
+                return;
+            }
+
+            for (let i = 0; i < projectUserCount; i++) {
+                const projectUser = projectUsers[i];
+
+                if (projectUser.userId == userId) {
+                    const role = projectUser.role;
+
+                    db.all(`SELECT * FROM vwProjects WHERE projectId = '${projectId}'`, (err, projects) => {
+                        if (err) throw err;
+
+                        if (projects.length != 1) {
+                            req.session.error = "Project not found or you are not authorised to see it";
+                            res.redirect('/projects/list');
+                            db.close();
+                            return;
+                        }
+
+                        const projectRow = projects[0];
+
+                        project = {
+                            projectId: projectRow.id,
+                            name: projectRow.name,
+                            description: projectRow.description,
+                            createdBy: projectRow.createdBy,
+                            createdByName: projectRow.createdByName,
+                            createdAt: new Date(projectRow.createdAt).toUTCString(),
+                            archived: projectRow.archived == 1 ? true : false,
+                        };
+
+                        let projectUsersList: IProjectUser[] = [];
+
+                        for (let j = 0; j < projectUserCount; j++) {
+                            const projectUser = projectUsers[j];
+
+                            projectUsersList.push({
+                                projectUserId: projectUser.projectUserId,
+                                projectId: projectUser.projectId,
+                                userId: projectUser.userId,
+                                userName: projectUser.userName,
+                                role: projectUser.role,
+                            });
+                        }
+
+                        res.locals.project = project;
+                        res.locals.projectUsers = projectUsersList;
+                        res.locals.userProjectRole = role;
+
+                        next();
+                        db.close();
+                        return;
+                    });
+                } else if (i + 1 == projectUserCount) {
+                    req.session.error = "Project not found or you are not authorised to see it";
+                    res.redirect('/projects/list');
+                    db.close();
+                    return;
+                }
+            }
         });
     }
 }

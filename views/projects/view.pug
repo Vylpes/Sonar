@@ -1,0 +1,47 @@
+extends ../layout
+
+block content
+    .row
+        .col
+            a(href="/projects/list").btn.text-primary
+                i.fas.fa-chevron-circle-left
+                span.ms-1 Back to Listing
+            h1= project.name
+            if project.archived
+                .badge.rounded-pill.bg-warning.mb-3.me-1
+                    i.fas.fa-archive
+                    span.ms-1 Archived
+    .row
+        .col-4
+            .card
+                .card-header Details
+                .card-body
+                    .mb-2
+                        p.mb-0.text-secondary Description
+                        p= project.description
+                    .mb-2
+                        p.mb-0.text-secondary Created By
+                        p= project.createdByName
+                    .mb-2
+                        p.mb-0.text-secondary Created At
+                        p= project.createdAt
+        .col-8
+            .card
+                .card-header Assigned Users
+                .card-body
+                    table#assigned-users-table
+                        thead
+                            tr
+                                th Name
+                        tbody
+                            each row in projectUsers
+                                tr
+                                    td
+                                        span= row.userName
+                                        if row.role = 1
+                                            .badge.rounded-pill.bg-primary.mb-3.ms-1
+                                                i.fas.fa-shield-alt
+                                                span.ms-1 Admin
+
+block scripts
+    script(src='/js/project-view.js')

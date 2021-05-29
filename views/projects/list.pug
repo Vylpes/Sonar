@@ -6,19 +6,26 @@ block content
             h1 Projects
         .col
             .d-grid.gap-2.d-md-flex.justify-content-md-end
-                button(data-bs-toggle='modal' data-bs-target='#new-project-modal').btn.btn-primary New
+                button(data-bs-toggle='modal' data-bs-target='#new-project-modal').btn.text-primary
+                    i.fas.fa-plus-square
+                    span.ms-1 New
     table#project-list-table
         thead
             tr
                 th Name
                 th Created By
                 th Created At
+                th Actions
         tbody
             each row in projects
                 tr
                     td= row.name
                     td= row.createdByName
                     td= row.createdAt
+                    td
+                        a(href="/projects/view/" + row.projectId).btn.text-primary
+                            i.fas.fa-eye
+                            span.ms-1 View
     form(method='POST' action='/projects/new').modal.fade#new-project-modal
         .modal-dialog.modal-dialog-scrollable
             .modal-content
@@ -32,9 +39,10 @@ block content
                     .form-group.mb-3
                         label Description
                         input(type='text' name='description').form-control
-                .modal-footer
-                    button(type='button' data-bs-dismiss='modal').btn.btn-secondary Close
-                    button(type='submit').btn.btn-primary Create
+                    .form-group.text-center
+                        button(type='submit').btn.text-primary
+                            i.fas.fa-check-square
+                            span.ms-1 Create
 
 block scripts
     script(src='/js/project-list.js')

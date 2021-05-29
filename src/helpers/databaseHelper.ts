@@ -14,6 +14,7 @@ export class DatabaseHelper {
 
                 // views
                 db.run(readFileSync("./data/views/vwProjects.sql").toString());
+                db.run(readFileSync("./data/views/vwProjectUsers.sql").toString());
 
                 db.close();
 
