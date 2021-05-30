@@ -73,7 +73,7 @@ export class App {
 
         this._app.use(this._pugMiddleware.GetBaseString);
 
-        this._databaseHelper.Init();
+        // this._databaseHelper.Init();
     }
 
     private SetupRoutes() {

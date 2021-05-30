@@ -1,29 +1,34 @@
-import { Database } from "sqlite3";
-import { existsSync, readFileSync } from "fs";
+import { readFileSync } from "fs";
+import mysql from "mysql";
 
 export class DatabaseHelper {
-    public Init() {
-        if (!this.DatabaseExists()) {
-            const db = new Database(process.env.SQLITE3_DB);
+    public createConnection(): mysql.Connection {
+        const connection = mysql.createConnection({
+            host: process.env.MYSQL_HOST,
+            port: 3306,
+            user: process.env.MYSQL_USER,
+            password: process.env.MYSQL_PASSWORD,
+            database: process.env.MYSQL_DATABASE,
+        });
 
-            db.serialize(() => {
-                // tables
-                db.run(readFileSync("./data/tables/users.sql").toString());
-                db.run(readFileSync("./data/tables/projects.sql").toString());
-                db.run(readFileSync("./data/tables/projectUsers.sql").toString());
-
-                // views
-                db.run(readFileSync("./data/views/vwProjects.sql").toString());
-                db.run(readFileSync("./data/views/vwProjectUsers.sql").toString());
-
-                db.close();
-
-                console.log("Initialised Database");
-            })
-        }
+        return connection;
     }
 
-    public DatabaseExists(): Boolean {
-        return existsSync(process.env.SQLITE3_DB);
+    public init() {
+        const connection = this.createConnection();
+        connection.connect();
+
+        // tables
+        connection.query(readFileSync("./data/tables/users.sql").toString());
+        connection.query(readFileSync("./data/tables/projects.sql").toString());
+        connection.query(readFileSync("./data/tables/projectUsers.sql").toString());
+
+        // views
+        connection.query(readFileSync("./data/views/vwProjects.sql").toString());
+        connection.query(readFileSync("./data/views/vwProjectUsers.sql").toString());
+
+        connection.end();
+
+        console.log("Initialised Database");
     }
 }
