@@ -1,5 +1,5 @@
 import { readFileSync } from "fs";
-import mysql from "mysql";
+import mysql from "mysql2";
 
 export class DatabaseHelper {
     public createConnection(): mysql.Connection {

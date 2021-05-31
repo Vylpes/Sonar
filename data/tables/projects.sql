@@ -1,5 +1,5 @@
 CREATE TABLE projects (
-      id TEXT UNIQUE
+      id VARCHAR(36) UNIQUE
     , name TEXT
     , description TEXT
     , createdBy TEXT
