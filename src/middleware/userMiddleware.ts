@@ -1,4 +1,3 @@
-import { Database } from "sqlite3";
 import { v4 as uuidv4 } from "uuid";
 import { Request, Response, NextFunction } from "express";
 import { hash, compare } from "bcrypt";
