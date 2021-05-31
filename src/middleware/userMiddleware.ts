@@ -1,9 +1,17 @@
-import { Database } from "sqlite3";
+// import { Database } from "sqlite3";
 import { v4 as uuidv4 } from "uuid";
 import { Request, Response, NextFunction } from "express";
 import { hash, compare } from "bcrypt";
+import mysql from "mysql2";
+import { DatabaseHelper } from "../helpers/databaseHelper";
 
 export class UserMiddleware {
+    private _databaseHelper: DatabaseHelper;
+
+    constructor() {
+        this._databaseHelper = new DatabaseHelper();
+    }
+
     public Login(req: Request, res: Response, next: NextFunction) {
         const email = req.body.email;
         const password = req.body.password;
@@ -14,12 +22,19 @@ export class UserMiddleware {
             return;
         }
 
-        const db = new Database(process.env.SQLITE3_DB);
+        const connection = mysql.createConnection({
+            host: process.env.MYSQL_HOST,
+            port: 3306,
+            user: process.env.MYSQL_USER,
+            password: process.env.MYSQL_PASSWORD,
+            database: process.env.MYSQL_DATABASE,
+        });
 
-        db.all(`SELECT * FROM users WHERE email = '${email}'`, (err, rows) => {
+        connection.execute(`SELECT * FROM users WHERE email = ?`, [ email ], (err, rows: mysql.RowDataPacket[]) => {
             if (rows.length != 1) {
                 req.session.error = "User does not exist";
                 res.redirect('/auth/login');
+                connection.end();
                 return;
             }
 
@@ -31,15 +46,17 @@ export class UserMiddleware {
                 if (same) {
                     res.locals.user = row;
                     next();
-                    db.close();
+
+                    connection.end();
+                    return;
                 } else {
                     req.session.error = "Password is incorrect";
                     res.redirect('/auth/login');
 
-                    db.close();
+                    connection.end();
                     return;
                 }
-            });
+            })
         });
     }
 
@@ -67,44 +84,44 @@ export class UserMiddleware {
             return;
         }
 
-        const db = new Database(process.env.SQLITE3_DB);
+        // const db = new Database(process.env.SQLITE3_DB);
 
-        db.all(`SELECT * FROM users WHERE email = '${email}' OR username = '${username}'`, (err, rows) => {
-            if (err) throw err;
+        // db.all(`SELECT * FROM users WHERE email = '${email}' OR username = '${username}'`, (err, rows) => {
+        //     if (err) throw err;
 
-            if (rows.length > 0) {
-                req.session.error = "User already exists";
-                res.redirect('/auth/login');
+        //     if (rows.length > 0) {
+        //         req.session.error = "User already exists";
+        //         res.redirect('/auth/login');
                 
-                db.close();
-                return;
-            }
+        //         db.close();
+        //         return;
+        //     }
 
-            db.all(`SELECT * FROM users WHERE active = 1`, (err1, rows1) => {
-                if (err1) throw err1;
+        //     db.all(`SELECT * FROM users WHERE active = 1`, (err1, rows1) => {
+        //         if (err1) throw err1;
 
-                var firstUser = false;
+        //         var firstUser = false;
                 
-                if (rows1.length == 0) {
-                    firstUser = true;
-                }
+        //         if (rows1.length == 0) {
+        //             firstUser = true;
+        //         }
                 
-                var stmt = db.prepare('INSERT INTO users VALUES (?, ?, ?, ?, ?, ?, ?)');
+        //         var stmt = db.prepare('INSERT INTO users VALUES (?, ?, ?, ?, ?, ?, ?)');
 
-                hash(password, 10).then(pwd => {
-                    stmt.run(uuidv4(), email, username, pwd, 0, firstUser ? 1 : 0, 1);
+        //         hash(password, 10).then(pwd => {
+        //             stmt.run(uuidv4(), email, username, pwd, 0, firstUser ? 1 : 0, 1);
     
-                    stmt.finalize();
+        //             stmt.finalize();
     
-                    if (firstUser) {
-                        console.log("First user has registered. This user is now the admin");
-                    }
+        //             if (firstUser) {
+        //                 console.log("First user has registered. This user is now the admin");
+        //             }
     
-                    next();
-                    db.close();
-                });
-            });
-        });
+        //             next();
+        //             db.close();
+        //         });
+        //     });
+        // });
     }
 
     public Authorise(req: Request, res: Response, next: NextFunction) {
