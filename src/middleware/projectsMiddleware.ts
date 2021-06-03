@@ -1,19 +1,25 @@
 import { Request, Response, NextFunction } from "express";
-import { Database } from "sqlite3";
 import { IProject } from "../models/IProject";
 import { IProjectUser } from "../models/IProjectUser";
 import { v4 as uuidv4 } from "uuid";
 import { UserProjectRole } from "../constants/UserProjectRole";
+import { createConnection, RowDataPacket, QueryError } from "mysql2";
 
 export class ProjectsMiddleware {
     public GetAllProjectsByUserId(req: Request, res: Response, next: NextFunction) {
         const userId = req.session.userId;
-
-        const db = new Database(process.env.SQLITE3_DB);
+        
+        const connection = createConnection({
+            host: process.env.MYSQL_HOST,
+            port: 3306,
+            user: process.env.MYSQL_USER,
+            password: process.env.MYSQL_PASSWORD,
+            database: process.env.MYSQL_DATABASE,
+        });
 
         let projects: IProject[] = [];
 
-        db.all(`SELECT * FROM projectUsers WHERE userId = '${userId}'`, (err, projectUsers) => {
+        connection.execute('SELECT * FROM projectUsers WHERE userId = ?', [ userId ], (err: QueryError, projectUsers: RowDataPacket[]) => {
             if (err) throw err;
 
             const projectUserCount = projectUsers.length;
@@ -21,18 +27,19 @@ export class ProjectsMiddleware {
             if (projectUserCount == 0) {
                 res.locals.projects = projects;
                 next();
-                db.close();
+                connection.end();
+                return;
             }
 
             for (let i = 0; i < projectUserCount; i++) {
                 const projectUser = projectUsers[i];
 
-                db.all(`SELECT * FROM vwProjects WHERE projectId = '${projectUser.projectId}'`, (err1, projectRows) => {
-                    if (err1) throw err1;
+                connection.execute('SELECT * FROM vwProjects WHERE projectId = ?', [ projectUser.projectId ], (err: QueryError, projectRows: RowDataPacket[]) => {
+                    if (err) throw err;
 
                     if (projectRows.length > 0) {
                         const projectRow = projectRows[0];
-    
+
                         const project: IProject = {
                             projectId: projectRow.projectId,
                             name: projectRow.name,
@@ -48,7 +55,9 @@ export class ProjectsMiddleware {
                         if (i + 1 == projectUserCount) {
                             res.locals.projects = projects;
                             next();
-                            db.close();
+
+                            connection.end();
+                            return;
                         }
                     }
                 });
@@ -69,33 +78,52 @@ export class ProjectsMiddleware {
         const userId = req.session.userId;
         const projectId = uuidv4();
 
-        const db = new Database(process.env.SQLITE3_DB);
-
-        db.serialize(() => {
-            const stmt = db.prepare('INSERT INTO projects VALUES (?, ?, ?, ?, ?, ?)');
-            stmt.run(projectId, projectName, projectDescription, userId, new Date(), 0);
-            stmt.finalize();
-
-            const stmt2 = db.prepare('INSERT INTO projectUsers VALUES (?, ?, ?, ?)');
-            stmt2.run(uuidv4(), projectId, userId, UserProjectRole.Admin);
-            stmt2.finalize();
-
-            res.locals.projectId = projectId;
-
-            next();
-            db.close();
+        const connection = createConnection({
+            host: process.env.MYSQL_HOST,
+            port: 3306,
+            user: process.env.MYSQL_USER,
+            password: process.env.MYSQL_PASSWORD,
+            database: process.env.MYSQL_DATABASE,
         });
+
+        connection.execute('INSERT INTO projects VALUES (?, ?, ?, ?, ?, ?)', [
+            projectId,
+            projectName,
+            projectDescription,
+            userId,
+            new Date(),
+            0,
+        ]);
+
+        connection.execute('INSERT INTO projectUsers VALUES (?, ?, ?, ?)', [
+            uuidv4(),
+            projectId,
+            userId,
+            UserProjectRole.Admin
+        ]);
+
+        res.locals.projectId = projectId;
+
+        next();
+        connection.end();
+        return;
     }
 
     public GetProjectById(req: Request, res: Response, next: NextFunction) {
         const userId = req.session.userId;
         const projectId = req.params.id;
 
-        const db = new Database(process.env.SQLITE3_DB);
+        const connection = createConnection({
+            host: process.env.MYSQL_HOST,
+            port: 3306,
+            user: process.env.MYSQL_USER,
+            password: process.env.MYSQL_PASSWORD,
+            database: process.env.MYSQL_DATABASE,
+        });
 
         let project: IProject;
 
-        db.all(`SELECT * FROM vwProjectUsers WHERE projectId = '${projectId}'`, (err, projectUsers) => {
+        connection.execute('SELECT * FROM vwProjectUsers WHERE projectId = ?', [ projectId ], (err: QueryError, projectUsers: RowDataPacket[]) => {
             if (err) throw err;
 
             const projectUserCount = projectUsers.length;
@@ -103,7 +131,8 @@ export class ProjectsMiddleware {
             if (projectUserCount == 0) {
                 req.session.error = "Project not found or you are not authorised to see it";
                 res.redirect('/projects/list');
-                db.close();
+
+                connection.end();
                 return;
             }
 
@@ -113,13 +142,13 @@ export class ProjectsMiddleware {
                 if (projectUser.userId == userId) {
                     const role = projectUser.role;
 
-                    db.all(`SELECT * FROM vwProjects WHERE projectId = '${projectId}'`, (err, projects) => {
+                    connection.execute('SELECT * FROM vwProjects WHERE projectId = ?', [ projectId ], (err: QueryError, projects: RowDataPacket[]) => {
                         if (err) throw err;
 
                         if (projects.length != 1) {
-                            req.session.error = "Project not found or you are not authorised to see it";
+                            req.session.error = 'Project not found or you are not authorised to see it';
                             res.redirect('/projects/list');
-                            db.close();
+                            connection.end();
                             return;
                         }
 
@@ -133,7 +162,7 @@ export class ProjectsMiddleware {
                             createdByName: projectRow.createdByName,
                             createdAt: new Date(projectRow.createdAt).toUTCString(),
                             archived: projectRow.archived == 1 ? true : false,
-                        };
+                        }
 
                         let projectUsersList: IProjectUser[] = [];
 
@@ -154,13 +183,13 @@ export class ProjectsMiddleware {
                         res.locals.userProjectRole = role;
 
                         next();
-                        db.close();
+                        connection.end();
                         return;
                     });
                 } else if (i + 1 == projectUserCount) {
                     req.session.error = "Project not found or you are not authorised to see it";
                     res.redirect('/projects/list');
-                    db.close();
+                    connection.end();
                     return;
                 }
             }

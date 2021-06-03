@@ -1,5 +1,5 @@
 CREATE TABLE users (
-      id TEXT UNIQUE
+      id VARCHAR(36) UNIQUE
     , email TEXT
     , username TEXT
     , password TEXT
