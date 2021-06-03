@@ -1,5 +1,4 @@
 import { Express, Request, Response, NextFunction } from "express";
-import { DatabaseHelper } from "./helpers/databaseHelper";
 import { PugMiddleware } from "./middleware/pugMiddleware";
 
 import express from "express";
@@ -17,7 +16,6 @@ import { ProjectsRouter } from "./routes/projects";
 
 export class App {
     private _app: Express;
-    private _databaseHelper: DatabaseHelper;
     private _pugMiddleware: PugMiddleware;
 
     private _authRouter: AuthRouter;
@@ -27,7 +25,6 @@ export class App {
 
     constructor() {
         this._app = express();
-        this._databaseHelper = new DatabaseHelper();
         this._pugMiddleware = new PugMiddleware();
 
         this._authRouter = new AuthRouter();
@@ -72,8 +69,6 @@ export class App {
         });
 
         this._app.use(this._pugMiddleware.GetBaseString);
-
-        // this._databaseHelper.Init();
     }
 
     private SetupRoutes() {
