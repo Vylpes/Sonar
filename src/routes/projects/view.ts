@@ -1,5 +1,4 @@
 import { Request, Response, Router } from "express";
-import { resourceLimits } from "worker_threads";
 import { Page } from "../../contracts/Page";
 import { ProjectsMiddleware } from "../../middleware/projectsMiddleware";
 import { UserMiddleware } from "../../middleware/userMiddleware";

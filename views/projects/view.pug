@@ -29,6 +29,10 @@ block content
             .card
                 .card-header Assigned Users
                 .card-body
+                    .d-grid.gap-2.d-md-flex.justify-content-md-end
+                        button(data-bs-toggle='modal' data-bs-target='#assign-user-modal').btn.text-primary.mb-3
+                            i.fas.fa-user-plus
+                            span.ms-1 Assign User
                     table#assigned-users-table
                         thead
                             tr
@@ -42,6 +46,15 @@ block content
                                             .badge.rounded-pill.bg-primary.mb-3.ms-1
                                                 i.fas.fa-shield-alt
                                                 span.ms-1 Admin
+    form(method='POST' action='/projects/assign-user').modal.fade#assign-user-modal
+        .modal-dialog.modal-dialog-scrollable
+            .modal-content
+                .modal-header
+                    h5.modal-title Assign User
+                    button(type='button' data-bs-dismiss='modal').btn-close
+                .modal-body
+                    .form-group
+                        input(type='hidden' name='projectId' value=project.projectId)
 
 block scripts
     script(src='/js/project-view.js')

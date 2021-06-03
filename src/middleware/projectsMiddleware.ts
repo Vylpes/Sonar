@@ -155,7 +155,7 @@ export class ProjectsMiddleware {
                         const projectRow = projects[0];
 
                         project = {
-                            projectId: projectRow.id,
+                            projectId: projectRow.projectId,
                             name: projectRow.name,
                             description: projectRow.description,
                             createdBy: projectRow.createdBy,
