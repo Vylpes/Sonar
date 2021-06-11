@@ -55,6 +55,21 @@ block content
                 .modal-body
                     .form-group
                         input(type='hidden' name='projectId' value=project.projectId)
+                    .form-group.mb-3
+                        label Username
+                        input(type='text' name='username').form-control.mb-2#assigned-username-input
+                        button(type='button').btn.btn-primary#find-user-button.me-2 Find User
+                        button(type='button').btn.btn-secondary#clear-user-button Clear
+                    .form-group.mb-3
+                        .card
+                            .card-header User to Assign
+                            .card-body
+                                p Ethan Lane (vylpes@outlook.com)
+                                p @vylpes
+                    .form-group.text-center
+                        button(type='submit').btn.text-primary#assign-user-submit
+                            i.fas.fa-check-square
+                            span.ms-1 Create
 
 block scripts
     script(src='/js/project-view.js')
