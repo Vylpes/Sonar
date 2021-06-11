@@ -82,6 +82,8 @@ export class App {
         this._app.use('/auth', this._authRouter.Route());
         this._app.use('/dashboard', this._dashboardRouter.Route());
         this._app.use('/projects', this._projectsRouter.Route());
+
+        this._app.use('/api', this._apiEndpoint.Route());
     }
 
     private SetupErrors() {
