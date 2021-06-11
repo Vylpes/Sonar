@@ -14,6 +14,8 @@ import { DashboardRouter } from "./routes/dashboard";
 import { IndexRouter } from "./routes";
 import { ProjectsRouter } from "./routes/projects";
 
+import { ApiEndpoint } from "./api/apiEndpoint";
+
 export class App {
     private _app: Express;
     private _pugMiddleware: PugMiddleware;
@@ -23,6 +25,8 @@ export class App {
     private _indexRouter: IndexRouter;
     private _projectsRouter: ProjectsRouter;
 
+    private _apiEndpoint: ApiEndpoint;
+
     constructor() {
         this._app = express();
         this._pugMiddleware = new PugMiddleware();
@@ -31,6 +35,8 @@ export class App {
         this._dashboardRouter = new DashboardRouter();
         this._indexRouter = new IndexRouter();
         this._projectsRouter = new ProjectsRouter();
+
+        this._apiEndpoint = new ApiEndpoint();
     }
 
     public Start(port: number) {
