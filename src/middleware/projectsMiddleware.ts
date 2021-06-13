@@ -155,7 +155,7 @@ export class ProjectsMiddleware {
                         const projectRow = projects[0];
 
                         project = {
-                            projectId: projectRow.id,
+                            projectId: projectRow.projectId,
                             name: projectRow.name,
                             description: projectRow.description,
                             createdBy: projectRow.createdBy,
@@ -193,6 +193,56 @@ export class ProjectsMiddleware {
                     return;
                 }
             }
+        });
+    }
+
+    public EditProject(req: Request, res: Response, next: NextFunction) {
+        const projectId = req.body.projectId;
+        const projectName = req.body.name;
+        const projectDescription = req.body.description;
+
+        const userId = req.session.userId;
+
+        if (!projectId) {
+            req.session.error = "Project does not exist or you are not authorised to see it";
+            res.redirect('/projects/list');
+            return;
+        }
+        
+        if (!projectName || !projectDescription) {
+            req.session.error = "All fields are required";
+            res.redirect(`/projects/view/${projectId}`);
+            return;
+        }
+
+        const connection = createConnection({
+            host: process.env.MYSQL_HOST,
+            port: 3306,
+            user: process.env.MYSQL_USER,
+            password: process.env.MYSQL_PASSWORD,
+            database: process.env.MYSQL_DATABASE,
+        });
+
+        connection.execute('SELECT * FROM vwProjectUsers WHERE projectId = ? AND userId = ?', [ projectId, userId ], (err: QueryError, projectUsers: RowDataPacket[]) => {
+            if (err) throw err;
+
+            if (projectUsers.length != 1) {
+                req.session.error = "Project does not exist or you are not authorised to see it";
+                res.redirect('/projects/list');
+
+                connection.end();
+                return;
+            }
+
+            connection.execute('UPDATE projects SET name = ?, description = ? WHERE id = ?', [ projectName, projectDescription, projectId ], (err: QueryError) => {
+                if (err) throw err;
+
+                res.locals.projectId = projectId;
+
+                connection.end();
+                next();
+                return;
+            });
         });
     }
 }
