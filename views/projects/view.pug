@@ -30,7 +30,7 @@ block content
                 .card-header Assigned Users
                 .card-body
                     .d-grid.gap-2.d-md-flex.justify-content-md-end
-                        button(data-bs-toggle='modal' data-bs-target='#assign-user-modal').btn.text-primary.mb-3
+                        a(href="/projects/assign/#{project.projectId}").btn.text-primary.mb-3
                             i.fas.fa-user-plus
                             span.ms-1 Assign User
                     table#assigned-users-table

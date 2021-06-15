@@ -1,0 +1,29 @@
+extends ../../layout
+
+block content
+    .row
+        .col
+            a(href="/projects/view/#{project.projectId}").btn.text-primary
+                i.fas.fa-chevron-circle-left
+                span.ms-1 Back to Listing
+            h1 Assign User to #{project.name}
+    .row
+        .col
+            table#assign-user-table
+                thead
+                    tr
+                        th Username
+                        th Email
+                        th Actions
+                tbody
+                    each row in users
+                        tr
+                            td= row.username
+                            td= row.email
+                            td
+                                a(href="/projects/assign/#{project.projectId}/#{row.userId}")
+                                    i.fas.fa-eye
+                                    span.ms-1 Assign
+
+block scripts
+    script(src="/js/project-assign.js");
