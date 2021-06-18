@@ -23,6 +23,8 @@ export class UserMiddleware {
         });
 
         connection.execute(`SELECT * FROM users WHERE email = ?`, [ email ], (err: QueryError, rows: RowDataPacket[]) => {
+            if (err) throw err;
+
             if (rows.length != 1) {
                 req.session.error = "User does not exist";
                 res.redirect('/auth/login');

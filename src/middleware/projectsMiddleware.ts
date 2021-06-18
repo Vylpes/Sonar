@@ -4,6 +4,7 @@ import { IProjectUser } from "../models/IProjectUser";
 import { v4 as uuidv4 } from "uuid";
 import { UserProjectRole } from "../constants/UserProjectRole";
 import { createConnection, RowDataPacket, QueryError } from "mysql2";
+import { IUser } from "../models/IUser";
 
 export class ProjectsMiddleware {
     public GetAllProjectsByUserId(req: Request, res: Response, next: NextFunction) {
@@ -192,6 +193,71 @@ export class ProjectsMiddleware {
                     connection.end();
                     return;
                 }
+            }
+        });
+    }
+
+    public GetUsersNotInProject(req: Request, res: Response, next: NextFunction) {
+        const projectId = req.params.id;
+
+        if (!projectId) {
+            req.session.error = "Project id not given";
+            res.redirect('/projects/list');
+
+            return;
+        }
+
+        const connection = createConnection({
+            host: process.env.MYSQL_HOST,
+            port: 3306,
+            user: process.env.MYSQL_USER,
+            password: process.env.MYSQL_PASSWORD,
+            database: process.env.MYSQL_DATABASE,
+        });
+
+        let users: IUser[] = [];
+
+        connection.execute('SELECT * FROM users', (err: QueryError, userRows: RowDataPacket[]) => {
+            if (err) throw err;
+
+            const userCount = userRows.length;
+
+            if (userCount == 0) {
+                res.locals.users = [];
+
+                next();
+                connection.end();
+                return;
+            }
+
+            for (let i = 0; i < userCount; i++) {
+                const user = userRows[i];
+
+                connection.execute('SELECT * FROM vwProjectUsers WHERE userId = ? AND projectId = ?', [ user.id, projectId ], (err: QueryError, projectUsers: RowDataPacket[]) => {
+                    if (err) throw err;
+
+                    // If the query finds no user for the projectId in the vwProjectUsers view
+                    if (projectUsers.length == 0) {
+                        const userModel: IUser = {
+                            userId: user.userId,
+                            email: user.email,
+                            username: user.username,
+                            verified: user.verified == 1 ? true : false,
+                            admin: user.admin == 1 ? true : false,
+                            active: user.active == 1? true : false,
+                        }
+
+                        users.push(userModel);
+                    }
+
+                    if (i + 1 == userCount) {
+                        res.locals.users = users;
+
+                        next();
+                        connection.end();
+                        return;
+                    }
+                });
             }
         });
     }

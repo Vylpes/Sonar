@@ -3,7 +3,7 @@ extends ../../layout
 block content
     .row
         .col
-            a(href="/projects/view/#{project.projectId}").btn.text-primary
+            a(href="/projects/view/" + project.projectId).btn.text-primary
                 i.fas.fa-chevron-circle-left
                 span.ms-1 Back to Listing
             h1 Assign User to #{project.name}
@@ -21,9 +21,9 @@ block content
                             td= row.username
                             td= row.email
                             td
-                                a(href="/projects/assign/#{project.projectId}/#{row.userId}")
+                                a(href="/projects/assign/assign/" + project.projectId + "/" + row.userId)
                                     i.fas.fa-eye
                                     span.ms-1 Assign
 
 block scripts
-    script(src="/js/project-assign.js");
+    script(src="/js/project-assign-assign.js")

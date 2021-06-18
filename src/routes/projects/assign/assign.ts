@@ -3,7 +3,7 @@ import { UserMiddleware } from "../../../middleware/userMiddleware";
 import { ProjectsMiddleware } from "../../../middleware/projectsMiddleware";
 import { Router, Request, Response } from "express";
 
-export class View extends Page {
+export class Assign extends Page {
     private _userMiddleware: UserMiddleware;
     private _projectsMiddleware: ProjectsMiddleware;
 
@@ -15,11 +15,17 @@ export class View extends Page {
 
     OnGet() {
         // No id given, not found
-        super.router.get('/assign', this._userMiddleware.Authorise, (req: Request, res: Response) => {
+        super.router.get('/assign/assign', this._userMiddleware.Authorise, (req: Request, res: Response) => {
             res.redirect('/projects/list');
         });
 
-        // TODO: /assign/:id
-        // TODO: /assign/:id/:user
+        super.router.get('/assign/assign/:id', this._userMiddleware.Authorise, this._projectsMiddleware.GetProjectById, this._projectsMiddleware.GetUsersNotInProject, (req: Request, res: Response) => {
+            res.locals.viewData.project = res.locals.project;
+            res.locals.viewData.users = res.locals.users;
+
+            res.render('projects/assign/assign', res.locals.viewData);
+        });
+
+        // TODO: /assign/assign/:id/:user (should be a confirmation dialog, on post will execute)
     }
 }
