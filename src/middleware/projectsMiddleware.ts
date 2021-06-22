@@ -239,12 +239,12 @@ export class ProjectsMiddleware {
                     // If the query finds no user for the projectId in the vwProjectUsers view
                     if (projectUsers.length == 0) {
                         const userModel: IUser = {
-                            userId: user.userId,
+                            userId: user.id,
                             email: user.email,
                             username: user.username,
                             verified: user.verified == 1 ? true : false,
                             admin: user.admin == 1 ? true : false,
-                            active: user.active == 1? true : false,
+                            active: user.active == 1 ? true : false,
                         }
 
                         users.push(userModel);

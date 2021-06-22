@@ -26,6 +26,15 @@ export class Assign extends Page {
             res.render('projects/assign/assign', res.locals.viewData);
         });
 
-        // TODO: /assign/assign/:id/:user (should be a confirmation dialog, on post will execute)
+        super.router.get('/assign/assign/:id/:userid', this._userMiddleware.Authorise, this._projectsMiddleware.GetProjectById, this._userMiddleware.GetUserByUserId, (req: Request, res: Response) => {
+            res.locals.viewData.user = res.locals.user;
+            res.locals.viewData.project = res.locals.project;
+
+            res.render('projects/assign/assignConfirm', res.locals.viewData);
+        });
+    }
+
+    OnPost() {
+        // TODO: /assign/assign/:id/:userid
     }
 }
