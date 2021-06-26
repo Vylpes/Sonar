@@ -35,6 +35,10 @@ export class Assign extends Page {
     }
 
     OnPost() {
-        // TODO: /assign/assign/:id/:userid
+        super.router.post('/assign/assign/:id/:userid', this._userMiddleware.Authorise, this._projectsMiddleware.AssignUserToProject, (req: Request, res: Response) => {
+            req.session.success = "Assigned user to project";
+
+            res.redirect('/projects/view/' + req.params.id);
+        });
     }
 }

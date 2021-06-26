@@ -192,7 +192,7 @@ export class UserMiddleware {
                 const userRow = users[0];
 
                 user = {
-                    userId: userRow.userId,
+                    userId: userRow.id,
                     username: userRow.username,
                     email: userRow.email,
                     verified: userRow.verified == 1 ? true : false,

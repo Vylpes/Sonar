@@ -124,10 +124,10 @@ export class ProjectsMiddleware {
 
         let project: IProject;
 
-        connection.execute('SELECT * FROM vwProjectUsers WHERE projectId = ?', [ projectId ], (err: QueryError, projectUsers: RowDataPacket[]) => {
+        connection.execute('SELECT * FROM vwProjectUsers WHERE projectId = ? AND userId = ?', [ projectId, userId ], (err: QueryError, projectUsers: RowDataPacket[]) => {
             if (err) throw err;
 
-            const projectUserCount = projectUsers.length;
+            let projectUserCount = projectUsers.length;
 
             if (projectUserCount == 0) {
                 req.session.error = "Project not found or you are not authorised to see it";
@@ -137,63 +137,60 @@ export class ProjectsMiddleware {
                 return;
             }
 
-            for (let i = 0; i < projectUserCount; i++) {
-                const projectUser = projectUsers[i];
+            const projectUser = projectUsers[0];
+            const role = projectUser.role;
 
-                if (projectUser.userId == userId) {
-                    const role = projectUser.role;
+            connection.execute('SELECT * FROM vwProjects WHERE projectId = ?', [ projectId ], (err: QueryError, projects: RowDataPacket[]) => {
+                if (err) throw err;
 
-                    connection.execute('SELECT * FROM vwProjects WHERE projectId = ?', [ projectId ], (err: QueryError, projects: RowDataPacket[]) => {
-                        if (err) throw err;
-
-                        if (projects.length != 1) {
-                            req.session.error = 'Project not found or you are not authorised to see it';
-                            res.redirect('/projects/list');
-                            connection.end();
-                            return;
-                        }
-
-                        const projectRow = projects[0];
-
-                        project = {
-                            projectId: projectRow.projectId,
-                            name: projectRow.name,
-                            description: projectRow.description,
-                            createdBy: projectRow.createdBy,
-                            createdByName: projectRow.createdByName,
-                            createdAt: new Date(projectRow.createdAt).toUTCString(),
-                            archived: projectRow.archived == 1 ? true : false,
-                        }
-
-                        let projectUsersList: IProjectUser[] = [];
-
-                        for (let j = 0; j < projectUserCount; j++) {
-                            const projectUser = projectUsers[j];
-
-                            projectUsersList.push({
-                                projectUserId: projectUser.projectUserId,
-                                projectId: projectUser.projectId,
-                                userId: projectUser.userId,
-                                userName: projectUser.userName,
-                                role: projectUser.role,
-                            });
-                        }
-
-                        res.locals.project = project;
-                        res.locals.projectUsers = projectUsersList;
-                        res.locals.userProjectRole = role;
-
-                        next();
-                        connection.end();
-                        return;
-                    });
-                } else if (i + 1 == projectUserCount) {
-                    req.session.error = "Project not found or you are not authorised to see it";
+                if (projects.length != 1) {
+                    req.session.error = 'Project not found or you are not authorised to see it';
                     res.redirect('/projects/list');
                     connection.end();
                     return;
                 }
-            }
+
+                connection.execute('SELECT * FROM vwProjectUsers WHERE projectId = ?', [ projectId ], (err: QueryError, projectUsers: RowDataPacket[]) => {
+                    if (err) throw err;
+
+                    const projectRow = projects[0];
+
+                    projectUserCount = projectUsers.length;
+
+                    project = {
+                        projectId: projectRow.projectId,
+                        name: projectRow.name,
+                        description: projectRow.description,
+                        createdBy: projectRow.createdBy,
+                        createdByName: projectRow.createdByName,
+                        createdAt: new Date(projectRow.createdAt).toUTCString(),
+                        archived: projectRow.archived == 1 ? true : false,
+                    }
+
+                    let projectUsersList: IProjectUser[] = [];
+
+                    for (let j = 0; j < projectUserCount; j++) {
+                        const projectUser = projectUsers[j];
+
+                        projectUsersList.push({
+                            projectUserId: projectUser.projectUserId,
+                            projectId: projectUser.projectId,
+                            userId: projectUser.userId,
+                            userName: projectUser.userName,
+                            role: projectUser.role,
+                            isAdmin: projectUser.role == UserProjectRole.Admin ? true : false,
+                        });
+                    }
+
+                    res.locals.project = project;
+                    res.locals.projectUsers = projectUsersList;
+                    res.locals.userProjectRole = role;
+
+                    next();
+                    connection.end();
+                    return;
+                });
+            });
         });
     }
 
@@ -259,6 +256,101 @@ export class ProjectsMiddleware {
                     }
                 });
             }
+        });
+    }
+
+    public AssignUserToProject(req: Request, res: Response, next: NextFunction) {
+        const projectId = req.params.id;
+        const userId = req.params.userid;
+
+        console.log(userId);
+
+        if (!projectId || !userId) {
+            req.session.error = "All fields are required";
+            res.redirect('/projects/list');
+            return;
+        }
+
+        const connection = createConnection({
+            host: process.env.MYSQL_HOST,
+            port: 3306,
+            user: process.env.MYSQL_USER,
+            password: process.env.MYSQL_PASSWORD,
+            database: process.env.MYSQL_DATABASE,
+        });
+
+        connection.execute('SELECT * FROM vwProjects WHERE projectId = ?', [ projectId ], (err: QueryError, projects: RowDataPacket[]) => {
+            if (err) throw err;
+
+            // If project doesn't exist
+            if (projects.length == 0) {
+                req.session.error = "Project does not exist";
+                res.redirect("/projects/list");
+
+                connection.end();
+                return;
+            }
+
+            connection.execute('SELECT * FROM users WHERE id = ?', [ userId ], (err: QueryError, users: RowDataPacket[]) => {
+                if (err) throw err;
+
+                if (users.length == 0) {
+                    req.session.error = "User does not exist";
+                    res.redirect("/projects/view/" + projectId);
+
+                    connection.end();
+                    return;
+                }
+
+                connection.execute('SELECT * FROM vwProjectUsers WHERE projectId = ? AND userId = ?', [ projectId, userId ], (err: QueryError, projectUsers: RowDataPacket[]) => {
+                    if (err) throw err;
+        
+                    // If user is already assigned to project
+                    if (projectUsers.length != 0) {
+                        req.session.error = "User is already assigned";
+                        res.redirect("/projects/view/" + projectId);
+        
+                        connection.end();
+                        return;
+                    }
+
+                    connection.execute('SELECT * FROM vwProjectUsers WHERE userId = ?', [ req.session.userId ], (err: QueryError, user: RowDataPacket[]) => {
+                        if (err) throw err;
+
+                        if (user.length == 0) {
+                            req.session.error = "Current user does not exist in project";
+                            res.redirect("/");
+
+                            connection.end();
+                            return;
+                        }
+
+                        const userRole = user[0].role;
+
+                        if (userRole != UserProjectRole.Admin) {
+                            req.session.error = "You are not authorised to assign users to this project";
+                            res.redirect("/project/view/" + projectId);
+
+                            connection.end();
+                            return;
+                        }
+
+                        connection.execute('INSERT INTO projectUsers VALUES (?, ?, ?, ?)', [
+                            uuidv4(),
+                            projectId,
+                            userId,
+                            UserProjectRole.Member,
+                        ], (err: QueryError) => {
+                            if (err) throw err;
+
+                            next();
+
+                            connection.end();
+                            return;
+                        });
+                    });
+                });
+            });
         });
     }
 }
