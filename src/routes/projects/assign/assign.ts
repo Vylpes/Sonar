@@ -14,7 +14,6 @@ export class Assign extends Page {
     }
 
     OnGet() {
-        // No id given, not found
         super.router.get('/assign/assign', this._userMiddleware.Authorise, (req: Request, res: Response) => {
             res.redirect('/projects/list');
         });

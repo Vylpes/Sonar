@@ -263,8 +263,6 @@ export class ProjectsMiddleware {
         const projectId = req.params.id;
         const userId = req.params.userid;
 
-        console.log(userId);
-
         if (!projectId || !userId) {
             req.session.error = "All fields are required";
             res.redirect('/projects/list');
@@ -348,6 +346,88 @@ export class ProjectsMiddleware {
                             connection.end();
                             return;
                         });
+                    });
+                });
+            });
+        });
+    }
+
+    public UnassignUserFromProject(req: Request, res: Response, next: NextFunction) {
+        const projectId = req.params.id;
+        const userId = req.params.userid;
+        const currentUserId = req.session.userId;
+
+        if (!projectId || !userId) {
+            req.session.error = "All fields are required";
+            res.redirect('/projects/list');
+            return;
+        }
+
+        const connection = createConnection({
+            host: process.env.MYSQL_HOST,
+            port: 3306,
+            user: process.env.MYSQL_USER,
+            password: process.env.MYSQL_PASSWORD,
+            database: process.env.MYSQL_DATABASE,
+        });
+
+        connection.execute('SELECT * FROM vwProjects WHERE projectId = ?', [ projectId ], (err: QueryError, projects: RowDataPacket[]) => {
+            if (err) throw err;
+
+            if (projects.length == 0) {
+                req.session.error = "Project does not exist";
+                res.redirect('/projects/list');
+
+                connection.end();
+                return;
+            }
+
+            connection.execute('SELECT * FROM vwProjectUsers WHERE projectId = ? AND userId = ?', [ projectId, userId ], (err: QueryError, projectUsers: RowDataPacket[]) => {
+                if (err) throw err;
+
+                if (projectUsers.length == 0) {
+                    req.session.error = "User is not assigned to project";
+                    res.redirect('/projects/view/' + projectId);
+
+                    connection.end();
+                    return;
+                }
+
+                const projectUser = projectUsers[0];
+
+                if (projectUser.userId == currentUserId) {
+                    req.session.error = "You can not unassign yourself";
+                    res.redirect('/projects/view/' + projectId);
+
+                    connection.end();
+                    return;
+                }
+
+                connection.execute('SELECT * FROM vwProjectUsers WHERE projectId = ? AND userId = ?', [ projectId, currentUserId ], (err: QueryError, projectUsers: RowDataPacket[]) => {
+                    if (err) throw err;
+
+                    if (projectUsers.length == 0) {
+                        req.session.error = "You are not authorised to unassign a user from this project";
+                        res.redirect('/projects/view/' + projectId);
+
+                        connection.end();
+                        return;
+                    }
+
+                    if (projectUsers[0].role != UserProjectRole.Admin) {
+                        req.session.error = "You are not authorised to unassign a user from this project";
+                        res.redirect('/projects/view/' + projectId);
+
+                        connection.end();
+                        return;
+                    }
+
+                    connection.execute('DELETE FROM projectUsers WHERE projectId = ? AND userId = ?', [ projectId, userId ], (err: QueryError) => {
+                        if (err) throw err;
+
+                        next();
+                        connection.end();
+                        return;
                     });
                 });
             });

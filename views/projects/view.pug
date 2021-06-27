@@ -37,39 +37,21 @@ block content
                         thead
                             tr
                                 th Name
+                                th Actions
                         tbody
                             each row in projectUsers
-                                tr
-                                    td
-                                        span= row.userName
-                                        if row.isAdmin
-                                            .badge.rounded-pill.bg-primary.mb-3.ms-1
-                                                i.fas.fa-shield-alt
-                                                span.ms-1 Admin
-    form(method='POST' action='/projects/assign-user').modal.fade#assign-user-modal
-        .modal-dialog.modal-dialog-scrollable
-            .modal-content
-                .modal-header
-                    h5.modal-title Assign User
-                    button(type='button' data-bs-dismiss='modal').btn-close
-                .modal-body
-                    .form-group
-                        input(type='hidden' name='projectId' value=project.projectId)
-                    .form-group.mb-3
-                        label Username
-                        input(type='text' name='username').form-control.mb-2#assigned-username-input
-                        button(type='button').btn.btn-primary#find-user-button.me-2 Find User
-                        button(type='button').btn.btn-secondary#clear-user-button Clear
-                    .form-group.mb-3
-                        .card
-                            .card-header User to Assign
-                            .card-body
-                                span#assign-username-span Please search for a user...
-                                span#assign-email-span
-                    .form-group.text-center
-                        button(type='submit').btn.text-primary#assign-user-submit
-                            i.fas.fa-check-square
-                            span.ms-1 Create
+                                if (row.userName)
+                                    tr
+                                        td
+                                            span= row.userName
+                                            if row.isAdmin
+                                                .badge.rounded-pill.bg-primary.mb-3.ms-1
+                                                    i.fas.fa-shield-alt
+                                                    span.ms-1 Admin
+                                        td
+                                            a(href="/projects/assign/unassign/" + project.projectId + "/" + row.userId).btn.text-primary
+                                                i.fas.fa-user-slash
+                                                span.ms-1 Unassign
 
 block scripts
     script(src='/js/project-view.js')

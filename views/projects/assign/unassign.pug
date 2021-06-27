@@ -6,12 +6,12 @@ block content
             a(href="/projects/view/" + project.projectId).btn.text-primary
                 i.fas.fa-chevron-circle-left
                 span.ms-1 Back to Project
-            h1 Assign User to #{project.name}
+            h1 Unassign User from #{project.name}
     .row
         .col
-            form(action="/projects/assign/assign/" + project.projectId + "/" + user.userId, method="POST")
+            form(action="/projects/assign/unassign/" + project.projectId + "/" + user.userId, method="POST")
                 .form-group.mb-3
-                    label Assign #{user.username} to #{project.name}?
+                    label Unassign #{user.username} from #{project.name}?
                     br
                     a(href="/projects/view/" + project.projectId).btn.text-secondary
                         i.fas.fa-times
