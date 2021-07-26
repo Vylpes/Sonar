@@ -433,4 +433,89 @@ export class ProjectsMiddleware {
             });
         });
     }
+
+    public ToggleAdmin(req: Request, res: Response, next: NextFunction) {
+        const projectId = req.params.projectid;
+        const userId = req.params.userid;
+
+        if (!projectId || !userId) {
+            req.session.error = "All fields are required";
+            res.redirect('/projects/list');
+            return;
+        }
+
+        const currentUserId = req.session.userId;
+
+        if (userId == currentUserId ) {
+            req.session.error = "Cannot toggle yourself!";
+            res.redirect('/projects/list');
+            return;
+        }
+
+        const connection = createConnection({
+            host: process.env.MYSQL_HOST,
+            port: 3306,
+            user: process.env.MYSQL_USER,
+            password: process.env.MYSQL_PASSWORD,
+            database: process.env.MYSQL_DATABASE,
+        });
+
+        connection.execute('SELECT * FROM vwProjectUsers WHERE projectId = ? AND userId = ?', [ projectId, currentUserId ], (err: QueryError, projectUsers: RowDataPacket[]) => {
+            if (err) throw err;
+
+            if (projectUsers.length == 0) {
+                req.session.error = "Project not found or you are not authorised to see it";
+                res.redirect('/projects/list');
+
+                connection.end();
+                return;
+            }
+
+            const projectUser = projectUsers[0];
+            const role = projectUser.role;
+
+            if (role != UserProjectRole.Admin) {
+                req.session.error = "Unauthorised";
+                res.redirect('/projects/view/' + projectId);
+
+                connection.end();
+                return;
+            }
+
+            connection.execute('SELECT * FROM vwProjectUsers WHERE projectId = ? AND userId = ?', [ projectId, userId ], (err: QueryError, projectUsers: RowDataPacket[]) => {
+                if (err) throw err;
+
+                if (projectUsers.length == 0) {
+                    req.session.error = "User requested is not part of the project";
+                    res.redirect('/projects/view/' + projectId);
+
+                    connection.end();
+                    return;
+                }
+
+                let projectUserToChange = projectUsers[0];
+                let roleToChange = projectUserToChange.role;
+
+                switch (roleToChange) {
+                    case UserProjectRole.Member:
+                        roleToChange = UserProjectRole.Admin;
+                        break;
+                    case UserProjectRole.Admin:
+                        roleToChange = UserProjectRole.Member;
+                        break;
+                    default:
+                        roleToChange = roleToChange;
+                        break;
+                }
+
+                connection.execute('UPDATE projectUsers SET role = ? WHERE projectId = ? AND userId = ?', [ roleToChange, projectUserToChange.projectId, projectUserToChange.userId ], (err: QueryError) => {
+                    if (err) throw err;
+
+                    next();
+                    connection.end();
+                    return;
+                });
+            });
+        });
+    }
 }

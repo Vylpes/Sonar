@@ -7,6 +7,7 @@ import { New } from "./projects/new";
 import { View } from "./projects/view";
 import { Assign } from "./projects/assign/assign";
 import { Unassign } from "./projects/assign/unassign";
+import { Update } from "./projects/assign/update"; 
 
 export class ProjectsRouter extends Route {
     private _userMiddleware: UserMiddleware;
@@ -17,6 +18,7 @@ export class ProjectsRouter extends Route {
     private _view: View;
     private _assignAssign: Assign;
     private _assignUnassign: Unassign;
+    private _assignUpdate: Update;
 
     constructor() {
         super();
@@ -28,6 +30,7 @@ export class ProjectsRouter extends Route {
         this._view = new View(super.router, this._userMiddleware, this._projectsMiddleware);
         this._assignAssign = new Assign(super.router, this._userMiddleware, this._projectsMiddleware);
         this._assignUnassign = new Unassign(super.router, this._userMiddleware, this._projectsMiddleware);
+        this._assignUpdate = new Update(super.router, this._userMiddleware, this._projectsMiddleware);
     }
 
     public Route(): Router {
@@ -36,6 +39,7 @@ export class ProjectsRouter extends Route {
         this._view.Route();
         this._assignAssign.Route();
         this._assignUnassign.Route();
+        this._assignUpdate.Route();
 
         return super.router;
     }

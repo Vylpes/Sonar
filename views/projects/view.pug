@@ -52,6 +52,9 @@ block content
                                             a(href="/projects/assign/unassign/" + project.projectId + "/" + row.userId).btn.text-primary
                                                 i.fas.fa-user-slash
                                                 span.ms-1 Unassign
+                                            a(href="/projects/assign/update/" + project.projectId + "/" + row.userId).btn.text-primary
+                                                i.fas.fa-user-edit
+                                                span.ms-1 Update
 
 block scripts
     script(src='/js/project-view.js')
