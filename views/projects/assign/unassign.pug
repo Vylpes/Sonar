@@ -1,0 +1,21 @@
+extends ../../layout
+
+block content
+    .row
+        .col
+            a(href="/projects/view/" + project.projectId).btn.text-primary
+                i.fas.fa-chevron-circle-left
+                span.ms-1 Back to Project
+            h1 Unassign User from #{project.name}
+    .row
+        .col
+            form(action="/projects/assign/unassign/" + project.projectId + "/" + user.userId, method="POST")
+                .form-group.mb-3
+                    label Unassign #{user.username} from #{project.name}?
+                    br
+                    a(href="/projects/view/" + project.projectId).btn.text-secondary
+                        i.fas.fa-times
+                        span.ms-1 Cancel
+                    button(type='submit').btn.text-primary.ms-1
+                        i.fas.fa-check-square
+                        span.ms-1 Confirm

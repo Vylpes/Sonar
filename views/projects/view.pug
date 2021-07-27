@@ -34,19 +34,32 @@ block content
             .card
                 .card-header Assigned Users
                 .card-body
+                    .d-grid.gap-2.d-md-flex.justify-content-md-end
+                        a(href="/projects/assign/assign/" + project.projectId).btn.text-primary.mb-3
+                            i.fas.fa-user-plus
+                            span.ms-1 Assign User
                     table#assigned-users-table
                         thead
                             tr
                                 th Name
+                                th Actions
                         tbody
                             each row in projectUsers
-                                tr
-                                    td
-                                        span= row.userName
-                                        if row.role = 1
-                                            .badge.rounded-pill.bg-primary.mb-3.ms-1
-                                                i.fas.fa-shield-alt
-                                                span.ms-1 Admin
+                                if (row.userName)
+                                    tr
+                                        td
+                                            span= row.userName
+                                            if row.isAdmin
+                                                .badge.rounded-pill.bg-primary.mb-3.ms-1
+                                                    i.fas.fa-shield-alt
+                                                    span.ms-1 Admin
+                                        td
+                                            a(href="/projects/assign/unassign/" + project.projectId + "/" + row.userId).btn.text-primary
+                                                i.fas.fa-user-slash
+                                                span.ms-1 Unassign
+                                            a(href="/projects/assign/update/" + project.projectId + "/" + row.userId).btn.text-primary
+                                                i.fas.fa-user-edit
+                                                span.ms-1 Update
     form(method='POST' action='/projects/edit').modal.fade#edit-project-modal
         .modal-dialog.modal-dialog-scrollable
             .modal-content

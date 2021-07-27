@@ -2,6 +2,8 @@ import { v4 as uuidv4 } from "uuid";
 import { Request, Response, NextFunction } from "express";
 import { hash, compare } from "bcrypt";
 import { createConnection, RowDataPacket, QueryError } from "mysql2";
+import { IUser } from "../models/IUser";
+import { UserProjectRole } from "../constants/UserProjectRole";
 
 export class UserMiddleware {
     public Login(req: Request, res: Response, next: NextFunction) {
@@ -23,6 +25,8 @@ export class UserMiddleware {
         });
 
         connection.execute(`SELECT * FROM users WHERE email = ?`, [ email ], (err: QueryError, rows: RowDataPacket[]) => {
+            if (err) throw err;
+
             if (rows.length != 1) {
                 req.session.error = "User does not exist";
                 res.redirect('/auth/login');
@@ -136,5 +140,72 @@ export class UserMiddleware {
             req.session.error = "Access denied";
             res.redirect('/auth/login');
         }
+    }
+
+    public GetUserByUserId(req: Request, res: Response, next: NextFunction) {
+        const currentUserId = req.session.userId;
+        const userId = req.params.userid;
+        const projectId = req.params.id;
+
+        const connection = createConnection({
+            host: process.env.MYSQL_HOST,
+            port: 3306,
+            user: process.env.MYSQL_USER,
+            password: process.env.MYSQL_PASSWORD,
+            database: process.env.MYSQL_DATABASE,
+        });
+
+        let user: IUser;
+
+        connection.execute('SELECT * FROM vwProjectUsers WHERE projectId = ? AND userId = ?', [ projectId, currentUserId ], (err: QueryError, users: RowDataPacket[]) => {
+            if (err) throw err;
+
+            if (users.length == 0) {
+                req.session.error = "Project not found or you are not authorised to see it";
+                res.redirect('/projects/list');
+
+                connection.end();
+                return;
+            }
+
+            const userRow = users[0];
+
+            if (userRow.role != UserProjectRole.Admin) {
+                req.session.error = "Unauthorised";
+                res.redirect('/projects/view/' + projectId);
+
+                connection.end();
+                return;
+            }
+
+            connection.execute('SELECT * FROM users WHERE id = ?', [ userId ], (err: QueryError, users: RowDataPacket[]) => {
+                if (err) throw err;
+
+                if (users.length == 0) {
+                    req.session.error = "User does not exist";
+                    res.redirect('/projects/view/' + projectId);
+
+                    connection.end();
+                    return;
+                }
+
+                const userRow = users[0];
+
+                user = {
+                    userId: userRow.id,
+                    username: userRow.username,
+                    email: userRow.email,
+                    verified: userRow.verified == 1 ? true : false,
+                    active: userRow.active == 1 ? true : false,
+                    admin: userRow.admin == 1 ? true : false,
+                };
+    
+                res.locals.user = user;
+                
+                next();
+                connection.end();
+                return;
+            });
+        });
     }
 }

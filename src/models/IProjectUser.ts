@@ -4,4 +4,6 @@ export interface IProjectUser {
     userId: string;
     userName: string;
     role: number;
+
+    isAdmin: boolean;
 }
