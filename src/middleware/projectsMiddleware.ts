@@ -312,7 +312,7 @@ export class ProjectsMiddleware {
                         return;
                     }
 
-                    connection.execute('SELECT * FROM vwProjectUsers WHERE userId = ?', [ req.session.userId ], (err: QueryError, user: RowDataPacket[]) => {
+                    connection.execute('SELECT * FROM vwProjectUsers WHERE userId = ? AND projectId = ?', [ req.session.userId, projectId ], (err: QueryError, user: RowDataPacket[]) => {
                         if (err) throw err;
 
                         if (user.length == 0) {
@@ -327,7 +327,7 @@ export class ProjectsMiddleware {
                       
                         if (userRole != UserProjectRole.Admin) {
                             req.session.error = "You are not authorised to assign users to this project";
-                            res.redirect("/project/view/" + projectId);
+                            res.redirect("/projects/view/" + projectId);
 
                             connection.end();
                             return;
