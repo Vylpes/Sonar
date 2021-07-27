@@ -1,16 +1,21 @@
 extends ../layout
 
 block content
+    a(href="/projects/list").btn.text-primary
+        i.fas.fa-chevron-circle-left
+        span.ms-1 Back to Listing
     .row
         .col
-            a(href="/projects/list").btn.text-primary
-                i.fas.fa-chevron-circle-left
-                span.ms-1 Back to Listing
-            h1= project.name
+            h1#view-project-name= project.name
             if project.archived
                 .badge.rounded-pill.bg-warning.mb-3.me-1
                     i.fas.fa-archive
                     span.ms-1 Archived
+        .col
+            .d-grid.gap-2.d-md-flex.justify-content-md-end
+                button(data-bs-toggle='modal' data-bs-target='#edit-project-modal').btn.text-primary
+                    i.fas.fa-edit
+                    span.ms-1 Edit
     .row
         .col-4
             .card
@@ -18,7 +23,7 @@ block content
                 .card-body
                     .mb-2
                         p.mb-0.text-secondary Description
-                        p= project.description
+                        p#view-project-description= project.description
                     .mb-2
                         p.mb-0.text-secondary Created By
                         p= project.createdByName
@@ -55,6 +60,25 @@ block content
                                             a(href="/projects/assign/update/" + project.projectId + "/" + row.userId).btn.text-primary
                                                 i.fas.fa-user-edit
                                                 span.ms-1 Update
+    form(method='POST' action='/projects/edit').modal.fade#edit-project-modal
+        .modal-dialog.modal-dialog-scrollable
+            .modal-content
+                .modal-header
+                    h5.modal-title Edit Project
+                    button(type='button' data-bs-dismiss='modal').btn-close
+                .modal-body
+                    .form-group
+                        input(type='hidden' name='projectId' value=project.projectId).form-control
+                    .form-group.mb-3
+                        label Project Name
+                        input(type='text' name='name' value=project.name).form-control
+                    .form-group.mb-3
+                        label Description
+                        input(type='text' name='description' value=project.description).form-control
+                    .form-group.text-center
+                        button(type='submit').btn.text-primary
+                            i.fas.fa-check-square
+                            span.ms-1 Edit
 
 block scripts
     script(src='/js/project-view.js')
