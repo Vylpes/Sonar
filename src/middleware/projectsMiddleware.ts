@@ -45,6 +45,7 @@ export class ProjectsMiddleware {
                             projectId: projectRow.projectId,
                             name: projectRow.name,
                             description: projectRow.description,
+                            taskPrefix: projectRow.taskPrefix,
                             createdBy: projectRow.createdBy,
                             createdByName: projectRow.createdByName,
                             createdAt: new Date(projectRow.createdAt).toUTCString(),
@@ -69,8 +70,9 @@ export class ProjectsMiddleware {
     public CreateProject(req: Request, res: Response, next: NextFunction) {
         const projectName = req.body.name;
         const projectDescription = req.body.description;
+        const projectTaskPrefix = req.body.taskPrefix;
 
-        if (!projectName || !projectDescription) {
+        if (!projectName || !projectDescription || !projectTaskPrefix) {
             req.session.error = "All fields are required";
             res.redirect('/projects/list');
             return;
@@ -87,10 +89,11 @@ export class ProjectsMiddleware {
             database: process.env.MYSQL_DATABASE,
         });
 
-        connection.execute('INSERT INTO projects VALUES (?, ?, ?, ?, ?, ?)', [
+        connection.execute('INSERT INTO projects VALUES (?, ?, ?, ?, ?, ?, ?)', [
             projectId,
             projectName,
             projectDescription,
+            projectTaskPrefix,
             userId,
             new Date(),
             0,
@@ -161,6 +164,7 @@ export class ProjectsMiddleware {
                         projectId: projectRow.projectId,
                         name: projectRow.name,
                         description: projectRow.description,
+                        taskPrefix: projectRow.taskPrefix,
                         createdBy: projectRow.createdBy,
                         createdByName: projectRow.createdByName,
                         createdAt: new Date(projectRow.createdAt).toUTCString(),
