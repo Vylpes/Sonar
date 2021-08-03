@@ -39,6 +39,10 @@ block content
                     .form-group.mb-3
                         label Description
                         input(type='text' name='description').form-control
+                    .form-group.mb-3
+                        label Task Prefix
+                        input(type='text' name='taskPrefix').form-control
+                        span.text-danger This can't be changed once set!
                     .form-group.text-center
                         button(type='submit').btn.text-primary
                             i.fas.fa-check-square
