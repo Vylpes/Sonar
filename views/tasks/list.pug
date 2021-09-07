@@ -1,0 +1,27 @@
+extends ../layout
+
+block content
+    .row
+        .col
+            h1 Tasks
+        .col
+            .d-grid.gap-2.d-md-flex.justify-content-md-end
+    table#task-list-table
+        thead
+            tr
+                th ID
+                th Name
+                th Assigned To
+                th Created At
+                th Actions
+        tbody
+            each row in tasks
+                tr
+                    td= row.taskNumber
+                    td= row.name
+                    td= row.AssignedToName
+                    td= row.createdAt
+                    td
+
+block scripts
+    script(src='/js/task-list.js')

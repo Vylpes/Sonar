@@ -24,6 +24,7 @@ export class Init {
 	connection.query(readFileSync("./data/tables/users.sql").toString());
 	connection.query(readFileSync("./data/tables/projects.sql").toString());
 	connection.query(readFileSync("./data/tables/projectUsers.sql").toString());
+    connection.query(readFileSync("./data/tables/tasks.sql").toString());
 
 	// views
 	connection.query(readFileSync("./data/views/vwProjects.sql").toString());

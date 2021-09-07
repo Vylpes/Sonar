@@ -13,6 +13,7 @@ import { AuthRouter } from "./routes/auth";
 import { DashboardRouter } from "./routes/dashboard";
 import { IndexRouter } from "./routes";
 import { ProjectsRouter } from "./routes/projects";
+import { TasksRouter } from "./routes/tasks";
 
 import { ApiEndpoint } from "./api/apiEndpoint";
 
@@ -24,6 +25,7 @@ export class App {
     private _dashboardRouter: DashboardRouter;
     private _indexRouter: IndexRouter;
     private _projectsRouter: ProjectsRouter;
+    private _tasksRouter: TasksRouter;
 
     private _apiEndpoint: ApiEndpoint;
 
@@ -35,6 +37,7 @@ export class App {
         this._dashboardRouter = new DashboardRouter();
         this._indexRouter = new IndexRouter();
         this._projectsRouter = new ProjectsRouter();
+        this._tasksRouter = new TasksRouter();
 
         this._apiEndpoint = new ApiEndpoint();
     }
@@ -82,6 +85,7 @@ export class App {
         this._app.use('/auth', this._authRouter.Route());
         this._app.use('/dashboard', this._dashboardRouter.Route());
         this._app.use('/projects', this._projectsRouter.Route());
+        this._app.use('/tasks', this._tasksRouter.Route());
 
         this._app.use('/api', this._apiEndpoint.Route());
     }
