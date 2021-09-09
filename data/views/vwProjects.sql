@@ -9,6 +9,6 @@ SELECT
   , u.username AS createdByName
   , p.createdAt
   , p.archived
-FROM projects p
+FROM Project p
 LEFT JOIN users u
   ON p.createdBy = u.id

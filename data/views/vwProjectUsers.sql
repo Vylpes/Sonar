@@ -6,6 +6,6 @@ SELECT
   , pU.userId
   , u.username AS userName
   , pU.role
-FROM projectUsers pU
-LEFT JOIN users u
+FROM ProjectUser pU
+LEFT JOIN User u
   ON pU.userId = u.id

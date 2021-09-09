@@ -16,12 +16,12 @@ SELECT
     , uA.username AS AssignedToUsername
     , p.name AS ProjectName
     , tP.name AS ParentTaskName
-FROM tasks t
-LEFT JOIN users uA
+FROM Task t
+LEFT JOIN User uA
     ON t.assignedTo = uA.id
-LEFT JOIN users uC
+LEFT JOIN User uC
     oN t.createdBy = uC.id
-LEFT JOIN projects p
+LEFT JOIN Project p
     ON t.projectId = p.id
-LEFT JOIN tasks tP
+LEFT JOIN Task tP
     ON t.parentTask = tP.id

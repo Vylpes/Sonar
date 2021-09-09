@@ -13,7 +13,9 @@
       "resolveJsonModule": true,
       "allowJs": true,
       "allowSyntheticDefaultImports": true,
-      "skipLibCheck": true
+      "skipLibCheck": true,
+      "emitDecoratorMetadata": true,
+      "experimentalDecorators": true,
   },
   "include": [
       "./src/**/*"

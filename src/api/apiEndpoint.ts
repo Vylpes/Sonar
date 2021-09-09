@@ -1,22 +1,27 @@
 import { Router } from "express";
+import { Connection } from "typeorm";
 import { Route } from "../contracts/Route";
 import { UserMiddleware } from "../middleware/userMiddleware";
-import { Username } from "./user/username";
+import { CreateProject } from "./project/CreateProject";
+import { GetAllProjectsByUserId } from "./project/GetAllProjectsByUserId";
 
 export class ApiEndpoint extends Route {
-    private _userMiddleware: UserMiddleware;
+    private _connection: Connection;
 
-    private _username: Username;
+    private _getAllProjectsByUserId: GetAllProjectsByUserId;
+    private _createProject: CreateProject;
 
-    constructor() {
+    constructor(connection: Connection) {
         super();
-        this._userMiddleware = new UserMiddleware();
-
-        this._username = new Username(super.router, this._userMiddleware);
+        this._connection = connection;
+        
+        this._getAllProjectsByUserId = new GetAllProjectsByUserId(super.router, this._connection);
+        this._createProject = new CreateProject(super.router, this._connection);
     }
 
     public Route(): Router {
-        this._username.Route();
+        this._getAllProjectsByUserId.Route();
+        this._createProject.Route();
 
         return super.router;
     }

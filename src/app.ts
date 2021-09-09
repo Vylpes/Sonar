@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import { Express, Request, Response, NextFunction } from "express";
 import { PugMiddleware } from "./middleware/pugMiddleware";
 
@@ -16,8 +17,10 @@ import { ProjectsRouter } from "./routes/projects";
 import { TasksRouter } from "./routes/tasks";
 
 import { ApiEndpoint } from "./api/apiEndpoint";
+import { Connection } from "typeorm";
 
 export class App {
+    private _connection: Connection;
     private _app: Express;
     private _pugMiddleware: PugMiddleware;
 
@@ -29,7 +32,8 @@ export class App {
 
     private _apiEndpoint: ApiEndpoint;
 
-    constructor() {
+    constructor(connection: Connection) {
+        this._connection = connection;
         this._app = express();
         this._pugMiddleware = new PugMiddleware();
 
@@ -39,7 +43,7 @@ export class App {
         this._projectsRouter = new ProjectsRouter();
         this._tasksRouter = new TasksRouter();
 
-        this._apiEndpoint = new ApiEndpoint();
+        this._apiEndpoint = new ApiEndpoint(connection);
     }
 
     public Start(port: number) {
