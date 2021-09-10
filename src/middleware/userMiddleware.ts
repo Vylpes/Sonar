@@ -6,56 +6,6 @@ import { IUser } from "../models/IUser";
 import { UserProjectRole } from "../constants/UserProjectRole";
 
 export class UserMiddleware {
-    public Login(req: Request, res: Response, next: NextFunction) {
-        const email = req.body.email;
-        const password = req.body.password;
-
-        if (!email || !password) {
-            req.session.error = "All fields are required";
-            res.redirect('/auth/login');
-            return;
-        }
-
-        const connection = createConnection({
-            host: process.env.MYSQL_HOST,
-            port: 3306,
-            user: process.env.MYSQL_USER,
-            password: process.env.MYSQL_PASSWORD,
-            database: process.env.MYSQL_DATABASE,
-        });
-
-        connection.execute(`SELECT * FROM users WHERE email = ?`, [ email ], (err: QueryError, rows: RowDataPacket[]) => {
-            if (err) throw err;
-
-            if (rows.length != 1) {
-                req.session.error = "User does not exist";
-                res.redirect('/auth/login');
-                connection.end();
-                return;
-            }
-
-            const row = rows[0];
-
-            compare(password, row.password, (err, same) => {
-                if (err) throw err;
-
-                if (same) {
-                    res.locals.user = row;
-                    next();
-
-                    connection.end();
-                    return;
-                } else {
-                    req.session.error = "Password is incorrect";
-                    res.redirect('/auth/login');
-
-                    connection.end();
-                    return;
-                }
-            })
-        });
-    }
-
     public Register(req: Request, res: Response, next: NextFunction) {
         const username = req.body.username;
         const email = req.body.email;
