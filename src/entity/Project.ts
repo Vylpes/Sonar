@@ -15,6 +15,11 @@ export class Project {
         this.CreatedBy = createdBy;
     }
 
+    public EditProject(name: string, description: string) {
+        this.Name = name;
+        this.Description = description;
+    }
+
     @PrimaryColumn()
     Id: string;
 
