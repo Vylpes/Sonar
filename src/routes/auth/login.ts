@@ -21,7 +21,7 @@ export class Login extends Page {
     }
 
     OnPost() {
-        super.router.post('/login', this._userMiddleware.Login, (req: Request, res: Response) => {
+        super.router.post('/login', (req: Request, res: Response) => {
             req.session.regenerate(() => {
                 const user = res.locals.user;
 

@@ -20,7 +20,6 @@ import { ApiEndpoint } from "./api/apiEndpoint";
 import { Connection } from "typeorm";
 
 export class App {
-    private _connection: Connection;
     private _app: Express;
     private _pugMiddleware: PugMiddleware;
 
@@ -32,8 +31,7 @@ export class App {
 
     private _apiEndpoint: ApiEndpoint;
 
-    constructor(connection: Connection) {
-        this._connection = connection;
+    constructor() {
         this._app = express();
         this._pugMiddleware = new PugMiddleware();
 
@@ -43,7 +41,7 @@ export class App {
         this._projectsRouter = new ProjectsRouter();
         this._tasksRouter = new TasksRouter();
 
-        this._apiEndpoint = new ApiEndpoint(connection);
+        this._apiEndpoint = new ApiEndpoint();
     }
 
     public Start(port: number) {

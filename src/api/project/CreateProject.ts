@@ -1,5 +1,5 @@
 import { Request, Response, Router } from "express";
-import { Connection } from "typeorm";
+import { Connection, getConnection } from "typeorm";
 import { Page } from "../../contracts/Page";
 import { Project } from "../../entity/Project";
 import { v4 as uuid } from "uuid";
@@ -8,15 +8,15 @@ import { ProjectUser } from "../../entity/ProjectUser";
 import { UserProjectRole } from "../../constants/UserProjectRole";
 
 export class CreateProject extends Page {
-    private _connection: Connection;
-
-    constructor(router: Router, connection: Connection) {
+    constructor(router: Router) {
         super(router);
-        this._connection = connection;
     }
 
     public OnPost() {
+        // TODO: As long as user is authorised
         super.router.post('/project/createProject', (req: Request, res: Response) => {
+            const connection = getConnection();
+
             const projectName = req.body.name;
             const projectDescription = req.body.description;
             const projectTaskPrefix = req.body.taskPrefix;
@@ -25,9 +25,9 @@ export class CreateProject extends Page {
                 throw new Error("All fields are required: name, description, taskPrefix");
             }
 
-            const userRepository = this._connection.getRepository(User);
-            const projectRepository = this._connection.getRepository(Project);
-            const projectUserRepository = this._connection.getRepository(ProjectUser);
+            const userRepository = connection.getRepository(User);
+            const projectRepository = connection.getRepository(Project);
+            const projectUserRepository = connection.getRepository(ProjectUser);
 
             userRepository.findOne({ Id: req.session.userId }).then(async user => {
                 const project = new Project(uuid(), projectName, projectDescription, projectTaskPrefix, new Date(), false, user);

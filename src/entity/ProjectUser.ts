@@ -22,4 +22,9 @@ export class ProjectUser {
 
     @ManyToOne(_ => User, user => user.AssignedProjects)
     User: User;
+
+    public ToggleAdmin() {
+        if (this.Role == 0) this.Role = 1;
+        if (this.Role == 1) this.Role = 0;
+    }
 }

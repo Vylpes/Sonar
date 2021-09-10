@@ -4,8 +4,8 @@ export class Index {
     private _app: App;
 
     constructor() {
-        createConnection().then(async connection => {
-            this._app = new App(connection);
+        createConnection().then(async _ => {
+            this._app = new App();
             this._app.Start(3000);
         }).catch(e => console.error(e));
     }
