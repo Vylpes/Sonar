@@ -13,9 +13,15 @@ export class Update extends Page {
 
     OnGet() {
         super.router.get('/assign/update/:projectId/:userId', this._userMiddleware.Authorise, async (req: Request, res: Response) => {
-            await ProjectUser.ToggleAdmin(req.params.projectId, req.params.userId, req.session.userId);
+            const result = await ProjectUser.ToggleAdmin(req.params.projectId, req.params.userId, req.session.userId);
 
-            res.redirect('/projects/view/' + req.params.projectid);
+            if (!result) {
+                req.session.error = "An error occurred. Please try again";
+                res.redirect('/projects/view/' + req.params.projectId);
+                return;
+            }
+
+            res.redirect('/projects/view/' + req.params.projectId);
         });
     }
 }

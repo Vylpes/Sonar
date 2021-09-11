@@ -43,7 +43,7 @@ export class ProjectUser {
             return UserProjectPermissions.None;
         }
 
-        const projectUser = await projectUserRepository.findOne({ Project: project, User: user});
+        const projectUser = await projectUserRepository.findOne({ Project: project, User: user }, { relations: ["Project", "User"] });
 
         if (!projectUser) {
             return UserProjectPermissions.None;
@@ -56,7 +56,7 @@ export class ProjectUser {
                 permissions |= UserProjectPermissions.View;
                 break;
             case UserProjectRole.Admin:
-                permissions |= UserProjectPermissions.View | UserProjectPermissions.Update | UserProjectPermissions.Assign | UserProjectPermissions.Promote;
+                permissions |= (UserProjectPermissions.View | UserProjectPermissions.Update | UserProjectPermissions.Assign | UserProjectPermissions.Promote);
         }
 
         return permissions;
@@ -72,7 +72,11 @@ export class ProjectUser {
         const project = await projectRepository.findOne(projectId);
         const user = await userRepository.findOne(userId);
 
-        const projectUser = await projectUserRepository.findOne({ Project: project, User: user});
+        const projectUser = await projectUserRepository.findOne({ Project: project, User: user}, { relations: ["Project", "User"] });
+
+        if (typeof projectUser != "number" && !projectUser) {
+            return null;
+        }
 
         return projectUser.Role;
     }
@@ -82,7 +86,7 @@ export class ProjectUser {
     }
 
     public static async AssignUserToProject(projectId: string, userId: string, currentUserId: string): Promise<ProjectUser> {
-        if (!this.HasPermission(projectId, currentUserId, UserProjectPermissions.Assign)) {
+        if (!(await ProjectUser.HasPermission(projectId, currentUserId, UserProjectPermissions.Assign))) {
             return null;
         }
 
@@ -100,7 +104,7 @@ export class ProjectUser {
     }
 
     public static async UnassignUserFromProject(projectId: string, userId: string, currentUserId: string): Promise<boolean> {
-        if (!this.HasPermission(projectId, currentUserId, UserProjectPermissions.Assign)) {
+        if (!(await ProjectUser.HasPermission(projectId, currentUserId, UserProjectPermissions.Assign))) {
             return false;
         }
 
@@ -119,34 +123,43 @@ export class ProjectUser {
     }
 
     public static async GetAllUsersNotInProject(projectId: string, currentUserId: string): Promise<User[]> {
-        if (!ProjectUser.HasPermission(projectId, currentUserId, UserProjectPermissions.View)) {
-            return [];
-        }
-
-        const connection = getConnection();
-
-        const projectRepository = connection.getRepository(Project);
-        const userRepository = connection.getRepository(User);
-
-        const project = await projectRepository.findOne(projectId);
-
-        if (!project) {
-            return [];
-        }
-
-        const users = await userRepository.find();
-
-        users.forEach(user => {
-            if (project.ProjectUsers.find(x => x.User == user)) {
-                users.splice(users.indexOf(user));
+        return new Promise(async (resolve) => {
+            if (!(await ProjectUser.HasPermission(projectId, currentUserId, UserProjectPermissions.View))) {
+                resolve([]);
+                return;
             }
-        });
 
-        return users;
+            const connection = getConnection();
+
+            const projectRepository = connection.getRepository(Project);
+            const userRepository = connection.getRepository(User);
+
+            const project = await projectRepository.findOne(projectId, { relations: ["ProjectUsers", "ProjectUsers.User"] });
+
+            if (!project) {
+                return [];
+            }
+
+            const users = await userRepository.find();
+
+            const usersNotInProject: User[] = [];
+
+            users.forEach((user, index, array) => {
+                if (!project.ProjectUsers.find(x => x.User.Id == user.Id)) {
+                    usersNotInProject.push(user);
+                }
+
+                if (index == array.length - 1) resolve(usersNotInProject);
+            });
+        });
     }
 
     public static async ToggleAdmin(projectId: string, userId: string, currentUserId: string): Promise<boolean> {
-        if (!ProjectUser.HasPermission(projectId, currentUserId, UserProjectPermissions.Promote)) {
+        if (!(await ProjectUser.HasPermission(projectId, currentUserId, UserProjectPermissions.Promote))) {
+            return false;
+        }
+
+        if (userId == currentUserId) {
             return false;
         }
 
@@ -158,7 +171,11 @@ export class ProjectUser {
         const user = await User.GetUser(userId);
 
         // TODO: ProjectUser.GetProjectUser();
-        const projectUser = await projectUserRepository.findOne({ Project: project, User: user });
+        const projectUser = await projectUserRepository.findOne({ Project: project, User: user }, { relations: ["Project", "User"]});
+
+        if (!projectUser) {
+            return false;
+        }
 
         let newRole: number;
 

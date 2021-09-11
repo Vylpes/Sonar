@@ -20,6 +20,7 @@ export class List extends Page {
 
             // res.locals.viewData.projects = await Project.ToObjectArray(projects);
             res.locals.viewData.projects = await Project.GetAllProjects(req.session.userId);
+
             res.render('projects/list', res.locals.viewData);
         });
     }

@@ -24,9 +24,17 @@ export class View extends Page {
                 return;
             }
 
+            const role = await ProjectUser.GetRole(project.Id, req.session.userId);
+
+            if (typeof role != "number" && !role) {
+                req.session.error = "Project not found";
+                res.redirect('/projects/list');
+                return;
+            }
+
             res.locals.viewData.project = project;
             res.locals.viewData.projectUsers = project.ProjectUsers;
-            res.locals.viewData.userProjectRole = ProjectUser.GetRole(project.Id, req.session.userId);
+            res.locals.viewData.userProjectRole = role;
 
             res.render('projects/view', res.locals.viewData);
         });

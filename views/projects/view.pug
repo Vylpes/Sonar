@@ -35,7 +35,7 @@ block content
                 .card-header Assigned Users
                 .card-body
                     .d-grid.gap-2.d-md-flex.justify-content-md-end
-                        a(href="/projects/assign/assign/" + project.projectId).btn.text-primary.mb-3
+                        a(href="/projects/assign/assign/" + project.Id).btn.text-primary.mb-3
                             i.fas.fa-user-plus
                             span.ms-1 Assign User
                     table#assigned-users-table
@@ -53,10 +53,10 @@ block content
                                                 i.fas.fa-shield-alt
                                                 span.ms-1 Admin
                                     td
-                                        a(href="/projects/assign/unassign/" + project.projectId + "/" + row.userId).btn.text-primary
+                                        a(href="/projects/assign/unassign/" + project.Id + "/" + row.User.Id).btn.text-primary
                                             i.fas.fa-user-slash
                                             span.ms-1 Unassign
-                                        a(href="/projects/assign/update/" + project.projectId + "/" + row.userId).btn.text-primary
+                                        a(href="/projects/assign/update/" + project.Id + "/" + row.User.Id).btn.text-primary
                                             i.fas.fa-user-edit
                                             span.ms-1 Update
     form(method='POST' action='/projects/edit').modal.fade#edit-project-modal
@@ -67,13 +67,13 @@ block content
                     button(type='button' data-bs-dismiss='modal').btn-close
                 .modal-body
                     .form-group
-                        input(type='hidden' name='projectId' value=project.projectId).form-control
+                        input(type='hidden' name='projectId' value=project.Id).form-control
                     .form-group.mb-3
                         label Project Name
-                        input(type='text' name='name' value=project.name).form-control
+                        input(type='text' name='name' value=project.Name).form-control
                     .form-group.mb-3
                         label Description
-                        input(type='text' name='description' value=project.description).form-control
+                        input(type='text' name='description' value=project.Description).form-control
                     .form-group.text-center
                         button(type='submit').btn.text-primary
                             i.fas.fa-check-square

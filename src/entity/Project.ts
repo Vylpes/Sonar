@@ -50,7 +50,7 @@ export class Project {
     }
 
     public static async EditProject(projectId: string, name: string, description: string, currentUserId: string): Promise<boolean> {
-        if (!ProjectUser.HasPermission(projectId, currentUserId, UserProjectPermissions.Update)) {
+        if (!(await ProjectUser.HasPermission(projectId, currentUserId, UserProjectPermissions.Update))) {
             return false;
         }
 
@@ -80,22 +80,25 @@ export class Project {
 
             const user = await userRepository.findOne(currentUserId);
 
-            // const projectUsers = await projectUserRepository.find({ relations: ["User", "Project"]});
-            const projects = await projectRepository.find({ relations: ["ProjectUsers", "CreatedBy"]});
+            const projectUsers = await projectUserRepository.find({ relations: ["User", "Project", "Project.CreatedBy"] });
+            // const projects = await projectRepository.find({ relations: ["ProjectUsers", "CreatedBy", "ProjectUsers.User"] });
 
-            const projectsToPush: Project[] = [];
+            // const projectsToPush: Project[] = [];
+            const projects: Project[] = [];
 
-            // projectUsers.forEach((projectUser, index, array) => {
-            //     if (projectUser.User.Id == currentUserId) projects.push(projectUser.Project);
+            projectUsers.forEach((projectUser, index, array) => {
+                if (projectUser.User.Id == user.Id) projects.push(projectUser.Project);
 
-            //     if (index == array.length - 1) resolve(projects);
-            // });
-
-            projects.forEach((project, index, array) => {
-                if (project.ProjectUsers.find(x => x.User = user)) projectsToPush.push(project);
-
-                if (index == array.length - 1) resolve(projectsToPush);
+                if (index == array.length - 1) resolve(projects);
             });
+
+            // projects.forEach((project, index, array) => {
+            //     project.ProjectUsers.forEach((projectUser, index1, array1) => {
+            //         if (projectUser.User == user) projectsToPush.push(project);
+
+            //         if (index == array.length - 1 && index1 == array1.length - 1) resolve(projectsToPush);
+            //     });
+            // });
         });
     }
 
@@ -118,7 +121,7 @@ export class Project {
     }
 
     public static async GetProject(projectId: string, currentUserId: string): Promise<Project> {
-        if (!ProjectUser.HasPermission(projectId, currentUserId, UserProjectPermissions.View)) {
+        if (!(await ProjectUser.HasPermission(projectId, currentUserId, UserProjectPermissions.View))) {
             return null;
         }
 
