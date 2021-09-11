@@ -13,7 +13,7 @@ export class Edit extends Page {
     }
 
     OnPost() {
-        super.router.post('/edit', this._userMiddleware.Authorise, (req: Request, res: Response) => {
+        super.router.post('/edit', this._userMiddleware.Authorise, async (req: Request, res: Response) => {
             const projectId = req.body.projectId;
             const name = req.body.name;
             const description = req.body.description;
@@ -26,22 +26,24 @@ export class Edit extends Page {
 
             const projectRepository = connection.getRepository(Project);
 
-            projectRepository.findOneOrFail(projectId).then(project => {
-                if (!project.ProjectUsers.find(x => x.User.Id == req.session.userId)) {
-                    req.session.error = "Unauthorised";
-                    res.redirect('/projects/list');
-                    return;
-                }
+            const project = await projectRepository.findOne(projectId);
 
-                project.EditProject(name, description);
-                projectRepository.save(project);
-
-                res.redirect(`/projects/view/${projectId}`);
-            }).catch(e => {
+            if (!project) {
                 req.session.error = "Project not found";
                 res.redirect('/projects/list');
                 return;
-            });
+            }
+            
+            if (!project.ProjectUsers.find(x => x.User.Id == req.session.userId)) {
+                req.session.error = "Unauthorised";
+                res.redirect('/projects/list');
+                return;
+            }
+
+            project.EditProject(name, description);
+            await projectRepository.save(project);
+
+            res.redirect(`/projects/view/${projectId}`);
         });
     }
 }

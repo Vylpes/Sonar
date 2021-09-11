@@ -20,7 +20,7 @@ export class Login extends Page {
     }
 
     OnPost() {
-        super.router.post('/login', (req: Request, res: Response) => {
+        super.router.post('/login', async (req: Request, res: Response) => {
             const email = req.body.email;
             const password = req.body.password;
 
@@ -34,30 +34,31 @@ export class Login extends Page {
 
             const userRepository = connection.getRepository(User);
 
-            userRepository.findOneOrFail({ Email: email }).then(user => {
-                compare(password, user.Password, (err, same) => {
-                    if (err) throw err;
+            const user = await userRepository.findOneOrFail({ Email: email });
 
-                    if (same) {
-                        req.session.regenerate(() => {
-                            const user = res.locals.user;
-            
-                            req.session.userId = user.id;
-                            req.session.userEmail = user.email;
-                            req.session.userName = user.username;
-            
-                            res.redirect('/dashboard');
-                        });
-                    } else {
-                        req.session.error = "Password is incorrect";
-                        res.redirect('/auth/login');
-                        return;
-                    }
-                });
-            }).catch(e => {
+            if (!user) {
                 req.session.error = "User does not exist";
                 res.redirect('/auth/login');
                 return;
+            }
+
+            compare(password, user.Password, (err, same) => {
+                if (err) throw err;
+
+                if (same) {
+                    req.session.regenerate(() => {
+                        const user = res.locals.user;
+        
+                        req.session.userId = user.id;
+                        req.session.userEmail = user.email;
+                        req.session.userName = user.username;
+        
+                        res.redirect('/dashboard');
+                    });
+                } else {
+                    req.session.error = "Password is incorrect";
+                    res.redirect('/auth/login');
+                }
             });
         });
     }

@@ -11,7 +11,7 @@ export class Register extends Page {
     }
 
     OnPost() {
-        super.router.post('/register', (req: Request, res: Response) => {
+        super.router.post('/register', async (req: Request, res: Response) => {
             const username = req.body.username;
             const email = req.body.email;
             const password = req.body.password;
@@ -39,42 +39,36 @@ export class Register extends Page {
 
             const userRepository = connection.getRepository(User);
 
-            userRepository.findAndCount({ Email: email }).then((userEmail) => {
-                if(userEmail[1] > 0) {
-                    req.session.error = "User already exists";
-                    res.redirect('/auth/login');
-                    return;
-                }
+            let user = await userRepository.findAndCount({ Email: email });
 
-                userRepository.findAndCount({ Username: username }).then((userUsername) => {
-                    if (userUsername[1] > 0) {
-                        req.session.error = "User already exists";
-                        res.redirect('/auth/login');
-                        return;
-                    }
+            if(user[1] > 0) {
+                req.session.error = "User already exists";
+                res.redirect('/auth/login');
+                return;
+            }
 
-                    userRepository.find({ Active: true }).then(activeUsers => {
-                        var firstUser = activeUsers.length == 0;
+            user = await userRepository.findAndCount({ Username: username });
 
-                        hash(password, 10).then(pwd => {
-                            const user = new User(uuid(), email, username, pwd, false, firstUser, true);
+            if (user[1] > 0) {
+                req.session.error = "User already exists";
+                res.redirect('/auth/login');
+                return;
+            }
 
-                            userRepository.save(user);
+            const activeUsers = await userRepository.find({ Active: true });
 
-                            if (firstUser) console.log("First user was registered. This user is now the admin");
+            var firstUser = activeUsers.length == 0;
 
-                            req.session.success = "Successfully registered. You can now login";
-                            res.redirect('/auth/login');
-                        });
-                    }).catch(e => {
-                        throw new Error(e);
-                    })
-                }).catch(e => {
-                    throw new Error(e);
-                });
-            }).catch(e => {
-                throw new Error(e);
-            });
+            const hashedPassword = await hash(password, 10);
+
+            const createdUser = new User(uuid(), email, username, hashedPassword, false, firstUser, true);
+
+            userRepository.save(createdUser);
+
+            if (firstUser) console.log("First user was registered. This user is now the admin");
+
+            req.session.success = "Successfully registered. You can now login";
+            res.redirect('/auth/login');
         });
     }
 }
