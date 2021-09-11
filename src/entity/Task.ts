@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryColumn } from "typeorm";
+import { Column, Entity, getConnection, JoinColumn, ManyToOne, OneToOne, PrimaryColumn } from "typeorm";
 import { Project } from "./Project";
 import { User } from "./User";
 
@@ -53,4 +53,22 @@ export class Task {
 
     @ManyToOne(_ => Task, task => task.ParentTask)
     ChildTasks: Task[];
+
+    public static async GetAllTasks(currentUserId: string): Promise<Task[]> {
+        const connection = getConnection();
+
+        const taskRepository = connection.getRepository(Task);
+
+        const projects = await Project.GetAllProjects(currentUserId);
+
+        const tasks: Task[] = [];
+
+        projects.forEach(project => {
+            project.Tasks.forEach(task => {
+                tasks.push(task);
+            })
+        });
+
+        return tasks;
+    }
 }
