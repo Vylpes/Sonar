@@ -23,51 +23,13 @@ export class Register extends Page {
                 return;
             }
 
-            if (password !== passwordRepeat) {
-                req.session.error = "Passwords do not match";
+            if (User.RegisterUser(username, email, password, passwordRepeat)) {
+                req.session.success = "You are now registered";
                 res.redirect('/auth/login');
                 return;
             }
 
-            if (password.length < 7) {
-                req.session.error = "Password must be at least 7 characters long";
-                res.redirect('/auth/login');
-                return;
-            }
-
-            const connection = getConnection();
-
-            const userRepository = connection.getRepository(User);
-
-            let user = await userRepository.findAndCount({ Email: email });
-
-            if(user[1] > 0) {
-                req.session.error = "User already exists";
-                res.redirect('/auth/login');
-                return;
-            }
-
-            user = await userRepository.findAndCount({ Username: username });
-
-            if (user[1] > 0) {
-                req.session.error = "User already exists";
-                res.redirect('/auth/login');
-                return;
-            }
-
-            const activeUsers = await userRepository.find({ Active: true });
-
-            var firstUser = activeUsers.length == 0;
-
-            const hashedPassword = await hash(password, 10);
-
-            const createdUser = new User(uuid(), email, username, hashedPassword, false, firstUser, true);
-
-            userRepository.save(createdUser);
-
-            if (firstUser) console.log("First user was registered. This user is now the admin");
-
-            req.session.success = "Successfully registered. You can now login";
+            req.session.error = "Failed to register user. Please try again";
             res.redirect('/auth/login');
         });
     }

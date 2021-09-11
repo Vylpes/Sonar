@@ -30,36 +30,20 @@ export class Login extends Page {
                 return;
             }
 
-            const connection = getConnection();
-
-            const userRepository = connection.getRepository(User);
-
-            const user = await userRepository.findOneOrFail({ Email: email });
-
-            if (!user) {
-                req.session.error = "User does not exist";
+            if (await User.IsLoginCorrect(email, password)) {
+                req.session.regenerate(() => {
+                    const user = res.locals.user;
+    
+                    req.session.userId = user.id;
+                    req.session.userEmail = user.email;
+                    req.session.userName = user.username;
+    
+                    res.redirect('/dashboard');
+                });
+            } else {
+                req.session.error = "Password is incorrect";
                 res.redirect('/auth/login');
-                return;
             }
-
-            compare(password, user.Password, (err, same) => {
-                if (err) throw err;
-
-                if (same) {
-                    req.session.regenerate(() => {
-                        const user = res.locals.user;
-        
-                        req.session.userId = user.id;
-                        req.session.userEmail = user.email;
-                        req.session.userName = user.username;
-        
-                        res.redirect('/dashboard');
-                    });
-                } else {
-                    req.session.error = "Password is incorrect";
-                    res.redirect('/auth/login');
-                }
-            });
         });
     }
 }

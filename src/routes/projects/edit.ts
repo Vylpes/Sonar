@@ -22,26 +22,9 @@ export class Edit extends Page {
                 throw new Error("Fields are required: projectId, name, description");
             }
 
-            const connection = getConnection();
-
-            const projectRepository = connection.getRepository(Project);
-
-            const project = await projectRepository.findOne(projectId);
-
-            if (!project) {
-                req.session.error = "Project not found";
-                res.redirect('/projects/list');
-                return;
+            if (!Project.EditProject(projectId, name, description, req.session.userId)) {
+                req.session.error = "Error editing project";
             }
-            
-            if (!project.ProjectUsers.find(x => x.User.Id == req.session.userId)) {
-                req.session.error = "Unauthorised";
-                res.redirect('/projects/list');
-                return;
-            }
-
-            project.EditProject(name, description);
-            await projectRepository.save(project);
 
             res.redirect(`/projects/view/${projectId}`);
         });

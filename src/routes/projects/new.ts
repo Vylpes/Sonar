@@ -28,23 +28,7 @@ export class New extends Page {
                 return;
             }
 
-            const connection = getConnection();
-
-            const projectRepository = connection.getRepository(Project);
-            const projectUserRepository = connection.getRepository(ProjectUser);
-            const userRepository = connection.getRepository(User);
-
-            const user = await userRepository.findOne(req.session.userId);
-
-            if (!user) {
-                throw new Error("Current user not found");
-            }
-            
-            const project = new Project(uuid(), name, description, taskPrefix, new Date(), false, user);
-            await projectRepository.save(project);
-
-            const projectUser = new ProjectUser(uuid(), UserProjectRole.Admin, project, user);
-            await projectUserRepository.save(projectUser);
+            const project = await Project.CreateProject(name, description, taskPrefix, req.session.userId);
 
             req.session.success = "Successfully created project";
             res.redirect(`/projects/view/${project.Id}`);

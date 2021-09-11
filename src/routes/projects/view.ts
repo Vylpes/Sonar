@@ -15,36 +15,12 @@ export class View extends Page {
     }
 
     OnGet() {
-        super.router.get('/view/:id', this._userMiddleware.Authorise, async (req: Request, res: Response) => {
-            const connection = getConnection();
-
-            const projectRepository = connection.getRepository(Project);
-            const projectUserRepository = connection.getRepository(ProjectUser);
-            const userRepository = connection.getRepository(User);
-
-            const project = await projectRepository.findOne(req.params.id);
-
-            if (!project) {
-                req.session.error = "Project not found or you are not authorised to see it";
-                res.redirect('/projects/list');
-                return;
-            }
-
-            const user = await userRepository.findOne(req.session.userId);
-
-            const projectUsers = await projectUserRepository.find({ Project: project });
-
-            const projectUser = projectUsers.find(x => x.User == user && x.Project == project);
-
-            if (!projectUser) {
-                req.session.error = "Project not found or you are not authorised to see it";
-                res.redirect('/projects/list');
-                return;
-            }
+        super.router.get('/view/:projectId', this._userMiddleware.Authorise, async (req: Request, res: Response) => {
+            const project = await Project.GetProject(req.params.projectId, req.session.userId);
 
             res.locals.viewData.project = project;
-            res.locals.viewData.projectUsers = projectUsers;
-            res.locals.viewData.userProjectRole = projectUser.Role;
+            res.locals.viewData.projectUsers = project.ProjectUsers;
+            res.locals.viewData.userProjectRole = project.ProjectUsers.find(x => x.User.Id == req.session.userId).Role;
 
             res.render('projects/view', res.locals.viewData);
         });

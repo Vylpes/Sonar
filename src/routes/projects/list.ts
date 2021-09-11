@@ -16,24 +16,7 @@ export class List extends Page {
 
     OnGet() {
         super.router.get('/list', this._userMiddleware.Authorise, async (req: Request, res: Response) => {
-            const connection = getConnection();
-
-            const projectUserRepository = connection.getRepository(ProjectUser);
-            const userRepository = connection.getRepository(User);
-
-            let projects: Project[];
-
-            const user = await userRepository.findOne(req.session.userId);
-
-            if (!user) {
-                throw new Error("Current user not found");
-            }
-
-            const projectUsers = await projectUserRepository.find({ User: user });
-            
-            projects = projectUsers.map(x => x.Project);
-
-            res.locals.viewData.projects = projects;
+            res.locals.viewData.projects = Project.GetAllProjects(req.session.userId);
             res.render('projects/list', res.locals.viewData);
         });
     }
