@@ -126,7 +126,7 @@ export class Project {
 
         const projectRepository = connection.getRepository(Project);
 
-        const project = await projectRepository.findOne(projectId);
+        const project = await projectRepository.findOne(projectId, { relations: ["ProjectUsers", "CreatedBy", "ProjectUsers.User"] });
 
         return project;
     }

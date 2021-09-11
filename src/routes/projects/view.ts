@@ -18,6 +18,12 @@ export class View extends Page {
         super.router.get('/view/:projectId', this._userMiddleware.Authorise, async (req: Request, res: Response) => {
             const project = await Project.GetProject(req.params.projectId, req.session.userId);
 
+            if (!project) {
+                req.session.error = "Project not found";
+                res.redirect('/projects/list');
+                return;
+            }
+
             res.locals.viewData.project = project;
             res.locals.viewData.projectUsers = project.ProjectUsers;
             res.locals.viewData.userProjectRole = ProjectUser.GetRole(project.Id, req.session.userId);

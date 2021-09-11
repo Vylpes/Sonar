@@ -23,7 +23,7 @@ block content
                     td= row.CreatedBy.Username
                     td= row.CreatedAt
                     td
-                        a(href="/projects/view/" + row.projectId).btn.text-primary
+                        a(href="/projects/view/" + row.Id).btn.text-primary
                             i.fas.fa-eye
                             span.ms-1 View
     form(method='POST' action='/projects/new').modal.fade#new-project-modal

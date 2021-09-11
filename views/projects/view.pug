@@ -6,7 +6,7 @@ block content
         span.ms-1 Back to Listing
     .row
         .col
-            h1#view-project-name= project.name
+            h1#view-project-name= project.Name
             if project.archived
                 .badge.rounded-pill.bg-warning.mb-3.me-1
                     i.fas.fa-archive
@@ -23,13 +23,13 @@ block content
                 .card-body
                     .mb-2
                         p.mb-0.text-secondary Description
-                        p#view-project-description= project.description
+                        p#view-project-description= project.Description
                     .mb-2
                         p.mb-0.text-secondary Created By
-                        p= project.createdByName
+                        p= project.CreatedBy.Username
                     .mb-2
                         p.mb-0.text-secondary Created At
-                        p= project.createdAt
+                        p= project.CreatedAt
         .col-8
             .card
                 .card-header Assigned Users
@@ -44,22 +44,21 @@ block content
                                 th Name
                                 th Actions
                         tbody
-                            each row in projectUsers
-                                if (row.userName)
-                                    tr
-                                        td
-                                            span= row.userName
-                                            if row.isAdmin
-                                                .badge.rounded-pill.bg-primary.mb-3.ms-1
-                                                    i.fas.fa-shield-alt
-                                                    span.ms-1 Admin
-                                        td
-                                            a(href="/projects/assign/unassign/" + project.projectId + "/" + row.userId).btn.text-primary
-                                                i.fas.fa-user-slash
-                                                span.ms-1 Unassign
-                                            a(href="/projects/assign/update/" + project.projectId + "/" + row.userId).btn.text-primary
-                                                i.fas.fa-user-edit
-                                                span.ms-1 Update
+                            each row in project.ProjectUsers
+                                tr
+                                    td
+                                        span= row.User.Username
+                                        if row.Role == 1
+                                            .badge.rounded-pill.bg-primary.mb-3.ms-1
+                                                i.fas.fa-shield-alt
+                                                span.ms-1 Admin
+                                    td
+                                        a(href="/projects/assign/unassign/" + project.projectId + "/" + row.userId).btn.text-primary
+                                            i.fas.fa-user-slash
+                                            span.ms-1 Unassign
+                                        a(href="/projects/assign/update/" + project.projectId + "/" + row.userId).btn.text-primary
+                                            i.fas.fa-user-edit
+                                            span.ms-1 Update
     form(method='POST' action='/projects/edit').modal.fade#edit-project-modal
         .modal-dialog.modal-dialog-scrollable
             .modal-content
