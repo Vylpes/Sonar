@@ -16,7 +16,10 @@ export class List extends Page {
 
     OnGet() {
         super.router.get('/list', this._userMiddleware.Authorise, async (req: Request, res: Response) => {
-            res.locals.viewData.projects = Project.GetAllProjects(req.session.userId);
+            // const projects = await Project.GetAllProjects(req.session.userId);
+
+            // res.locals.viewData.projects = await Project.ToObjectArray(projects);
+            res.locals.viewData.projects = await Project.GetAllProjects(req.session.userId);
             res.render('projects/list', res.locals.viewData);
         });
     }

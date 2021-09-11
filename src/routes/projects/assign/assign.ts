@@ -47,9 +47,10 @@ export class Assign extends Page {
     OnPost() {
         super.router.post('/assign/assign/:projectId/:userId', this._userMiddleware.Authorise, async (req: Request, res: Response) => {
             const projectUser = await ProjectUser.AssignUserToProject(req.params.projectId, req.params.userId, req.session.userId);
+            const project = await projectUser.Project;
 
             req.session.success = "Assigned user to project";
-            res.redirect(`/projects/view/${projectUser.Project.Id}`);
+            res.redirect(`/projects/view/${project.Id}`);
         });
     }
 }

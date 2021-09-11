@@ -20,7 +20,7 @@ export class View extends Page {
 
             res.locals.viewData.project = project;
             res.locals.viewData.projectUsers = project.ProjectUsers;
-            res.locals.viewData.userProjectRole = project.ProjectUsers.find(x => x.User.Id == req.session.userId).Role;
+            res.locals.viewData.userProjectRole = ProjectUser.GetRole(project.Id, req.session.userId);
 
             res.render('projects/view', res.locals.viewData);
         });

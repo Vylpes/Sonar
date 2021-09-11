@@ -16,9 +16,9 @@ export class AuthRouter extends Route {
         super();
         this._userMiddleware = new UserMiddleware();
 
-        this._login = new Login(super.router, this._userMiddleware);
+        this._login = new Login(super.router);
         this._logout = new Logout(super.router);
-        this._register = new Register(super.router, this._userMiddleware);
+        this._register = new Register(super.router);
     }
 
     public Route(): Router {

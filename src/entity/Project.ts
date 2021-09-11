@@ -71,20 +71,32 @@ export class Project {
     }
 
     public static async GetAllProjects(currentUserId: string): Promise<Project[]> {
-        const connection = getConnection();
+        return new Promise(async (resolve) => {
+            const connection = getConnection();
 
-        const projectUserRepository = connection.getRepository(ProjectUser);
-        const userRepository = connection.getRepository(User);
+            const projectUserRepository = connection.getRepository(ProjectUser);
+            const userRepository = connection.getRepository(User);
+            const projectRepository = connection.getRepository(Project);
 
-        const user = await userRepository.findOne(currentUserId);
+            const user = await userRepository.findOne(currentUserId);
 
-        if (!user) {
-            return [];
-        }
+            // const projectUsers = await projectUserRepository.find({ relations: ["User", "Project"]});
+            const projects = await projectRepository.find({ relations: ["ProjectUsers", "CreatedBy"]});
 
-        const projectUsers = await projectUserRepository.find({ User: user });
-        
-        return projectUsers.map(x => x.Project);
+            const projectsToPush: Project[] = [];
+
+            // projectUsers.forEach((projectUser, index, array) => {
+            //     if (projectUser.User.Id == currentUserId) projects.push(projectUser.Project);
+
+            //     if (index == array.length - 1) resolve(projects);
+            // });
+
+            projects.forEach((project, index, array) => {
+                if (project.ProjectUsers.find(x => x.User = user)) projectsToPush.push(project);
+
+                if (index == array.length - 1) resolve(projectsToPush);
+            });
+        });
     }
 
     public static async CreateProject(name: string, description: string, taskPrefix: string, currentUserId: string): Promise<Project> {

@@ -62,6 +62,21 @@ export class ProjectUser {
         return permissions;
     }
 
+    public static async GetRole(projectId: string, userId: string): Promise<UserProjectRole> {
+        const connection = getConnection();
+
+        const projectRepository = connection.getRepository(Project);
+        const projectUserRepository = connection.getRepository(ProjectUser);
+        const userRepository = connection.getRepository(User);
+
+        const project = await projectRepository.findOne(projectId);
+        const user = await userRepository.findOne(userId);
+
+        const projectUser = await projectUserRepository.findOne({ Project: project, User: user});
+
+        return projectUser.Role;
+    }
+
     public static async HasPermission(projectId: string, userId: string, permission: UserProjectPermissions): Promise<boolean> {
         return (await this.GetPermissions(projectId, userId) & permission) == permission;
     }

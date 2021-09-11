@@ -111,4 +111,12 @@ export class User {
 
         return await userRepository.findOne(userId);
     }
+
+    public static async GetUserByEmailAddress(email: string): Promise<User> {
+        const connection = getConnection();
+
+        const userRepository = connection.getRepository(User);
+
+        return await userRepository.findOne({ Email: email });
+    }
 }

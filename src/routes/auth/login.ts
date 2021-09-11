@@ -31,12 +31,12 @@ export class Login extends Page {
             }
 
             if (await User.IsLoginCorrect(email, password)) {
-                req.session.regenerate(() => {
-                    const user = res.locals.user;
+                req.session.regenerate(async () => {
+                    const user = await User.GetUserByEmailAddress(email);
     
-                    req.session.userId = user.id;
-                    req.session.userEmail = user.email;
-                    req.session.userName = user.username;
+                    req.session.userId = user.Id;
+                    req.session.userEmail = user.Email;
+                    req.session.userName = user.Username;
     
                     res.redirect('/dashboard');
                 });
