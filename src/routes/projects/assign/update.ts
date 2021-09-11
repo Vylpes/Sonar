@@ -1,20 +1,20 @@
 import { Page } from "../../../contracts/Page";
 import { UserMiddleware } from "../../../middleware/userMiddleware";
-import { ProjectsMiddleware } from "../../../middleware/projectsMiddleware";
 import { Router, Request, Response } from "express";
+import { ProjectUser } from "../../../entity/ProjectUser";
 
 export class Update extends Page {
     private _userMiddleware: UserMiddleware;
-    private _projectsMiddleware: ProjectsMiddleware;
 
-    constructor(router: Router, userMiddleware: UserMiddleware, projectsMiddleware: ProjectsMiddleware) {
+    constructor(router: Router, userMiddleware: UserMiddleware) {
         super(router);
         this._userMiddleware = userMiddleware;
-        this._projectsMiddleware = projectsMiddleware;
     }
 
     OnGet() {
-        super.router.get('/assign/update/:projectid/:userid', this._userMiddleware.Authorise, this._projectsMiddleware.ToggleAdmin, (req: Request, res: Response) => {
+        super.router.get('/assign/update/:projectId/:userId', this._userMiddleware.Authorise, async (req: Request, res: Response) => {
+            await ProjectUser.ToggleAdmin(req.params.projectId, req.params.userId, req.session.userId);
+
             res.redirect('/projects/view/' + req.params.projectid);
         });
     }

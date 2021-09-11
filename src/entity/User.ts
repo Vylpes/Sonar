@@ -103,4 +103,12 @@ export class User {
         
         return true;
     }
+
+    public static async GetUser(userId: string): Promise<User> {
+        const connection = getConnection();
+
+        const userRepository = connection.getRepository(User);
+
+        return await userRepository.findOne(userId);
+    }
 }

@@ -1,5 +1,9 @@
 import { Request, Response, Router } from "express";
+import { UserProjectPermissions } from "../../../constants/UserProjectRole";
 import { Page } from "../../../contracts/Page";
+import { Project } from "../../../entity/Project";
+import { ProjectUser } from "../../../entity/ProjectUser";
+import { User } from "../../../entity/User";
 import { UserMiddleware } from "../../../middleware/userMiddleware";
 
 export class Unassign extends Page {
@@ -11,18 +15,25 @@ export class Unassign extends Page {
     }
 
     OnGet() {
-        super.router.get('/assign/unassign/:id/:userid', this._userMiddleware.Authorise, this._projectsMiddleware.GetProjectById, this._userMiddleware.GetUserByUserId, (req: Request, res: Response) => {
-            // res.locals.viewData.user = res.locals.user;
-            // res.locals.viewData.project = res.locals.project;
+        super.router.get('/assign/unassign/:projectId/:userId', this._userMiddleware.Authorise, async (req: Request, res: Response) => {
+            if (!ProjectUser.HasPermission(req.params.projectId, req.session.userId, UserProjectPermissions.Assign)) {
+                req.session.error = "Unauthorised";
+                res.redirect("/projects/list");
+                return;
+            }
+            
+            res.locals.viewData.user = await User.GetUser(req.params.userId);
+            res.locals.viewData.project = await Project.GetProject(req.params.projectId, req.session.userId);
 
-            // res.render('projects/assign/unassign', res.locals.viewData);
+            res.render('projects/assign/unassign', res.locals.viewData);
         });
     }
 
     OnPost() {
-        super.router.post('/assign/unassign/:id/:userid', this._userMiddleware.Authorise, this._projectsMiddleware.UnassignUserFromProject, (req: Request, res: Response) => {
-            req.session.success = "Unassigned user from project";
+        super.router.post('/assign/unassign/:projectId/:userId', this._userMiddleware.Authorise, (req: Request, res: Response) => {
+            ProjectUser.UnassignUserFromProject(req.params.projectId, req.params.userId, req.session.userId);
 
+            req.session.success = "Unassigned user from project";
             res.redirect('/projects/view/' + req.params.id);
         });
     }

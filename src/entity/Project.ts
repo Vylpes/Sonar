@@ -3,7 +3,7 @@ import { ProjectUser } from "./ProjectUser";
 import { Task } from "./Task";
 import { User } from "./User";
 import { v4 as uuid } from "uuid";
-import { UserProjectRole } from "../constants/UserProjectRole";
+import { UserProjectPermissions, UserProjectRole } from "../constants/UserProjectRole";
 
 @Entity()
 export class Project {
@@ -50,6 +50,10 @@ export class Project {
     }
 
     public static async EditProject(projectId: string, name: string, description: string, currentUserId: string): Promise<boolean> {
+        if (!ProjectUser.HasPermission(projectId, currentUserId, UserProjectPermissions.Update)) {
+            return false;
+        }
+
         const connection = getConnection();
 
         const projectRepository = connection.getRepository(Project);
@@ -57,10 +61,6 @@ export class Project {
         const project = await projectRepository.findOne(projectId);
 
         if (!project) {
-            return false;
-        }
-        
-        if (!project.ProjectUsers.find(x => x.User.Id == currentUserId)) {
             return false;
         }
 
@@ -106,24 +106,16 @@ export class Project {
     }
 
     public static async GetProject(projectId: string, currentUserId: string): Promise<Project> {
+        if (!ProjectUser.HasPermission(projectId, currentUserId, UserProjectPermissions.View)) {
+            return null;
+        }
+
         const connection = getConnection();
 
-            const projectRepository = connection.getRepository(Project);
-            const userRepository = connection.getRepository(User);
+        const projectRepository = connection.getRepository(Project);
 
-            const project = await projectRepository.findOne(projectId);
+        const project = await projectRepository.findOne(projectId);
 
-            if (!project) {
-                return null;
-            }
-
-            const user = await userRepository.findOne(currentUserId);
-            const projectUser = project.ProjectUsers.find(x => x.User == user && x.Project == project);
-
-            if (!projectUser) {
-                return null;
-            }
-
-            return project;
+        return project;
     }
 }
