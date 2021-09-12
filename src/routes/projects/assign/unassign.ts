@@ -7,15 +7,12 @@ import { User } from "../../../entity/User";
 import { UserMiddleware } from "../../../middleware/userMiddleware";
 
 export class Unassign extends Page {
-    private _userMiddleware: UserMiddleware;
-
-    constructor(router: Router, userMiddleware: UserMiddleware) {
+    constructor(router: Router) {
         super(router);
-        this._userMiddleware = userMiddleware;
     }
 
     OnGet() {
-        super.router.get('/assign/unassign/:projectId/:userId', this._userMiddleware.Authorise, async (req: Request, res: Response) => {
+        super.router.get('/assign/unassign/:projectId/:userId', UserMiddleware.Authorise, async (req: Request, res: Response) => {
             if (!ProjectUser.HasPermission(req.params.projectId, req.session.User.Id, UserProjectPermissions.Assign)) {
                 req.session.error = "Unauthorised";
                 res.redirect("/projects/list");
@@ -30,7 +27,7 @@ export class Unassign extends Page {
     }
 
     OnPost() {
-        super.router.post('/assign/unassign/:projectId/:userId', this._userMiddleware.Authorise, async (req: Request, res: Response) => {
+        super.router.post('/assign/unassign/:projectId/:userId', UserMiddleware.Authorise, async (req: Request, res: Response) => {
             await ProjectUser.UnassignUserFromProject(req.params.projectId, req.params.userId, req.session.User);
 
             req.session.success = "Unassigned user from project";

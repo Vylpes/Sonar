@@ -1,4 +1,4 @@
-import { Column, Entity, getConnection, JoinColumn, ManyToOne, OneToOne, PrimaryColumn } from "typeorm";
+import { Column, Entity, getConnection, ManyToOne, PrimaryColumn } from "typeorm";
 import { UserProjectPermissions, UserProjectRole } from "../constants/UserProjectRole";
 import { Project } from "./Project";
 import { User } from "./User";
@@ -171,8 +171,7 @@ export class ProjectUser {
 
         const project = await Project.GetProject(projectId, currentUser);
         const user = await User.GetUser(userId);
-
-        // TODO: ProjectUser.GetProjectUser();
+        
         const projectUser = await projectUserRepository.findOne({ Project: project, User: user }, { relations: ["Project", "User"]});
 
         if (!projectUser) {

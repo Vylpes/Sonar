@@ -1,23 +1,18 @@
 import { Page } from "../../../contracts/Page";
 import { UserMiddleware } from "../../../middleware/userMiddleware";
 import { Router, Request, Response } from "express";
-import { getConnection } from "typeorm";
 import { Project } from "../../../entity/Project";
-import { UserProjectPermissions, UserProjectRole } from "../../../constants/UserProjectRole";
+import { UserProjectPermissions } from "../../../constants/UserProjectRole";
 import { User } from "../../../entity/User";
 import { ProjectUser } from "../../../entity/ProjectUser";
-import { v4 as uuid } from "uuid";
 
 export class Assign extends Page {
-    private _userMiddleware: UserMiddleware;
-
-    constructor(router: Router, userMiddleware: UserMiddleware) {
+    constructor(router: Router) {
         super(router);
-        this._userMiddleware = userMiddleware;
     }
 
     OnGet() {
-        super.router.get('/assign/assign/:projectId', this._userMiddleware.Authorise, async (req: Request, res: Response) => {
+        super.router.get('/assign/assign/:projectId', UserMiddleware.Authorise, async (req: Request, res: Response) => {
             if (!ProjectUser.HasPermission(req.params.projectId, req.session.User.Id, UserProjectPermissions.Assign)) {
                 req.session.error = "Unauthorised";
                 res.redirect("/projects/list");
@@ -30,7 +25,7 @@ export class Assign extends Page {
             res.render('projects/assign/assign', res.locals.viewData);
         });
 
-        super.router.get('/assign/assign/:projectId/:userId', this._userMiddleware.Authorise, async (req: Request, res: Response) => {
+        super.router.get('/assign/assign/:projectId/:userId', UserMiddleware.Authorise, async (req: Request, res: Response) => {
             if(!ProjectUser.HasPermission(req.params.projectId, req.session.User.Id, UserProjectPermissions.Assign)) {
                 req.session.error = "Unauthorised";
                 res.redirect("/projects/list");
@@ -45,7 +40,7 @@ export class Assign extends Page {
     }
 
     OnPost() {
-        super.router.post('/assign/assign/:projectId/:userId', this._userMiddleware.Authorise, async (req: Request, res: Response) => {
+        super.router.post('/assign/assign/:projectId/:userId', UserMiddleware.Authorise, async (req: Request, res: Response) => {
             const projectUser = await ProjectUser.AssignUserToProject(req.params.projectId, req.params.userId, req.session.User);
             const project = await projectUser.Project;
 

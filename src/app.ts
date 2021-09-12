@@ -18,7 +18,6 @@ import { TasksRouter } from "./routes/tasks";
 
 export class App {
     private _app: Express;
-    private _pugMiddleware: PugMiddleware;
 
     private _authRouter: AuthRouter;
     private _dashboardRouter: DashboardRouter;
@@ -28,7 +27,6 @@ export class App {
 
     constructor() {
         this._app = express();
-        this._pugMiddleware = new PugMiddleware();
 
         this._authRouter = new AuthRouter();
         this._dashboardRouter = new DashboardRouter();
@@ -72,7 +70,7 @@ export class App {
             next();
         });
 
-        this._app.use(this._pugMiddleware.GetBaseString);
+        this._app.use(PugMiddleware.GetBaseString);
     }
 
     private SetupRoutes() {

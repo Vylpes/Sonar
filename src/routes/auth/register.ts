@@ -1,9 +1,6 @@
-import { hash } from "bcrypt";
 import { Router, Request, Response } from "express";
-import { getConnection } from "typeorm";
 import { Page } from "../../contracts/Page";
 import { User } from "../../entity/User";
-import { v4 as uuid } from "uuid";
 
 export class Register extends Page {
     constructor(router: Router) {

@@ -1,6 +1,4 @@
-import { compare } from "bcrypt";
 import { Router, Request, Response } from "express";
-import { getConnection } from "typeorm";
 import { Page } from "../../contracts/Page";
 import { User } from "../../entity/User";
 

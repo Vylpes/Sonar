@@ -1,4 +1,4 @@
-import { Column, Entity, getConnection, JoinColumn, ManyToOne, OneToOne, PrimaryColumn } from "typeorm";
+import { Column, Entity, ManyToOne, PrimaryColumn } from "typeorm";
 import { Project } from "./Project";
 import { User } from "./User";
 
@@ -56,10 +56,6 @@ export class Task {
 
     public static async GetAllTasks(currentUser: User): Promise<Task[]> {
         return new Promise(async (resolve) => {
-            const connection = getConnection();
-
-            const taskRepository = connection.getRepository(Task);
-
             const projects = await Project.GetAllProjects(currentUser);
 
             const tasks: Task[] = [];

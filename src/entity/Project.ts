@@ -1,4 +1,4 @@
-import { Column, Entity, getConnection, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn } from "typeorm";
+import { Column, Entity, getConnection, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
 import { ProjectUser } from "./ProjectUser";
 import { Task } from "./Task";
 import { User } from "./User";
@@ -75,13 +75,8 @@ export class Project {
             const connection = getConnection();
 
             const projectUserRepository = connection.getRepository(ProjectUser);
-            const userRepository = connection.getRepository(User);
-            const projectRepository = connection.getRepository(Project);
 
             const projectUsers = await projectUserRepository.find({ relations: ["User", "Project", "Project.CreatedBy"] });
-            // const projects = await projectRepository.find({ relations: ["ProjectUsers", "CreatedBy", "ProjectUsers.User"] });
-
-            // const projectsToPush: Project[] = [];
             const projects: Project[] = [];
 
             projectUsers.forEach((projectUser, index, array) => {
@@ -89,14 +84,6 @@ export class Project {
 
                 if (index == array.length - 1) resolve(projects);
             });
-
-            // projects.forEach((project, index, array) => {
-            //     project.ProjectUsers.forEach((projectUser, index1, array1) => {
-            //         if (projectUser.User == user) projectsToPush.push(project);
-
-            //         if (index == array.length - 1 && index1 == array1.length - 1) resolve(projectsToPush);
-            //     });
-            // });
         });
     }
 
@@ -105,7 +92,6 @@ export class Project {
 
         const projectRepository = connection.getRepository(Project);
         const projectUserRepository = connection.getRepository(ProjectUser);
-        const userRepository = connection.getRepository(User);
         
         const project = new Project(uuid(), name, description, taskPrefix, new Date(), false, currentUser);
         await projectRepository.save(project);

@@ -4,15 +4,12 @@ import { Task } from "../../entity/Task";
 import { UserMiddleware } from "../../middleware/userMiddleware";
 
 export class List extends Page {
-    private _userMiddleware: UserMiddleware;
-
-    constructor(router: Router, userMiddleware: UserMiddleware) {
+    constructor(router: Router) {
         super(router);
-        this._userMiddleware = userMiddleware;
     }
 
     OnGet() {
-        super.router.get('/list', this._userMiddleware.Authorise, async (req: Request, res: Response) => {
+        super.router.get('/list', UserMiddleware.Authorise, async (req: Request, res: Response) => {
             res.locals.viewData.tasks = Task.GetAllTasks(req.session.User);
 
             res.render('tasks/list', res.locals.viewData);

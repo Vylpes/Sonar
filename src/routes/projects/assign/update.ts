@@ -4,15 +4,12 @@ import { Router, Request, Response } from "express";
 import { ProjectUser } from "../../../entity/ProjectUser";
 
 export class Update extends Page {
-    private _userMiddleware: UserMiddleware;
-
-    constructor(router: Router, userMiddleware: UserMiddleware) {
+    constructor(router: Router) {
         super(router);
-        this._userMiddleware = userMiddleware;
     }
 
     OnGet() {
-        super.router.get('/assign/update/:projectId/:userId', this._userMiddleware.Authorise, async (req: Request, res: Response) => {
+        super.router.get('/assign/update/:projectId/:userId', UserMiddleware.Authorise, async (req: Request, res: Response) => {
             const result = await ProjectUser.ToggleAdmin(req.params.projectId, req.params.userId, req.session.User);
 
             if (!result) {
