@@ -6,12 +6,8 @@ export class PugMiddleware {
             title: 'Sonar',
             message: res.locals.message,
             error: res.locals.error,
-            user: {
-                authenticated: req.session.userId != null,
-                userId: req.session.userId,
-                username: req.session.userName,
-                email: req.session.userEmail,
-            }
+            isAuthenticated: req.session.User != null,
+            user: req.session.User,
         };
 
         next();

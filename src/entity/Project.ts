@@ -49,8 +49,8 @@ export class Project {
         this.Description = description;
     }
 
-    public static async EditProject(projectId: string, name: string, description: string, currentUserId: string): Promise<boolean> {
-        if (!(await ProjectUser.HasPermission(projectId, currentUserId, UserProjectPermissions.Update))) {
+    public static async EditProject(projectId: string, name: string, description: string, currentUser: User): Promise<boolean> {
+        if (!(await ProjectUser.HasPermission(projectId, currentUser.Id, UserProjectPermissions.Update))) {
             return false;
         }
 
@@ -70,15 +70,13 @@ export class Project {
         return true;
     }
 
-    public static async GetAllProjects(currentUserId: string): Promise<Project[]> {
+    public static async GetAllProjects(currentUser: User): Promise<Project[]> {
         return new Promise(async (resolve) => {
             const connection = getConnection();
 
             const projectUserRepository = connection.getRepository(ProjectUser);
             const userRepository = connection.getRepository(User);
             const projectRepository = connection.getRepository(Project);
-
-            const user = await userRepository.findOne(currentUserId);
 
             const projectUsers = await projectUserRepository.find({ relations: ["User", "Project", "Project.CreatedBy"] });
             // const projects = await projectRepository.find({ relations: ["ProjectUsers", "CreatedBy", "ProjectUsers.User"] });
@@ -87,7 +85,7 @@ export class Project {
             const projects: Project[] = [];
 
             projectUsers.forEach((projectUser, index, array) => {
-                if (projectUser.User.Id == user.Id) projects.push(projectUser.Project);
+                if (projectUser.User.Id == currentUser.Id) projects.push(projectUser.Project);
 
                 if (index == array.length - 1) resolve(projects);
             });
@@ -102,26 +100,24 @@ export class Project {
         });
     }
 
-    public static async CreateProject(name: string, description: string, taskPrefix: string, currentUserId: string): Promise<Project> {
+    public static async CreateProject(name: string, description: string, taskPrefix: string, currentUser: User): Promise<Project> {
         const connection = getConnection();
 
         const projectRepository = connection.getRepository(Project);
         const projectUserRepository = connection.getRepository(ProjectUser);
         const userRepository = connection.getRepository(User);
-
-        const user = await userRepository.findOne(currentUserId);
         
-        const project = new Project(uuid(), name, description, taskPrefix, new Date(), false, user);
+        const project = new Project(uuid(), name, description, taskPrefix, new Date(), false, currentUser);
         await projectRepository.save(project);
 
-        const projectUser = new ProjectUser(uuid(), UserProjectRole.Admin, project, user);
+        const projectUser = new ProjectUser(uuid(), UserProjectRole.Admin, project, currentUser);
         await projectUserRepository.save(projectUser);
 
         return project;
     }
 
-    public static async GetProject(projectId: string, currentUserId: string): Promise<Project> {
-        if (!(await ProjectUser.HasPermission(projectId, currentUserId, UserProjectPermissions.View))) {
+    public static async GetProject(projectId: string, currentUser: User): Promise<Project> {
+        if (!(await ProjectUser.HasPermission(projectId, currentUser.Id, UserProjectPermissions.View))) {
             return null;
         }
 

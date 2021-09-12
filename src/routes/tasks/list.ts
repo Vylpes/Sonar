@@ -13,7 +13,7 @@ export class List extends Page {
 
     OnGet() {
         super.router.get('/list', this._userMiddleware.Authorise, async (req: Request, res: Response) => {
-            res.locals.viewData.tasks = Task.GetAllTasks(req.session.userId);
+            res.locals.viewData.tasks = Task.GetAllTasks(req.session.User);
 
             res.render('tasks/list', res.locals.viewData);
         });

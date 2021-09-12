@@ -13,7 +13,7 @@ export class Update extends Page {
 
     OnGet() {
         super.router.get('/assign/update/:projectId/:userId', this._userMiddleware.Authorise, async (req: Request, res: Response) => {
-            const result = await ProjectUser.ToggleAdmin(req.params.projectId, req.params.userId, req.session.userId);
+            const result = await ProjectUser.ToggleAdmin(req.params.projectId, req.params.userId, req.session.User);
 
             if (!result) {
                 req.session.error = "An error occurred. Please try again";

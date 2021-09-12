@@ -7,7 +7,7 @@ import { UserProjectRole } from "../constants/UserProjectRole";
 
 export class UserMiddleware {
     public Authorise(req: Request, res: Response, next: NextFunction) {
-        if (req.session.userId) {
+        if (req.session.User) {
             next();
         } else {
             req.session.error = "Access denied";

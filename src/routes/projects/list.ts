@@ -19,7 +19,7 @@ export class List extends Page {
             // const projects = await Project.GetAllProjects(req.session.userId);
 
             // res.locals.viewData.projects = await Project.ToObjectArray(projects);
-            res.locals.viewData.projects = await Project.GetAllProjects(req.session.userId);
+            res.locals.viewData.projects = await Project.GetAllProjects(req.session.User);
 
             res.render('projects/list', res.locals.viewData);
         });

@@ -9,9 +9,9 @@ block content
             h1 Unassign User from #{project.Name}
     .row
         .col
-            form(action="/projects/assign/unassign/" + project.Id + "/" + user.Id, method="POST")
+            form(action="/projects/assign/unassign/" + project.Id + "/" + unassignedUser.Id, method="POST")
                 .form-group.mb-3
-                    label Unassign #{user.Username} from #{project.Name}?
+                    label Unassign #{unassignedUser.Username} from #{project.Name}?
                     br
                     a(href="/projects/view/" + project.Id).btn.text-secondary
                         i.fas.fa-times

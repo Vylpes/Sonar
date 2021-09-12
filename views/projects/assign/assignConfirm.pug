@@ -9,9 +9,9 @@ block content
             h1 Assign User to #{project.Name}
     .row
         .col
-            form(action="/projects/assign/assign/" + project.Id + "/" + user.Id, method="POST")
+            form(action="/projects/assign/assign/" + project.Id + "/" + assignedUser.Id, method="POST")
                 .form-group.mb-3
-                    label Assign #{user.username} to #{project.Name}?
+                    label Assign #{assignedUser.username} to #{project.Name}?
                     br
                     a(href="/projects/view/" + project.Id).btn.text-secondary
                         i.fas.fa-times

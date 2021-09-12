@@ -54,21 +54,23 @@ export class Task {
     @ManyToOne(_ => Task, task => task.ParentTask)
     ChildTasks: Task[];
 
-    public static async GetAllTasks(currentUserId: string): Promise<Task[]> {
-        const connection = getConnection();
+    public static async GetAllTasks(currentUser: User): Promise<Task[]> {
+        return new Promise(async (resolve) => {
+            const connection = getConnection();
 
-        const taskRepository = connection.getRepository(Task);
+            const taskRepository = connection.getRepository(Task);
 
-        const projects = await Project.GetAllProjects(currentUserId);
+            const projects = await Project.GetAllProjects(currentUser);
 
-        const tasks: Task[] = [];
+            const tasks: Task[] = [];
 
-        projects.forEach(project => {
-            project.Tasks.forEach(task => {
-                tasks.push(task);
-            })
+            projects.forEach((project, index0, array0) => {
+                project.Tasks.forEach((task, index1, array1) => {
+                    tasks.push(task);
+
+                    if (index0 == array0.length - 1 && index1 == array1.length - 1) resolve(tasks);
+                })
+            });
         });
-
-        return tasks;
     }
 }

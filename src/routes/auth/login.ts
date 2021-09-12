@@ -11,7 +11,7 @@ export class Login extends Page {
 
     OnGet() {
         super.router.get('/login', (req: Request, res: Response) => {
-            if (res.locals.viewData.user.authenticated) {
+            if (res.locals.viewData.isAuthenticated) {
                 res.redirect('/dashboard');
             }
 
@@ -34,9 +34,7 @@ export class Login extends Page {
                 req.session.regenerate(async () => {
                     const user = await User.GetUserByEmailAddress(email);
     
-                    req.session.userId = user.Id;
-                    req.session.userEmail = user.Email;
-                    req.session.userName = user.Username;
+                    req.session.User = user;
     
                     res.redirect('/dashboard');
                 });

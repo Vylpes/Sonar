@@ -16,7 +16,7 @@ export class View extends Page {
 
     OnGet() {
         super.router.get('/view/:projectId', this._userMiddleware.Authorise, async (req: Request, res: Response) => {
-            const project = await Project.GetProject(req.params.projectId, req.session.userId);
+            const project = await Project.GetProject(req.params.projectId, req.session.User);
 
             if (!project) {
                 req.session.error = "Project not found";
@@ -24,7 +24,7 @@ export class View extends Page {
                 return;
             }
 
-            const role = await ProjectUser.GetRole(project.Id, req.session.userId);
+            const role = await ProjectUser.GetRole(project.Id, req.session.User.Id);
 
             if (typeof role != "number" && !role) {
                 req.session.error = "Project not found";

@@ -22,7 +22,7 @@ export class Edit extends Page {
                 throw new Error("Fields are required: projectId, name, description");
             }
 
-            if (!Project.EditProject(projectId, name, description, req.session.userId)) {
+            if (!Project.EditProject(projectId, name, description, req.session.User)) {
                 req.session.error = "Error editing project";
             }
 
