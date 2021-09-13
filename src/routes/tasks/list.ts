@@ -10,7 +10,7 @@ export class List extends Page {
 
     OnGet() {
         super.router.get('/list', UserMiddleware.Authorise, async (req: Request, res: Response) => {
-            res.locals.viewData.tasks = Task.GetAllTasks(req.session.User);
+            res.locals.viewData.tasks = await Task.GetAllTasks(req.session.User);
 
             res.render('tasks/list', res.locals.viewData);
         });

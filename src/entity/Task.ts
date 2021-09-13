@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, PrimaryColumn } from "typeorm";
+import { Column, Entity, getConnection, ManyToOne, PrimaryColumn } from "typeorm";
 import { Project } from "./Project";
 import { User } from "./User";
 
@@ -60,13 +60,35 @@ export class Task {
 
             const tasks: Task[] = [];
 
-            projects.forEach((project, index0, array0) => {
-                project.Tasks.forEach((task, index1, array1) => {
+            projects.forEach((project, index, array) => {
+                let lastItem = index == array.length - 1;
+
+                if (lastItem && project.Tasks.length == 0) {
+                    resolve(tasks);
+                }
+
+                project.Tasks.forEach((task, index, array) => {
                     tasks.push(task);
 
-                    if (index0 == array0.length - 1 && index1 == array1.length - 1) resolve(tasks);
+                    lastItem = lastItem && index == array.length - 1;
+
+                    if (lastItem) resolve(tasks);
                 })
             });
         });
+    }
+
+    public static async GetAssignedTasks(userId: string): Promise<Task[]> {
+        const connection = getConnection();
+        
+        const userRepository = connection.getRepository(User);
+
+        const user = await userRepository.findOne(userId, { relations: [ "AssignedTasks" ]});
+
+        if (!user) {
+            return null;
+        }
+        
+        return user.AssignedTasks;
     }
 }
