@@ -1,10 +1,9 @@
 import { Session } from "express-session";
+import { User } from "../entity/User";
 
 declare module 'express-session' {
     interface Session {
-        userId?: string;
-        userEmail?: string;
-        userName?: string;
+        User?: User;
         error?: string;
         success?: string;
     }

@@ -3,17 +3,17 @@ extends ../../layout
 block content
     .row
         .col
-            a(href="/projects/view/" + project.projectId).btn.text-primary
+            a(href="/projects/view/" + project.Id).btn.text-primary
                 i.fas.fa-chevron-circle-left
                 span.ms-1 Back to Project
-            h1 Assign User to #{project.name}
+            h1 Assign User to #{project.Name}
     .row
         .col
-            form(action="/projects/assign/assign/" + project.projectId + "/" + user.userId, method="POST")
+            form(action="/projects/assign/assign/" + project.Id + "/" + assignedUser.Id, method="POST")
                 .form-group.mb-3
-                    label Assign #{user.username} to #{project.name}?
+                    label Assign #{assignedUser.username} to #{project.Name}?
                     br
-                    a(href="/projects/view/" + project.projectId).btn.text-secondary
+                    a(href="/projects/view/" + project.Id).btn.text-secondary
                         i.fas.fa-times
                         span.ms-1 Cancel
                     button(type='submit').btn.text-primary.ms-1

@@ -1,21 +1,28 @@
 import { Router, Request, Response } from "express";
 import { Page } from "../../contracts/Page";
+import { Project } from "../../entity/Project";
 import { UserMiddleware } from "../../middleware/userMiddleware";
-import { ProjectsMiddleware } from "../../middleware/projectsMiddleware";
 
 export class Edit extends Page {
-    private _userMiddleware: UserMiddleware;
-    private _projectsMiddleware: ProjectsMiddleware;
-
-    constructor(router: Router, userMiddleare: UserMiddleware, projectsMiddleware: ProjectsMiddleware) {
+    constructor(router: Router) {
         super(router);
-        this._userMiddleware = userMiddleare;
-        this._projectsMiddleware = projectsMiddleware;
     }
 
     OnPost() {
-        super.router.post('/edit', this._userMiddleware.Authorise, this._projectsMiddleware.EditProject, (req: Request, res: Response) => {
-            res.redirect('/projects/view/' + res.locals.projectId);
+        super.router.post('/edit', UserMiddleware.Authorise, async (req: Request, res: Response) => {
+            const projectId = req.body.projectId;
+            const name = req.body.name;
+            const description = req.body.description;
+
+            if (!projectId || !name || !description) {
+                throw new Error("Fields are required: projectId, name, description");
+            }
+
+            if (!Project.EditProject(projectId, name, description, req.session.User)) {
+                req.session.error = "Error editing project";
+            }
+
+            res.redirect(`/projects/view/${projectId}`);
         });
     }
 }

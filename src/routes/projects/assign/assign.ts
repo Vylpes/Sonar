@@ -1,43 +1,51 @@
 import { Page } from "../../../contracts/Page";
 import { UserMiddleware } from "../../../middleware/userMiddleware";
-import { ProjectsMiddleware } from "../../../middleware/projectsMiddleware";
 import { Router, Request, Response } from "express";
+import { Project } from "../../../entity/Project";
+import { UserProjectPermissions } from "../../../constants/UserProjectRole";
+import { User } from "../../../entity/User";
+import { ProjectUser } from "../../../entity/ProjectUser";
 
 export class Assign extends Page {
-    private _userMiddleware: UserMiddleware;
-    private _projectsMiddleware: ProjectsMiddleware;
-
-    constructor(router: Router, userMiddleware: UserMiddleware, projectsMiddleware: ProjectsMiddleware) {
+    constructor(router: Router) {
         super(router);
-        this._userMiddleware = userMiddleware;
-        this._projectsMiddleware = projectsMiddleware;
     }
 
     OnGet() {
-        super.router.get('/assign/assign', this._userMiddleware.Authorise, (req: Request, res: Response) => {
-            res.redirect('/projects/list');
-        });
+        super.router.get('/assign/assign/:projectId', UserMiddleware.Authorise, async (req: Request, res: Response) => {
+            if (!ProjectUser.HasPermission(req.params.projectId, req.session.User.Id, UserProjectPermissions.Assign)) {
+                req.session.error = "Unauthorised";
+                res.redirect("/projects/list");
+                return;
+            }
 
-        super.router.get('/assign/assign/:id', this._userMiddleware.Authorise, this._projectsMiddleware.GetProjectById, this._projectsMiddleware.GetUsersNotInProject, (req: Request, res: Response) => {
-            res.locals.viewData.project = res.locals.project;
-            res.locals.viewData.users = res.locals.users;
+            res.locals.viewData.project = await Project.GetProject(req.params.projectId, req.session.User);
+            res.locals.viewData.users = await ProjectUser.GetAllUsersNotInProject(req.params.projectId, req.session.User);
 
             res.render('projects/assign/assign', res.locals.viewData);
         });
 
-        super.router.get('/assign/assign/:id/:userid', this._userMiddleware.Authorise, this._projectsMiddleware.GetProjectById, this._userMiddleware.GetUserByUserId, (req: Request, res: Response) => {
-            res.locals.viewData.user = res.locals.user;
-            res.locals.viewData.project = res.locals.project;
+        super.router.get('/assign/assign/:projectId/:userId', UserMiddleware.Authorise, async (req: Request, res: Response) => {
+            if(!ProjectUser.HasPermission(req.params.projectId, req.session.User.Id, UserProjectPermissions.Assign)) {
+                req.session.error = "Unauthorised";
+                res.redirect("/projects/list");
+                return;
+            }
+
+            res.locals.viewData.assignedUser = await User.GetUser(req.params.userId);
+            res.locals.viewData.project = await Project.GetProject(req.params.projectId, req.session.User);
 
             res.render('projects/assign/assignConfirm', res.locals.viewData);
         });
     }
 
     OnPost() {
-        super.router.post('/assign/assign/:id/:userid', this._userMiddleware.Authorise, this._projectsMiddleware.AssignUserToProject, (req: Request, res: Response) => {
-            req.session.success = "Assigned user to project";
+        super.router.post('/assign/assign/:projectId/:userId', UserMiddleware.Authorise, async (req: Request, res: Response) => {
+            const projectUser = await ProjectUser.AssignUserToProject(req.params.projectId, req.params.userId, req.session.User);
+            const project = await projectUser.Project;
 
-            res.redirect('/projects/view/' + req.params.id);
+            req.session.success = "Assigned user to project";
+            res.redirect(`/projects/view/${project.Id}`);
         });
     }
 }

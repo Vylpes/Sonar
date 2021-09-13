@@ -8,7 +8,7 @@ html
         link(rel='stylesheet', href='/css/style.css')
         block styles
     body
-        if user.authenticated
+        if isAuthenticated
             nav.navbar.navbar-expand-lg.navbar-light.bg-light
                 .container-fluid
                     a.navbar-brand(href="/dashboard") Sonar
@@ -24,7 +24,7 @@ html
                                 a.nav-link(href="/tasks/list") Tasks
                             li.nav-item
                                 a.nav-link(href="/auth/logout") Logout
-                        span.navbar-text Logged in as #{user.username}
+                        span.navbar-text Logged in as #{user.Username}
         else
             nav.navbar.navbar-expand-lg.navbar-light.bg-light
                 .container-fluid

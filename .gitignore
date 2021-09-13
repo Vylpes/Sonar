@@ -105,6 +105,7 @@ dist
 
 # Project Specific Files
 *.db
+ormconfig.json
 
 # macOS Misc Files
 .DS_Store

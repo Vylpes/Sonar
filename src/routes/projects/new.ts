@@ -1,21 +1,29 @@
 import { Router, Request, Response } from "express";
 import { Page } from "../../contracts/Page";
+import { Project } from "../../entity/Project";
 import { UserMiddleware } from "../../middleware/userMiddleware";
-import { ProjectsMiddleware } from "../../middleware/projectsMiddleware";
 
 export class New extends Page {
-    private _userMiddleware: UserMiddleware;
-    private _projectsMiddleware: ProjectsMiddleware;
-
-    constructor(router: Router, userMiddleare: UserMiddleware, projectsMiddleware: ProjectsMiddleware) {
+    constructor(router: Router) {
         super(router);
-        this._userMiddleware = userMiddleare;
-        this._projectsMiddleware = projectsMiddleware;
     }
 
     OnPost() {
-        super.router.post('/new', this._userMiddleware.Authorise, this._projectsMiddleware.CreateProject, (req: Request, res: Response) => {
-            res.redirect('/projects/view/' + res.locals.projectId);
+        super.router.post('/new', UserMiddleware.Authorise, async (req: Request, res: Response) => {
+            const name = req.body.name;
+            const description = req.body.description;
+            const taskPrefix = req.body.taskPrefix;
+
+            if (!name || !description || !taskPrefix) {
+                req.session.error = "All fields are required";
+                res.redirect('/projects/list');
+                return;
+            }
+
+            const project = await Project.CreateProject(name, description, taskPrefix, req.session.User);
+
+            req.session.success = "Successfully created project";
+            res.redirect(`/projects/view/${project.Id}`);
         });
     }
 }

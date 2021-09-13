@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import { Express, Request, Response, NextFunction } from "express";
 import { PugMiddleware } from "./middleware/pugMiddleware";
 
@@ -15,11 +16,8 @@ import { IndexRouter } from "./routes";
 import { ProjectsRouter } from "./routes/projects";
 import { TasksRouter } from "./routes/tasks";
 
-import { ApiEndpoint } from "./api/apiEndpoint";
-
 export class App {
     private _app: Express;
-    private _pugMiddleware: PugMiddleware;
 
     private _authRouter: AuthRouter;
     private _dashboardRouter: DashboardRouter;
@@ -27,19 +25,14 @@ export class App {
     private _projectsRouter: ProjectsRouter;
     private _tasksRouter: TasksRouter;
 
-    private _apiEndpoint: ApiEndpoint;
-
     constructor() {
         this._app = express();
-        this._pugMiddleware = new PugMiddleware();
 
         this._authRouter = new AuthRouter();
         this._dashboardRouter = new DashboardRouter();
         this._indexRouter = new IndexRouter();
         this._projectsRouter = new ProjectsRouter();
         this._tasksRouter = new TasksRouter();
-
-        this._apiEndpoint = new ApiEndpoint();
     }
 
     public Start(port: number) {
@@ -77,7 +70,7 @@ export class App {
             next();
         });
 
-        this._app.use(this._pugMiddleware.GetBaseString);
+        this._app.use(PugMiddleware.GetBaseString);
     }
 
     private SetupRoutes() {
@@ -86,8 +79,6 @@ export class App {
         this._app.use('/dashboard', this._dashboardRouter.Route());
         this._app.use('/projects', this._projectsRouter.Route());
         this._app.use('/tasks', this._tasksRouter.Route());
-
-        this._app.use('/api', this._apiEndpoint.Route());
     }
 
     private SetupErrors() {

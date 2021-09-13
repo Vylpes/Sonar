@@ -1,11 +1,13 @@
+import { createConnection } from "typeorm";
 import { App } from "./app";
 export class Index {
     private _app: App;
 
     constructor() {
-        this._app = new App();
-
-        this._app.Start(3000);
+        createConnection().then(async _ => {
+            this._app = new App();
+            this._app.Start(3000);
+        }).catch(e => console.error(e));
     }
 }
 

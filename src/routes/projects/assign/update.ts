@@ -1,21 +1,24 @@
 import { Page } from "../../../contracts/Page";
 import { UserMiddleware } from "../../../middleware/userMiddleware";
-import { ProjectsMiddleware } from "../../../middleware/projectsMiddleware";
 import { Router, Request, Response } from "express";
+import { ProjectUser } from "../../../entity/ProjectUser";
 
 export class Update extends Page {
-    private _userMiddleware: UserMiddleware;
-    private _projectsMiddleware: ProjectsMiddleware;
-
-    constructor(router: Router, userMiddleware: UserMiddleware, projectsMiddleware: ProjectsMiddleware) {
+    constructor(router: Router) {
         super(router);
-        this._userMiddleware = userMiddleware;
-        this._projectsMiddleware = projectsMiddleware;
     }
 
     OnGet() {
-        super.router.get('/assign/update/:projectid/:userid', this._userMiddleware.Authorise, this._projectsMiddleware.ToggleAdmin, (req: Request, res: Response) => {
-            res.redirect('/projects/view/' + req.params.projectid);
+        super.router.get('/assign/update/:projectId/:userId', UserMiddleware.Authorise, async (req: Request, res: Response) => {
+            const result = await ProjectUser.ToggleAdmin(req.params.projectId, req.params.userId, req.session.User);
+
+            if (!result) {
+                req.session.error = "An error occurred. Please try again";
+                res.redirect('/projects/view/' + req.params.projectId);
+                return;
+            }
+
+            res.redirect('/projects/view/' + req.params.projectId);
         });
     }
 }

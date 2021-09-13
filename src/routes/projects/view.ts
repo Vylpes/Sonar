@@ -1,28 +1,35 @@
 import { Request, Response, Router } from "express";
 import { Page } from "../../contracts/Page";
-import { ProjectsMiddleware } from "../../middleware/projectsMiddleware";
+import { Project } from "../../entity/Project";
+import { ProjectUser } from "../../entity/ProjectUser";
 import { UserMiddleware } from "../../middleware/userMiddleware";
 
 export class View extends Page {
-    private _userMiddleware: UserMiddleware;
-    private _projectsMiddleware: ProjectsMiddleware;
-
-    constructor(router: Router, userMiddleware: UserMiddleware, projectsMiddleware: ProjectsMiddleware) {
+    constructor(router: Router) {
         super(router);
-        this._userMiddleware = userMiddleware;
-        this._projectsMiddleware = projectsMiddleware;
     }
 
     OnGet() {
-        // No id given, not found
-        super.router.get('/view', this._userMiddleware.Authorise, (req: Request, res: Response) => {
-            res.redirect('/projects/list');
-        });
+        super.router.get('/view/:projectId', UserMiddleware.Authorise, async (req: Request, res: Response) => {
+            const project = await Project.GetProject(req.params.projectId, req.session.User);
 
-        super.router.get('/view/:id', this._userMiddleware.Authorise, this._projectsMiddleware.GetProjectById, (req: Request, res: Response) => {
-            res.locals.viewData.project = res.locals.project;
-            res.locals.viewData.projectUsers = res.locals.projectUsers;
-            res.locals.viewData.userProjectRole = res.locals.userProjectRole;
+            if (!project) {
+                req.session.error = "Project not found";
+                res.redirect('/projects/list');
+                return;
+            }
+
+            const role = await ProjectUser.GetRole(project.Id, req.session.User.Id);
+
+            if (typeof role != "number" && !role) {
+                req.session.error = "Project not found";
+                res.redirect('/projects/list');
+                return;
+            }
+
+            res.locals.viewData.project = project;
+            res.locals.viewData.projectUsers = project.ProjectUsers;
+            res.locals.viewData.userProjectRole = role;
 
             res.render('projects/view', res.locals.viewData);
         });

@@ -1,18 +1,15 @@
 import { Router, Request, Response } from "express";
 import { Page } from "../../contracts/Page";
-import { UserMiddleware } from "../../middleware/userMiddleware";
+import { User } from "../../entity/User";
 
 export class Login extends Page {
-    private _userMiddleware: UserMiddleware;
-
-    constructor(router: Router, userMiddleware: UserMiddleware) {
+    constructor(router: Router) {
         super(router);
-        this._userMiddleware = userMiddleware;
     }
 
     OnGet() {
         super.router.get('/login', (req: Request, res: Response) => {
-            if (res.locals.viewData.user.authenticated) {
+            if (res.locals.viewData.isAuthenticated) {
                 res.redirect('/dashboard');
             }
 
@@ -21,16 +18,28 @@ export class Login extends Page {
     }
 
     OnPost() {
-        super.router.post('/login', this._userMiddleware.Login, (req: Request, res: Response) => {
-            req.session.regenerate(() => {
-                const user = res.locals.user;
+        super.router.post('/login', async (req: Request, res: Response) => {
+            const email = req.body.email;
+            const password = req.body.password;
 
-                req.session.userId = user.id;
-                req.session.userEmail = user.email;
-                req.session.userName = user.username;
+            if (!email || !password) {
+                req.session.error = "All fields are required";
+                res.redirect('/auth/login');
+                return;
+            }
 
-                res.redirect('/dashboard');
-            });
+            if (await User.IsLoginCorrect(email, password)) {
+                req.session.regenerate(async () => {
+                    const user = await User.GetUserByEmailAddress(email);
+    
+                    req.session.User = user;
+    
+                    res.redirect('/dashboard');
+                });
+            } else {
+                req.session.error = "Password is incorrect";
+                res.redirect('/auth/login');
+            }
         });
     }
 }

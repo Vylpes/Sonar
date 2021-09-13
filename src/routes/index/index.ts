@@ -8,7 +8,7 @@ export class Index extends Page {
 
     OnGet() {
         super.router.get('/', (req: Request, res: Response) => {
-            if (res.locals.viewData.user.authenticated) {
+            if (res.locals.viewData.isAuthenticated) {
                 res.redirect('/dashboard');
             }
 
