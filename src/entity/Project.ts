@@ -76,7 +76,7 @@ export class Project {
 
             const projectUserRepository = connection.getRepository(ProjectUser);
 
-            const projectUsers = await projectUserRepository.find({ relations: ["User", "Project", "Project.CreatedBy"] });
+            const projectUsers = await projectUserRepository.find({ relations: ["User", "Project", "Project.CreatedBy", "Project.Tasks" ] });
             const projects: Project[] = [];
 
             projectUsers.forEach((projectUser, index, array) => {
