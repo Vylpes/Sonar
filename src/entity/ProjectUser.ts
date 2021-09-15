@@ -53,10 +53,24 @@ export class ProjectUser {
 
         switch(projectUser.Role) {
             case UserProjectRole.Member:
-                permissions |= UserProjectPermissions.View;
+                permissions |= (
+                    UserProjectPermissions.View |
+                    UserProjectPermissions.TaskView |
+                    UserProjectPermissions.TaskCreate |
+                    UserProjectPermissions.TaskUpdate
+                );
                 break;
             case UserProjectRole.Admin:
-                permissions |= (UserProjectPermissions.View | UserProjectPermissions.Update | UserProjectPermissions.Assign | UserProjectPermissions.Promote);
+                permissions |= (
+                    UserProjectPermissions.View |
+                    UserProjectPermissions.Update |
+                    UserProjectPermissions.Assign |
+                    UserProjectPermissions.Promote |
+                    UserProjectPermissions.TaskView |
+                    UserProjectPermissions.TaskCreate |
+                    UserProjectPermissions.TaskUpdate |
+                    UserProjectPermissions.TaskDelete
+                );
         }
 
         return permissions;
