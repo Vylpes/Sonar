@@ -59,27 +59,47 @@ export class Task {
 
     public static async GetAllTasks(currentUser: User): Promise<Task[]> {
         return new Promise(async (resolve) => {
-            const projects = await Project.GetAllProjects(currentUser);
+            // const projects = await Project.GetAllProjects(currentUser);
 
-            const tasks: Task[] = [];
+            // const tasks: Task[] = [];
 
-            if (projects.length == 0) resolve(tasks);
+            // if (projects.length == 0) resolve(tasks);
 
-            projects.forEach((project, index, array) => {
-                let lastItem = index == array.length - 1;
+            // projects.forEach((project, index, array) => {
+            //     let lastItem = index == array.length - 1;
 
-                if (lastItem && project.Tasks.length == 0) {
-                    resolve(tasks);
-                }
+            //     if (lastItem && project.Tasks.length == 0) {
+            //         resolve(tasks);
+            //     }
 
-                project.Tasks.forEach((task, index, array) => {
-                    tasks.push(task);
+            //     project.Tasks.forEach((task, index, array) => {
+            //         console.log(task);
+            //         tasks.push(task);
 
-                    lastItem = lastItem && index == array.length - 1;
+            //         lastItem = lastItem && index == array.length - 1;
 
-                    if (lastItem) resolve(tasks);
-                })
+            //         if (lastItem) resolve(tasks);
+            //     })
+            // });
+
+            const connection = getConnection();
+            
+            const userRepository = connection.getRepository(User);
+
+            const user = await userRepository.findOne(currentUser.Id,
+                { relations: [
+                    "AssignedProjects",
+                    "AssignedProjects.Project", 
+                    "AssignedProjects.Project.Tasks",
+                    "AssignedProjects.Project.Tasks.AssignedTo",
+                    "AssignedProjects.Project.Tasks.Project",
+                ],
             });
+            
+            let projects = user.AssignedProjects.map(x => x.Project);
+            let tasks = projects.flatMap(x => x.Tasks);
+
+            resolve(tasks)
         });
     }
 
@@ -108,7 +128,7 @@ export class Task {
 
         const taskNumber = await Project.GetNextTask(project.Id, createdBy);
 
-        const task = new Task(uuid(), taskNumber, name, description, createdBy, new Date(), false, false,project, assignedTo, parentTask);
+        const task = new Task(uuid(), taskNumber, name, description, createdBy, new Date(), false, false, project, assignedTo, parentTask);
 
         await taskRepository.save(task);
 
