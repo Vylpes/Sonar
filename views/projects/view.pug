@@ -13,12 +13,12 @@ block content
                     span.ms-1 Archived
         .col
             .d-grid.gap-2.d-md-flex.justify-content-md-end
-                button(data-bs-toggle='modal' data-bs-target='#edit-project-modal').btn.text-primary
-                    i.fas.fa-edit
-                    span.ms-1 Edit
                 if canCreateTask
                     button(data-bs-toggle='modal' data-bs-target='#create-task-modal').btn.text-secondary
                         span New Task
+                button(data-bs-toggle='modal' data-bs-target='#edit-project-modal').btn.text-primary
+                    i.fas.fa-edit
+                    span.ms-1 Edit
     .row
         .col-4
             .card
@@ -92,7 +92,6 @@ block content
                         .form-group
                             input(type='hidden' name='projectId' value=project.Id).form-control
                         .form-group.mb-3
-                            label Task Number
                             span= project.TaskPrefix
                             span -
                             span= project.NextTask

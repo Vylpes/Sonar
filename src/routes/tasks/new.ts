@@ -12,7 +12,7 @@ export class New extends Page {
     public OnPost() {
         super.router.post('/new', UserMiddleware.Authorise, async (req: Request, res: Response) => {
             const name = req.body.name;
-            const description = req.body.description;
+            const description = req.body.description || "";
             const createdBy = req.session.User;
             const projectId = req.body.projectId;
 
@@ -22,7 +22,7 @@ export class New extends Page {
                 return;
             }
 
-            if (!name || !description || !createdBy) {
+            if (!name || !createdBy) {
                 req.session.error = "All fields are required";
                 res.redirect(`/projects/view/${projectId}`);
                 return;
