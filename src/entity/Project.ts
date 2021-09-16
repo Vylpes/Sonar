@@ -90,6 +90,8 @@ export class Project {
             const projectUsers = await projectUserRepository.find({ relations: ["User", "Project", "Project.CreatedBy", "Project.Tasks" ] });
             const projects: Project[] = [];
 
+            if (projectUsers.length == 0) resolve(projects);
+
             projectUsers.forEach((projectUser, index, array) => {
                 if (projectUser.User.Id == currentUser.Id) projects.push(projectUser.Project);
 

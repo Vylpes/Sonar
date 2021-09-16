@@ -63,6 +63,8 @@ export class Task {
 
             const tasks: Task[] = [];
 
+            if (projects.length == 0) resolve(tasks);
+
             projects.forEach((project, index, array) => {
                 let lastItem = index == array.length - 1;
 
