@@ -16,6 +16,9 @@ block content
                 button(data-bs-toggle='modal' data-bs-target='#edit-project-modal').btn.text-primary
                     i.fas.fa-edit
                     span.ms-1 Edit
+                if canCreateTask
+                    button(data-bs-toggle='modal' data-bs-target='#create-task-modal').btn.text-secondary
+                        span New Task
     .row
         .col-4
             .card
@@ -78,6 +81,30 @@ block content
                         button(type='submit').btn.text-primary
                             i.fas.fa-check-square
                             span.ms-1 Edit
-
+    if canCreateTask
+        form(method='POST' action='/tasks/new').modal.fade#create-task-modal
+            .modal-dialog.modal-dialog-scrollable
+                .modal-content
+                    .modal-header
+                        h5.modal-title New Task
+                        button(type='button' data-bs-dismiss='modal').btn-close
+                    .modal-body
+                        .form-group
+                            input(type='hidden' name='projectId' value=project.Id).form-control
+                        .form-group.mb-3
+                            label Task Number
+                            span= project.TaskPrefix
+                            span -
+                            span= project.NextTask
+                        .form-group.mb-3
+                            label Task Name
+                            input(type='text' name='name').form-control
+                        .form-group.mb-3
+                            label Description
+                            input(type='text' name='description').form-control 
+                        .form-group.text-center
+                            button(type='submit').btn.text-primary
+                                i.fas.fa-check-square
+                                span.ms-1 Submit
 block scripts
     script(src='/js/project-view.js')

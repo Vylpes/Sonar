@@ -1,4 +1,5 @@
 import { Request, Response, Router } from "express";
+import { UserProjectPermissions } from "../../constants/UserProjectRole";
 import { Page } from "../../contracts/Page";
 import { Project } from "../../entity/Project";
 import { ProjectUser } from "../../entity/ProjectUser";
@@ -30,6 +31,7 @@ export class View extends Page {
             res.locals.viewData.project = project;
             res.locals.viewData.projectUsers = project.ProjectUsers;
             res.locals.viewData.userProjectRole = role;
+            res.locals.viewData.canCreateTask = await ProjectUser.HasPermission(project.Id, req.session.User.Id, UserProjectPermissions.TaskCreate);
 
             res.render('projects/view', res.locals.viewData);
         });
