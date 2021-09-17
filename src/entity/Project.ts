@@ -15,6 +15,8 @@ export class Project {
         this.CreatedAt = createdAt;
         this.Archived = archived;
         this.CreatedBy = createdBy;
+
+        this.NextTask = 1;
     }
 
     @PrimaryColumn()
@@ -35,6 +37,9 @@ export class Project {
     @Column()
     Archived: boolean;
 
+    @Column()
+    NextTask: number;
+
     @ManyToOne(_ => User, user => user.CreatedProjects)
     CreatedBy: User;
 
@@ -47,6 +52,12 @@ export class Project {
     public EditValues(name: string, description: string) {
         this.Name = name;
         this.Description = description;
+    }
+
+    public EditNextTask(nextTask: number) {
+        if (nextTask <= this.NextTask) return;
+
+        this.NextTask = nextTask;
     }
 
     public static async EditProject(projectId: string, name: string, description: string, currentUser: User): Promise<boolean> {
@@ -78,6 +89,8 @@ export class Project {
 
             const projectUsers = await projectUserRepository.find({ relations: ["User", "Project", "Project.CreatedBy", "Project.Tasks" ] });
             const projects: Project[] = [];
+
+            if (projectUsers.length == 0) resolve(projects);
 
             projectUsers.forEach((projectUser, index, array) => {
                 if (projectUser.User.Id == currentUser.Id) projects.push(projectUser.Project);
@@ -114,5 +127,25 @@ export class Project {
         const project = await projectRepository.findOne(projectId, { relations: ["ProjectUsers", "CreatedBy", "ProjectUsers.User"] });
 
         return project;
+    }
+
+    public static async GetNextTask(projectId: string, currentUser: User): Promise<number> {
+        if (!(await ProjectUser.HasPermission(projectId, currentUser.Id, (UserProjectPermissions.Update | UserProjectPermissions.TaskCreate)))) {
+            return null;
+        }
+
+        const connection = getConnection();
+
+        const projectRepository = connection.getRepository(Project);
+
+        const project = await projectRepository.findOne(projectId);
+
+        const taskNumber = project.NextTask;
+
+        project.EditNextTask(taskNumber + 1);
+
+        await projectRepository.save(project);
+
+        return taskNumber;
     }
 }

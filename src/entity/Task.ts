@@ -1,10 +1,13 @@
 import { Column, Entity, getConnection, ManyToOne, PrimaryColumn } from "typeorm";
+import { UserProjectPermissions } from "../constants/UserProjectRole";
 import { Project } from "./Project";
+import { ProjectUser } from "./ProjectUser";
 import { User } from "./User";
+import { v4 as uuid } from "uuid";
 
 @Entity()
 export class Task {
-    constructor(id: string, taskNumber: number, name: string, description: string, createdBy: User, createdAt: Date, status: number, archived: boolean, project: Project, assignedTo?: User, parentTask?: Task) {
+    constructor(id: string, taskNumber: number, name: string, description: string, createdBy: User, createdAt: Date, done: boolean, archived: boolean, project: Project, assignedTo?: User, parentTask?: Task) {
         this.Id = id;
         this.TaskNumber = taskNumber;
         this.Name = name;
@@ -13,7 +16,7 @@ export class Task {
         this.AssignedTo = assignedTo;
         this.CreatedAt = createdAt;
         this.ParentTask = parentTask;
-        this.Status = status;
+        this.Done = done;
         this.Archived = archived;
         this.Project = project;
     }
@@ -34,7 +37,7 @@ export class Task {
     CreatedAt: Date;
 
     @Column()
-    Status: number;
+    Done: boolean;
 
     @Column()
     Archived: boolean;
@@ -43,10 +46,10 @@ export class Task {
     CreatedBy: User;
 
     @ManyToOne(_ => User, user => user.AssignedTasks)
-    AssignedTo: User;
+    AssignedTo?: User;
 
     @ManyToOne(_ => Task, task => task.ChildTasks)
-    ParentTask: Task;
+    ParentTask?: Task;
 
     @ManyToOne(_ => Project, project => project.Tasks)
     Project: Project;
@@ -55,27 +58,24 @@ export class Task {
     ChildTasks: Task[];
 
     public static async GetAllTasks(currentUser: User): Promise<Task[]> {
-        return new Promise(async (resolve) => {
-            const projects = await Project.GetAllProjects(currentUser);
+        const connection = getConnection();
+        
+        const userRepository = connection.getRepository(User);
 
-            const tasks: Task[] = [];
-
-            projects.forEach((project, index, array) => {
-                let lastItem = index == array.length - 1;
-
-                if (lastItem && project.Tasks.length == 0) {
-                    resolve(tasks);
-                }
-
-                project.Tasks.forEach((task, index, array) => {
-                    tasks.push(task);
-
-                    lastItem = lastItem && index == array.length - 1;
-
-                    if (lastItem) resolve(tasks);
-                })
-            });
+        const user = await userRepository.findOne(currentUser.Id,
+            { relations: [
+                "AssignedProjects",
+                "AssignedProjects.Project", 
+                "AssignedProjects.Project.Tasks",
+                "AssignedProjects.Project.Tasks.AssignedTo",
+                "AssignedProjects.Project.Tasks.Project",
+            ],
         });
+        
+        let projects = user.AssignedProjects.map(x => x.Project);
+        let tasks = projects.flatMap(x => x.Tasks);
+
+        return tasks;
     }
 
     public static async GetAssignedTasks(userId: string): Promise<Task[]> {
@@ -90,5 +90,23 @@ export class Task {
         }
         
         return user.AssignedTasks;
+    }
+
+    public static async CreateTask(name: string, description: string, createdBy: User, project: Project, assignedTo?: User, parentTask?: Task): Promise<Task> {
+        if (!(await ProjectUser.HasPermission(project.Id, createdBy.Id, UserProjectPermissions.TaskCreate))) {
+            return null;
+        }
+
+        const connection = getConnection();
+
+        const taskRepository = connection.getRepository(Task);
+
+        const taskNumber = await Project.GetNextTask(project.Id, createdBy);
+
+        const task = new Task(uuid(), taskNumber, name, description, createdBy, new Date(), false, false, project, assignedTo, parentTask);
+
+        await taskRepository.save(task);
+
+        return task;
     }
 }

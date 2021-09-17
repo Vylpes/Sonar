@@ -22,10 +22,17 @@ block content
         tbody
             each row in tasks
                 tr
-                    td= row.taskNumber
-                    td= row.name
-                    td= row.AssignedToName
-                    td= row.createdAt
+                    td
+                        span= row.Project.TaskPrefix
+                        span -
+                        span= row.TaskNumber
+                    td= row.Name
+                    td
+                        if row.AssignedTo
+                            span= row.AssignedTo.Username
+                        else
+                            span Unassigned
+                    td= row.CreatedAt
                     td
 
 block scripts
