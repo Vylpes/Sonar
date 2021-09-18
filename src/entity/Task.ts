@@ -109,4 +109,34 @@ export class Task {
 
         return task;
     }
+
+    public static async GetTaskByTaskString(taskString: string, currentUser: User): Promise<Task> {
+        const taskPrefix = taskString.split('-')[0];
+        const taskNumber = taskString.split('-')[1];
+
+        const connection = getConnection();
+
+        const projectRepository = connection.getRepository(Project);
+
+        const project = await projectRepository.findOne({ TaskPrefix: taskPrefix }, {
+            relations: [
+                "Tasks",
+                "Tasks.Project",
+                "Tasks.CreatedBy",
+                "Tasks.AssignedTo",
+            ]
+        });
+
+        if (!project) {
+            return null;
+        }
+
+        if (!(await ProjectUser.HasPermission(project.Id, currentUser.Id, UserProjectPermissions.TaskView))) {
+            return null;
+        }
+
+        const task = project.Tasks.find(x => x.TaskNumber == Number.parseInt(taskNumber));
+
+        return task;
+    }
 }
