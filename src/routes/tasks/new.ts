@@ -42,7 +42,7 @@ export class New extends Page {
                 req.session.error = "Unable to create task";
             }
 
-            res.redirect(`/projects/view/${projectId}`);
+            res.redirect(`/projects/view/${projectId}/tasks`);
             return;
         });
     }

@@ -21,52 +21,32 @@ block content
                     span.ms-1 Edit
     ul.nav.nav-tabs.mb-3
         li.nav-item
-            a.nav-link.active(href="/projects/view/" + project.Id) Details
+            a.nav-link(href="/projects/view/" + project.Id) Details
         li.nav-item
-            a.nav-link(href="/projects/view/" + project.Id + "/tasks") Tasks
-    .row
-        .col-4
-            .card
-                .card-header Details
-                .card-body
-                    .mb-2
-                        p.mb-0.text-secondary Description
-                        p#view-project-description= project.Description
-                    .mb-2
-                        p.mb-0.text-secondary Created By
-                        p= project.CreatedBy.Username
-                    .mb-2
-                        p.mb-0.text-secondary Created At
-                        p= project.CreatedAt
-        .col-8
-            .card
-                .card-header Assigned Users
-                .card-body
-                    .d-grid.gap-2.d-md-flex.justify-content-md-end
-                        a(href="/projects/assign/assign/" + project.Id).btn.text-primary.mb-3
-                            i.fas.fa-user-plus
-                            span.ms-1 Assign User
-                    table#assigned-users-table
-                        thead
-                            tr
-                                th Name
-                                th Actions
-                        tbody
-                            each row in project.ProjectUsers
-                                tr
-                                    td
-                                        span= row.User.Username
-                                        if row.Role == 1
-                                            .badge.rounded-pill.bg-primary.mb-3.ms-1
-                                                i.fas.fa-shield-alt
-                                                span.ms-1 Admin
-                                    td
-                                        a(href="/projects/assign/unassign/" + project.Id + "/" + row.User.Id).btn.text-primary
-                                            i.fas.fa-user-slash
-                                            span.ms-1 Unassign
-                                        a(href="/projects/assign/update/" + project.Id + "/" + row.User.Id).btn.text-primary
-                                            i.fas.fa-user-edit
-                                            span.ms-1 Update
+            a.nav-link.active(href="/projects/view/" + project.Id + "/tasks") Tasks
+    table#task-list-table
+        thead
+            tr
+                th ID
+                th Name
+                th Assigned To
+                th Created At
+                th Actions
+        tbody
+            each row in tasks
+                tr
+                    td
+                        span= project.TaskPrefix
+                        span -
+                        span= row.TaskNumber
+                    td= row.Name
+                    td
+                        if row.AssignedTo
+                            span= row.AssignedTo.Username
+                        else
+                            span Unassigned
+                    td= row.CreatedAt
+                    td
     form(method='POST' action='/projects/edit').modal.fade#edit-project-modal
         .modal-dialog.modal-dialog-scrollable
             .modal-content
@@ -111,4 +91,4 @@ block content
                                 i.fas.fa-check-square
                                 span.ms-1 Submit
 block scripts
-    script(src='/js/project-view.js')
+    script(src='/js/project-tasks.js')
