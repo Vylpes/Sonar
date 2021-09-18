@@ -47,6 +47,9 @@ block content
                             span Unassigned
                     td= row.CreatedAt
                     td
+                        a(href="/tasks/view/" + project.TaskPrefix + "-" + row.TaskNumber).btn.text-primary
+                            i.fas.fa-eye
+                            span.ms-1 View
     form(method='POST' action='/projects/edit').modal.fade#edit-project-modal
         .modal-dialog.modal-dialog-scrollable
             .modal-content
