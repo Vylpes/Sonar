@@ -1,0 +1,45 @@
+extends ../layout
+
+block content
+    a(href="/projects/view/" + task.Project.Id + "/tasks").btn.text-primary
+        i.fas.fa-chevron-circle-left
+        span.ms-1 Back to Project
+    .row
+        .col
+            span.text-secondary
+                span= task.Project.TaskPrefix
+                span -
+                span= task.TaskNumber
+            h1= task.Name
+            if task.Archived
+                .badge.rounded-pill.bg-warning.mb-3.me-1
+                    i.fas.fa-archive
+                    span.ms-1 Archived
+            if task.Done
+                .badge.round-pill.bg-success.mb-3.me-1
+                    i.fas.fa-check-circle
+                    span.ms-1 Done
+            else
+                .badge.round-pill.bg-secondary.mb-3.me-1
+                    i.far.fa-circle
+                    span.ms-1 Incomplete
+    .row
+        .col-4
+            .card
+                .card-header Details
+                .card-body
+                    .mb-2
+                        p.mb-0.text-secondary Description
+                        p= task.Description
+                    .mb-2
+                        p.mb-0.text-secondary Created By
+                        p= task.CreatedBy.Username
+                    .mb-2
+                        p.mb-0.text-secondary Assigned To
+                        if task.AssignedTo
+                            p= task.AssignedTo.Username
+                        else
+                            p Unassigned    
+                    .mb-2
+                        p.mb-0.text-secondary Created At
+                        p= task.CreatedAt

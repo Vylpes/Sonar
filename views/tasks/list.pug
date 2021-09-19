@@ -34,6 +34,9 @@ block content
                             span Unassigned
                     td= row.CreatedAt
                     td
+                        a(href="/tasks/view/" + row.Project.TaskPrefix + "-" + row.TaskNumber).btn.text-primary
+                            i.fas.fa-eye
+                            span.ms-1 View
 
 block scripts
     script(src='/js/task-list.js')
