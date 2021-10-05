@@ -37,7 +37,8 @@
     "start": "node dist/index.js",
     "init": "node dist/init.js",
     "lint": "eslint",
-    "test": "jest --passWithNoTests"
+    "test": "jest",
+    "test:coverage": "jest --coverage"
   },
   "devDependencies": {
     "@types/eslint": "^7.2.10",
