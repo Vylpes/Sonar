@@ -225,3 +225,88 @@ describe('CreateProject', () => {
         expect(savedProjectUser.Role).toBe(UserProjectRole.Admin);
     });
 });
+
+describe('GetProject', () => {
+    test('If user has permission to view, return project', async () => {
+        const user = {} as unknown as User;
+
+        const project = mock<Project>();
+        project.Id = "projectId";
+
+        repositoryMock.findOne.mockResolvedValue(project);
+
+        ProjectUser.HasPermission = jest.fn().mockResolvedValue(true);
+
+        const result = await Project.GetProject('projectId', user);
+
+        expect(result).toBe(project);
+    });
+
+    test('If user does not have permission to view, return null', async () => {
+        const user = {} as unknown as User;
+
+        ProjectUser.HasPermission = jest.fn().mockResolvedValue(false);
+
+        const result = await Project.GetProject('projectId', user);
+
+        expect(result).toBeNull();
+    });
+
+    test('If project does not exist, return null', async () => {
+        const user = {} as unknown as User;
+
+        repositoryMock.findOne.mockResolvedValue(null);
+
+        ProjectUser.HasPermission = jest.fn().mockResolvedValue(true);
+
+        const result = await Project.GetProject('projectId', user);
+
+        expect(result).toBeNull();
+    });
+});
+
+describe('GetNextTask', () => {
+    test('If user has permission, return next task and increment', async () => {
+        const user = {} as unknown as User;
+
+        const project = mock<Project>();
+        project.Id = 'projectId';
+        project.NextTask = 1;
+        
+        project.EditNextTask.mockImplementation((num) => {
+            project.NextTask = num;
+        });
+
+        repositoryMock.findOne.mockResolvedValue(project);
+
+        ProjectUser.HasPermission = jest.fn().mockResolvedValue(true);
+
+        const result = await Project.GetNextTask('projectId', user);
+
+        expect(result).toBe(1);
+        expect(project.NextTask).toBe(2);
+        expect(project.EditNextTask).toBeCalledWith(2);
+    });
+
+    test('If user does not have permission, return null', async () => {
+        const user = {} as unknown as User;
+
+        ProjectUser.HasPermission = jest.fn().mockResolvedValue(false);
+
+        const result = await Project.GetNextTask('projectId', user);
+
+        expect(result).toBeNull();
+    });
+
+    test('If project can not be found, return null', async () => {
+        const user = {} as unknown as User;
+
+        repositoryMock.findOne.mockResolvedValue(null);
+
+        ProjectUser.HasPermission = jest.fn().mockResolvedValue(true);
+
+        const result = await Project.GetNextTask('projectId', user);
+
+        expect(result).toBeNull();
+    });
+});
