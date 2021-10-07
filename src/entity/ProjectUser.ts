@@ -202,6 +202,10 @@ export class ProjectUser {
 
         const project = await Project.GetProject(projectId, currentUser);
         const user = await User.GetUser(userId);
+
+        if (!project || !user) {
+            return false;
+        }
         
         const projectUser = await projectUserRepository.findOne({ Project: project, User: user }, { relations: ["Project", "User"]});
 

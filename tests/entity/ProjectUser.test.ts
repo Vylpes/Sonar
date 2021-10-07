@@ -624,3 +624,209 @@ describe('GetAllUsersNotInProject', () => {
         expect(result.length).toBe(0);
     });
 });
+
+describe('ToggleAdmin', () => {
+    test('Given user has permission, expect user has admin status toggled from member to admin', async () => {
+        const project = mock<Project>();
+        project.Id = 'projectId';
+
+        const user = mock<User>();
+        user.Id = 'userId';
+
+        const currentUser = mock<User>();
+        currentUser.Id = 'currentUserId';
+
+        const projectUser = mock<ProjectUser>();
+        projectUser.Id = 'projectUserId';
+        projectUser.Project = project;
+        projectUser.User = user;
+        projectUser.Role = UserProjectRole.Member;
+
+        projectUser.UpdateRole.mockImplementation((role) => {
+            projectUser.Role = role;
+        });
+
+        ProjectUser.HasPermission = jest.fn().mockResolvedValue(true);
+
+        Project.GetProject = jest.fn().mockResolvedValue(project);
+        User.GetUser = jest.fn().mockResolvedValue(user);
+
+        repositoryMock.findOne.mockResolvedValue(projectUser);
+
+        const result = await ProjectUser.ToggleAdmin('projectId', 'userId', currentUser);
+
+        expect(result).toBeTruthy();
+        expect(repositoryMock.save).toBeCalledWith(projectUser);
+        expect(projectUser.Role).toBe(UserProjectRole.Admin);
+    });
+
+    test('Given user has permission, expect user has admin status toggled from admin to member', async () => {
+        const project = mock<Project>();
+        project.Id = 'projectId';
+
+        const user = mock<User>();
+        user.Id = 'userId';
+
+        const currentUser = mock<User>();
+        currentUser.Id = 'currentUserId';
+
+        const projectUser = mock<ProjectUser>();
+        projectUser.Id = 'projectUserId';
+        projectUser.Project = project;
+        projectUser.User = user;
+        projectUser.Role = UserProjectRole.Admin;
+
+        projectUser.UpdateRole.mockImplementation((role) => {
+            projectUser.Role = role;
+        });
+
+        ProjectUser.HasPermission = jest.fn().mockResolvedValue(true);
+
+        Project.GetProject = jest.fn().mockResolvedValue(project);
+        User.GetUser = jest.fn().mockResolvedValue(user);
+
+        repositoryMock.findOne.mockResolvedValue(projectUser);
+
+        const result = await ProjectUser.ToggleAdmin('projectId', 'userId', currentUser);
+
+        expect(result).toBeTruthy();
+        expect(repositoryMock.save).toBeCalledWith(projectUser);
+        expect(projectUser.Role).toBe(UserProjectRole.Member);
+    });
+
+    test('Given user doesn not have permission, expect false to be returned', async () => {
+        const project = mock<Project>();
+        project.Id = 'projectId';
+
+        const user = mock<User>();
+        user.Id = 'userId';
+
+        const currentUser = mock<User>();
+        currentUser.Id = 'currentUserId';
+
+        const projectUser = mock<ProjectUser>();
+        projectUser.Id = 'projectUserId';
+        projectUser.Project = project;
+        projectUser.User = user;
+        projectUser.Role = UserProjectRole.Member;
+
+        projectUser.UpdateRole.mockImplementation((role) => {
+            projectUser.Role = role;
+        });
+
+        ProjectUser.HasPermission = jest.fn().mockResolvedValue(false);
+
+        Project.GetProject = jest.fn().mockResolvedValue(project);
+        User.GetUser = jest.fn().mockResolvedValue(user);
+
+        repositoryMock.findOne.mockResolvedValue(projectUser);
+
+        const result = await ProjectUser.ToggleAdmin('projectId', 'userId', currentUser);
+
+        expect(result).toBeFalsy();
+        expect(repositoryMock.save).not.toBeCalled();
+        expect(projectUser.Role).toBe(UserProjectRole.Member);
+    });
+
+    test('Given projectUser can not be found, expect false to be returned', async () => {
+        const project = mock<Project>();
+        project.Id = 'projectId';
+
+        const user = mock<User>();
+        user.Id = 'userId';
+
+        const currentUser = mock<User>();
+        currentUser.Id = 'currentUserId';
+
+        const projectUser = mock<ProjectUser>();
+        projectUser.Id = 'projectUserId';
+        projectUser.Project = project;
+        projectUser.User = user;
+        projectUser.Role = UserProjectRole.Member;
+
+        projectUser.UpdateRole.mockImplementation((role) => {
+            projectUser.Role = role;
+        });
+
+        ProjectUser.HasPermission = jest.fn().mockResolvedValue(true);
+
+        Project.GetProject = jest.fn().mockResolvedValue(project);
+        User.GetUser = jest.fn().mockResolvedValue(user);
+
+        repositoryMock.findOne.mockResolvedValue(null);
+
+        const result = await ProjectUser.ToggleAdmin('projectId', 'userId', currentUser);
+
+        expect(result).toBeFalsy();
+        expect(repositoryMock.save).not.toBeCalled();
+        expect(projectUser.Role).toBe(UserProjectRole.Member);
+    });
+
+    test('Given project can not be found, expect false to be returned', async () => {
+        const project = mock<Project>();
+        project.Id = 'projectId';
+
+        const user = mock<User>();
+        user.Id = 'userId';
+
+        const currentUser = mock<User>();
+        currentUser.Id = 'currentUserId';
+
+        const projectUser = mock<ProjectUser>();
+        projectUser.Id = 'projectUserId';
+        projectUser.Project = project;
+        projectUser.User = user;
+        projectUser.Role = UserProjectRole.Member;
+
+        projectUser.UpdateRole.mockImplementation((role) => {
+            projectUser.Role = role;
+        });
+
+        ProjectUser.HasPermission = jest.fn().mockResolvedValue(true);
+
+        Project.GetProject = jest.fn().mockResolvedValue(null);
+        User.GetUser = jest.fn().mockResolvedValue(user);
+
+        repositoryMock.findOne.mockResolvedValue(projectUser);
+
+        const result = await ProjectUser.ToggleAdmin('projectId', 'userId', currentUser);
+
+        expect(result).toBeFalsy();
+        expect(repositoryMock.save).not.toBeCalled();
+        expect(projectUser.Role).toBe(UserProjectRole.Member);
+    });
+
+    test('Given user can not be found, expect false to be returned', async () => {
+        const project = mock<Project>();
+        project.Id = 'projectId';
+
+        const user = mock<User>();
+        user.Id = 'userId';
+
+        const currentUser = mock<User>();
+        currentUser.Id = 'currentUserId';
+
+        const projectUser = mock<ProjectUser>();
+        projectUser.Id = 'projectUserId';
+        projectUser.Project = project;
+        projectUser.User = user;
+        projectUser.Role = UserProjectRole.Member;
+
+        projectUser.UpdateRole.mockImplementation((role) => {
+            projectUser.Role = role;
+        });
+
+        ProjectUser.HasPermission = jest.fn().mockResolvedValue(true);
+
+        Project.GetProject = jest.fn().mockResolvedValue(project);
+        User.GetUser = jest.fn().mockResolvedValue(null);
+
+        repositoryMock.findOne.mockResolvedValue(projectUser);
+
+        const result = await ProjectUser.ToggleAdmin('projectId', 'userId', currentUser);
+
+        expect(result).toBeFalsy();
+        expect(repositoryMock.save).not.toBeCalled();
+        expect(projectUser.Role).toBe(UserProjectRole.Member);
+    });
+});
