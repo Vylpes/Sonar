@@ -32,7 +32,7 @@ jest.mock('typeorm', () => {
     }
 });
 
-import { Connection, Repository, SelectQueryBuilder } from "typeorm";
+import { Connection, FindConditions, Repository, SelectQueryBuilder } from "typeorm";
 import { UserProjectRole } from "../../src/constants/UserProjectRole";
 import { Project } from "../../src/entity/Project";
 import { ProjectUser } from "../../src/entity/ProjectUser";
@@ -55,133 +55,237 @@ beforeEach(() => {
 
 describe('Constructor', () => {
     test('Expect properties are set', () => {
-	const date = new Date();
-	const user = {} as unknown as User;
-	const project = mock<Project>();
-	const parentTask = mock<Task>();
+		const date = new Date();
+		const user = {} as unknown as User;
+		const project = mock<Project>();
+		const parentTask = mock<Task>();
 
-	const task = new Task('taskId', 1, 'name', 'description', user, date, false, false, project,
-	user, parentTask);
+		const task = new Task('taskId', 1, 'name', 'description', user, date, false, false, project,
+		user, parentTask);
 
-	expect(task.Id).toBe('taskId');
-	expect(task.TaskNumber).toBe(1);
-	expect(task.Name).toBe('name');
-	expect(task.Description).toBe('description');
-	expect(task.CreatedBy).toBe(user);
-	expect(task.CreatedAt).toBe(date);
-	expect(task.Done).toBeFalsy();
-	expect(task.Archived).toBeFalsy();
-	expect(task.Project).toBe(project);
-	expect(task.AssignedTo).toBe(user);
-	expect(task.ParentTask).toBe(parentTask);
+		expect(task.Id).toBe('taskId');
+		expect(task.TaskNumber).toBe(1);
+		expect(task.Name).toBe('name');
+		expect(task.Description).toBe('description');
+		expect(task.CreatedBy).toBe(user);
+		expect(task.CreatedAt).toBe(date);
+		expect(task.Done).toBeFalsy();
+		expect(task.Archived).toBeFalsy();
+		expect(task.Project).toBe(project);
+		expect(task.AssignedTo).toBe(user);
+		expect(task.ParentTask).toBe(parentTask);
     });
 });
 
 describe('GetAllTasks', () => {
     test('Expect all visible tasks to be returned', async () => {
-	const currentUser = mock<User>();
-	currentUser.Id = 'userId';
+		const currentUser = mock<User>();
+		currentUser.Id = 'userId';
 
-	const project1 = mock<Project>();
+		const project1 = mock<Project>();
 
-	const project2 = mock<Project>();
+		const project2 = mock<Project>();
 
-	const task1A = mock<Task>();
-	task1A.AssignedTo = currentUser;
-	task1A.Project = project1;
+		const task1A = mock<Task>();
+		task1A.AssignedTo = currentUser;
+		task1A.Project = project1;
 
-	const task1B = mock<Task>();
-	task1B.AssignedTo = currentUser;
-	task1B.Project = project1;
+		const task1B = mock<Task>();
+		task1B.AssignedTo = currentUser;
+		task1B.Project = project1;
 
-	const task2A = mock<Task>();
-	task2A.AssignedTo = currentUser;
-	task2A.Project = project2;
+		const task2A = mock<Task>();
+		task2A.AssignedTo = currentUser;
+		task2A.Project = project2;
 
-	const projectUser1 = mock<ProjectUser>();
-	projectUser1.User = currentUser;
-	projectUser1.Project = project1;
+		const projectUser1 = mock<ProjectUser>();
+		projectUser1.User = currentUser;
+		projectUser1.Project = project1;
 
-	const projectUser2 = mock<ProjectUser>();
-	projectUser2.User = currentUser;
-	projectUser2.Project = project2;
+		const projectUser2 = mock<ProjectUser>();
+		projectUser2.User = currentUser;
+		projectUser2.Project = project2;
 
-	project1.Tasks = [ task1A, task1B ];
-	project2.Tasks = [ task2A ];
+		project1.Tasks = [ task1A, task1B ];
+		project2.Tasks = [ task2A ];
 
-	currentUser.AssignedProjects = [ projectUser1, projectUser2 ];
+		currentUser.AssignedProjects = [ projectUser1, projectUser2 ];
 
-	repositoryMock.findOne.mockResolvedValue(currentUser);
+		repositoryMock.findOne.mockResolvedValue(currentUser);
 
-	const result = await Task.GetAllTasks(currentUser);
+		const result = await Task.GetAllTasks(currentUser);
 
-	expect(result.length).toBe(3);
-	expect(result).toContain(task1A);
-	expect(result).toContain(task1B);
-	expect(result).toContain(task2A);
+		expect(result.length).toBe(3);
+		expect(result).toContain(task1A);
+		expect(result).toContain(task1B);
+		expect(result).toContain(task2A);
     });
 });
 
 describe('GetAssignedTasks', () => {
     test('Given user exists, expect tasks returned', async () => {
-	const task = mock<Task>();
+		const task = mock<Task>();
 
-	const user = mock<User>();
-	user.Id = 'userId';
-	user.AssignedTasks = [ task ];
+		const user = mock<User>();
+		user.Id = 'userId';
+		user.AssignedTasks = [ task ];
 
-	repositoryMock.findOne.mockResolvedValue(user);
+		repositoryMock.findOne.mockResolvedValue(user);
 
-	const result = await Task.GetAssignedTasks('userId');
+		const result = await Task.GetAssignedTasks('userId');
 
-	expect(result.length).toBe(1);
-	expect(result).toContain(task);
-    });
+		expect(result.length).toBe(1);
+		expect(result).toContain(task);
+		});
 
-    test('Given user does not exist, expect null returned', async () => {
-	repositoryMock.findOne.mockResolvedValue(null);
+		test('Given user does not exist, expect null returned', async () => {
+		repositoryMock.findOne.mockResolvedValue(null);
 
-	const result = await Task.GetAssignedTasks('userId');
+		const result = await Task.GetAssignedTasks('userId');
 
-	expect(result).toBeNull();
+		expect(result).toBeNull();
     });
 });
 
 describe('CreateTask', () => {
     test('Given user has permission, expect task to be saved', async () => {
-	const user = mock<User>();
-	user.Id = 'userId';
+		const user = mock<User>();
+		user.Id = 'userId';
 
-	const project = mock<Project>();
-	project.Id = 'projectId';
-	project.NextTask = 1;
-	
-	Project.GetNextTask = jest.fn().mockImplementation(async (projectId: string, createdBy: User) => {
-	    return project.NextTask++;
-	});
+		const project = mock<Project>();
+		project.Id = 'projectId';
+		project.NextTask = 1;
+		
+		Project.GetNextTask = jest.fn().mockImplementation(async (projectId: string, createdBy: User) => {
+			return project.NextTask++;
+		});
 
-	ProjectUser.HasPermission = jest.fn().mockResolvedValue(true);
-	
-	const result = await Task.CreateTask('name', 'description', user, project, null, null);
+		ProjectUser.HasPermission = jest.fn().mockResolvedValue(true);
+		
+		const result = await Task.CreateTask('name', 'description', user, project, null, null);
 
-	expect(repositoryMock.save).toBeCalledWith(result);
-	expect(result.Project).toBe(project);
-	expect(result.CreatedBy).toBe(user);
-	expect(project.NextTask).toBe(2);
+		expect(repositoryMock.save).toBeCalledWith(result);
+		expect(result.Project).toBe(project);
+		expect(result.CreatedBy).toBe(user);
+		expect(project.NextTask).toBe(2);
     });
 
     test('Given user does not have permission, expect null to be returned', async () => {
-	const user = mock<User>();
-	user.Id = 'userId';
+		const user = mock<User>();
+		user.Id = 'userId';
 
-	const project = mock<Project>();
-	project.Id = 'projectId';
+		const project = mock<Project>();
+		project.Id = 'projectId';
 
-	ProjectUser.HasPermission = jest.fn().mockResolvedValue(false);
+		ProjectUser.HasPermission = jest.fn().mockResolvedValue(false);
 
-	const result = await Task.CreateTask('name', 'description', user, project, null, null);
+		const result = await Task.CreateTask('name', 'description', user, project, null, null);
 
-	expect(result).toBeNull();
-	expect(repositoryMock.save).not.toBeCalled();
+		expect(result).toBeNull();
+		expect(repositoryMock.save).not.toBeCalled();
     });
+});
+
+describe('GetTaskByTaskString', () => {
+	test('Given user has permission, expect task returned', async () => {
+		const user = mock<User>();
+		user.Id = 'userId';
+
+		const task = mock<Task>();
+		task.Id = 'taskId';
+		task.CreatedBy = user;
+		task.TaskNumber = 1;
+
+		const project = mock<Project>();
+		project.Tasks = [ task ];
+
+		repositoryMock.findOne.mockImplementation(async (conditions: FindConditions<Project>) => {
+			if (conditions.TaskPrefix == "TEST") {
+				return project;
+			}
+
+			return null;
+		});
+
+		ProjectUser.HasPermission = jest.fn().mockResolvedValueOnce(true);
+
+		const result = await Task.GetTaskByTaskString('TEST-1', user);
+
+		expect(result).toBe(task);
+	});
+
+	test('Given user does not have permission, expect null returned', async () => {
+		const user = mock<User>();
+		user.Id = 'userId';
+
+		const task = mock<Task>();
+		task.Id = 'taskId';
+		task.CreatedBy = user;
+		task.TaskNumber = 1;
+
+		const project = mock<Project>();
+		project.Tasks = [ task ];
+
+		repositoryMock.findOne.mockImplementation(async (conditions: FindConditions<Project>) => {
+			if (conditions.TaskPrefix == "TEST") {
+				return project;
+			}
+
+			return null;
+		});
+
+		ProjectUser.HasPermission = jest.fn().mockResolvedValueOnce(false);
+
+		const result = await Task.GetTaskByTaskString('TEST-1', user);
+
+		expect(result).toBeNull();
+	});
+
+	test('Given project is null, expect null returned', async () => {
+		const user = mock<User>();
+		user.Id = 'userId';
+
+		const task = mock<Task>();
+		task.Id = 'taskId';
+		task.CreatedBy = user;
+		task.TaskNumber = 1;
+
+		const project = mock<Project>();
+		project.Tasks = [ task ];
+
+		repositoryMock.findOne.mockResolvedValue(null);
+
+		ProjectUser.HasPermission = jest.fn().mockResolvedValueOnce(true);
+
+		const result = await Task.GetTaskByTaskString('TEST-1', user);
+
+		expect(result).toBeNull();
+	});
+
+	test('Given task prefix search is invalid, expect null returned', async () => {
+		const user = mock<User>();
+		user.Id = 'userId';
+
+		const task = mock<Task>();
+		task.Id = 'taskId';
+		task.CreatedBy = user;
+		task.TaskNumber = 1;
+
+		const project = mock<Project>();
+		project.Tasks = [ task ];
+
+		repositoryMock.findOne.mockImplementation(async (conditions: FindConditions<Project>) => {
+			if (conditions.TaskPrefix == "TEST") {
+				return project;
+			}
+
+			return null;
+		});
+
+		ProjectUser.HasPermission = jest.fn().mockResolvedValueOnce(true);
+
+		const result = await Task.GetTaskByTaskString('2', user);
+
+		expect(result).toBeNull();
+	});
 });
