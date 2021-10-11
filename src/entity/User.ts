@@ -55,7 +55,7 @@ export class User {
 
         const userRepository = connection.getRepository(User);
 
-        const user = await userRepository.findOneOrFail({ Email: email });
+        const user = await userRepository.findOne({ Email: email });
 
         if (!user) {
             return false;

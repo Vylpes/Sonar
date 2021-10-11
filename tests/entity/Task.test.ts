@@ -33,7 +33,6 @@ jest.mock('typeorm', () => {
 });
 
 import { Connection, FindConditions, Repository, SelectQueryBuilder } from "typeorm";
-import { UserProjectRole } from "../../src/constants/UserProjectRole";
 import { Project } from "../../src/entity/Project";
 import { ProjectUser } from "../../src/entity/ProjectUser";
 import { User } from "../../src/entity/User";
