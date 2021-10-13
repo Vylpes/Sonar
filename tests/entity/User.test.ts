@@ -107,3 +107,132 @@ describe('IsLoginCorrect', () => {
         expect(result).toBeFalsy();
     });
 });
+
+describe('RegisterUser', () => {
+    test('Given values are valid, expect user to be registered', async () => {
+	let user: User;
+
+	repositoryMock.findAndCount.mockResolvedValue([null, 0]);
+
+	repositoryMock.find.mockResolvedValue([]);
+
+	repositoryMock.save.mockImplementation(async (u: User) => {
+	    user = u;
+	});
+
+	const result = await User.RegisterUser('username', 'email', 'password', 'password');
+
+	expect(result).toBeTruthy();
+	expect(repositoryMock.save).toBeCalledTimes(1);
+	expect(user).toBeDefined();
+	expect(user.Admin).toBeTruthy();
+    });
+
+    test('Given passwords do not match, expect error', async () => {
+	const result = await User.RegisterUser('username', 'email', 'password', 'passwordRepeat');
+
+	expect(result).toBeFalsy();
+    });
+
+    test('Given password length is less than 7, expect error', async () => {
+	const result = await User.RegisterUser('username', 'email', 'one', 'one');
+
+	expect(result).toBeFalsy();
+    });
+
+    test('Given email is already taken, expect error', async () => {
+	const user = mock<User>();
+	user.Id = 'userId';
+	user.Email = 'email';
+
+	repositoryMock.findAndCount
+	    .mockResolvedValueOnce([[user], 1])
+	    .mockResolvedValue([[], 0]);
+	
+	const result = await User.RegisterUser('username', 'email', 'password', 'password');
+
+	expect(result).toBeFalsy();
+    });
+
+    test('Given username is already taken, expect error', async () => {
+	const user = mock<User>();
+	user.Id = 'userId';
+	user.Username = 'username';
+
+	repositoryMock.findAndCount
+	    .mockResolvedValueOnce([[], 0])
+	    .mockResolvedValue([[user], 1]);
+	
+	const result = await User.RegisterUser('username', 'email', 'password', 'password');
+
+	expect(result).toBeFalsy();
+    });
+
+    test('Given user is not the first user to register, expect user to not be an admin', async () =>
+    {
+	const adminUser = mock<User>();
+	adminUser.Active = true;
+	adminUser.Admin = true;
+
+	let user: User;
+
+	repositoryMock.findAndCount.mockResolvedValue([null, 0]);
+
+	repositoryMock.find.mockResolvedValue([adminUser]);
+
+	repositoryMock.save.mockImplementation(async (u: User) => {
+	    user = u;
+	});
+
+	const result = await User.RegisterUser('username', 'email', 'password', 'password');
+
+	expect(result).toBeTruthy();
+	expect(repositoryMock.save).toBeCalledTimes(1);
+	expect(user).toBeDefined();
+	expect(user.Admin).toBeFalsy();
+    });
+});
+
+describe('GetUser', () => {
+    test('Given user can be found, expect user returned', async () => {
+	const user = mock<User>();
+	user.Id = 'userId';
+
+	repositoryMock.findOne.mockResolvedValue(user);
+
+	const result = await User.GetUser('userId');
+
+	expect(result).toBe(user);
+    });
+
+    test('Given user can not be found, expect null returned', async () => {
+	repositoryMock.findOne.mockResolvedValue(null);
+
+	const result = await User.GetUser('userId');
+
+	expect(result).toBeNull();
+    });
+});
+
+describe('GetUserByEmailAddress', () => {
+    test('Given user can be found, expect user returned', async () => {
+	const user = mock<User>();
+	user.Id = 'userId';
+	user.Email = 'email';
+
+	repositoryMock.findOne.mockResolvedValue(user);
+
+	const result = await User.GetUserByEmailAddress('email');
+
+	expect(result).toBe(user);
+    });
+
+    test('Given user can not be found, expect null returned', async () => {
+	repositoryMock.findOne.mockResolvedValue(null);
+
+	const result = await User.GetUserByEmailAddress('email');
+
+	expect(result).toBeNull();
+    });
+
+});
