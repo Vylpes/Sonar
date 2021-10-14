@@ -11,6 +11,7 @@ export class Login extends Page {
         super.router.get('/login', (req: Request, res: Response) => {
             if (res.locals.viewData.isAuthenticated) {
                 res.redirect('/dashboard');
+		return;
             }
 
             res.render('auth/login', res.locals.viewData);
