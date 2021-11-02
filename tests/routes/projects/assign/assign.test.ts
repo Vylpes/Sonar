@@ -6,6 +6,14 @@ import { User } from "../../../../src/entity/User";
 import { Project } from "../../../../src/entity/Project";
 import { ProjectUser } from "../../../../src/entity/ProjectUser";
 
+declare module 'express-session' {
+	export interface SessionData {
+		User: { [key: string]: any };
+		error: { [key:string]: any };
+		success: { [key:string]: any };
+	}
+}
+
 describe('OnGet', () => {
     describe('/assign/assign/:projectId', () => {
 	test('Given user has permission to view, expect page rendered', async (done) => {
@@ -38,12 +46,12 @@ describe('OnGet', () => {
 	    });
 
 	    const router = mock<Router>();
-	    router.get.mockImplementationOnce((path: string, ...callback: Array<Application>): Router => {
-		expect(path).toBe('/assign/assign/:projectId');
+	    router.get.mockImplementationOnce((path: any, ...callback: Array<Application>): Router => {
+			expect(path).toBe('/assign/assign/:projectId');
 
-		callback[1](req, res);
+			callback[1](req, res);
 
-		return this;
+			return this;
 	    });
 
 	    Project.GetProject = jest.fn().mockResolvedValueOnce(project);
@@ -85,7 +93,7 @@ describe('OnGet', () => {
 	    });
 
 	    const router = mock<Router>();
-	    router.get.mockImplementationOnce((path: string, ...callback: Array<Application>): Router => {
+	    router.get.mockImplementationOnce((path: any, ...callback: Array<Application>): Router => {
 		expect(path).toBe('/assign/assign/:projectId');
 
 		callback[1](req, res);
@@ -134,10 +142,10 @@ describe('OnGet', () => {
 
 	    const router = mock<Router>();
 	    router.get
-		.mockImplementationOnce((path: string, ...callback: Array<Application>): Router => {
+		.mockImplementationOnce((path: any, ...callback: Array<Application>): Router => {
 		    return this;
 		})
-		.mockImplementationOnce((path: string, ...callback: Array<Application>): Router => {
+		.mockImplementationOnce((path: any, ...callback: Array<Application>): Router => {
 		    expect(path).toBe('/assign/assign/:projectId/:userId');
 
 		    callback[1](req, res);
@@ -183,10 +191,10 @@ describe('OnGet', () => {
 
 	    const router = mock<Router>();
 	    router.get
-		.mockImplementationOnce((path: string, ...callback: Array<Application>): Router => {
+		.mockImplementationOnce((path: any, ...callback: Array<Application>): Router => {
 		    return this;
 		})
-		.mockImplementationOnce((path: string, ...callback: Array<Application>): Router => {
+		.mockImplementationOnce((path: any, ...callback: Array<Application>): Router => {
 		    expect(path).toBe('/assign/assign/:projectId/:userId');
 
 		    callback[1](req, res);
@@ -233,7 +241,7 @@ describe('OnPost', () => {
 	});
 
 	const router = mock<Router>();
-	router.post.mockImplementation((path: string, ...callback: Array<Application>): Router => {
+	router.post.mockImplementation((path: any, ...callback: Array<Application>): Router => {
 	    expect(path).toBe('/assign/assign/:projectId/:userId');
 
 	    callback[1](req, res);
@@ -275,7 +283,7 @@ describe('OnPost', () => {
 	    });
 
 	const router = mock<Router>();
-	router.post.mockImplementation((path: string, ...callback: Array<Application>): Router => {
+	router.post.mockImplementation((path: any, ...callback: Array<Application>): Router => {
 	    expect(path).toBe('/assign/assign/:projectId/:userId');
 
 	    callback[1](req, res);
@@ -317,7 +325,7 @@ describe('OnPost', () => {
 	    });
 
 	const router = mock<Router>();
-	router.post.mockImplementation((path: string, ...callback: Array<Application>): Router => {
+	router.post.mockImplementation((path: any, ...callback: Array<Application>): Router => {
 	    expect(path).toBe('/assign/assign/:projectId/:userId');
 
 	    callback[1](req, res);

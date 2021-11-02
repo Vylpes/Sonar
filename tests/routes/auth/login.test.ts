@@ -28,7 +28,7 @@ describe('OnGet', () => {
 	};
 
 	const router = mock<Router>();
-	router.get.mockImplementation((p: string, callback: Application): Router => {
+	router.get.mockImplementation((p: any, callback: Application): Router => {
 	    page = p;
 	    callback(req, res);
 
@@ -54,7 +54,7 @@ describe('OnGet', () => {
 	};
 
 	const router = mock<Router>();
-	router.get.mockImplementation((p: string, callback: Application): Router => {
+	router.get.mockImplementation((p: any, callback: Application): Router => {
 	    page = p;
 	    callback(req, res);
 
@@ -94,7 +94,7 @@ describe('OnPost', () => {
 	const res = mock<Response>();
 
 	const router = mock<Router>();
-	router.post.mockImplementation((p: string, callback: Application): Router => {
+	router.post.mockImplementation((p: any, callback: Application): Router => {
 	    page = p;
 	    callback(req, res);
 
@@ -122,7 +122,7 @@ describe('OnPost', () => {
 	const res = mock<Response>();
 
 	const router = mock<Router>();
-	router.post.mockImplementation((p: string, callback: Application): Router => {
+	router.post.mockImplementation((p: any, callback: Application): Router => {
 	    page = p;
 	    callback(req, res);
 
@@ -149,7 +149,7 @@ describe('OnPost', () => {
 	const res = mock<Response>();
 
 	const router = mock<Router>();
-	router.post.mockImplementation((p: string, callback: Application): Router => {
+	router.post.mockImplementation((p: any, callback: Application): Router => {
 	    page = p;
 	    callback(req, res);
 
@@ -181,7 +181,7 @@ describe('OnPost', () => {
 	});
 
 	const router = mock<Router>();
-	router.post.mockImplementation((p: string, callback: Application): Router => {
+	router.post.mockImplementation((p: any, callback: Application): Router => {
 	    page = p;
 	    callback(req, res);
 

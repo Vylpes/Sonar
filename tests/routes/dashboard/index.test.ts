@@ -21,7 +21,7 @@ describe('OnGet', () => {
 	});
 
 	const router = mock<Router>();
-	router.get.mockImplementation((path: string, ...callback: Array<Application>): Router => {
+	router.get.mockImplementation((path: any, ...callback: Array<Application>): Router => {
 	    expect(path).toBe('/');
 		
 		callback[1](req, res);

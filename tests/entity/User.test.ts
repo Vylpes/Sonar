@@ -116,7 +116,7 @@ describe('RegisterUser', () => {
 
 	repositoryMock.find.mockResolvedValue([]);
 
-	repositoryMock.save.mockImplementation(async (u: User) => {
+	repositoryMock.save.mockImplementation(async (u: any) => {
 	    user = u;
 	});
 
@@ -180,7 +180,7 @@ describe('RegisterUser', () => {
 
 	repositoryMock.find.mockResolvedValue([adminUser]);
 
-	repositoryMock.save.mockImplementation(async (u: User) => {
+	repositoryMock.save.mockImplementation(async (u: any) => {
 	    user = u;
 	});
 

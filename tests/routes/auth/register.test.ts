@@ -23,7 +23,7 @@ describe('OnPost', () => {
 	});
 
 	const router = mock<Router>();
-	router.post.mockImplementation((path: string, callback: Application): Router => {
+	router.post.mockImplementation((path: any, callback: Application): Router => {
 	    expect(path).toBe('/register');
 
 	    callback(req, res);
@@ -56,7 +56,7 @@ describe('OnPost', () => {
 	});
 
 	const router = mock<Router>();
-	router.post.mockImplementation((path: string, callback: Application): Router => {
+	router.post.mockImplementation((path: any, callback: Application): Router => {
 	    expect(path).toBe('/register');
 
 	    callback(req, res);
@@ -89,7 +89,7 @@ describe('OnPost', () => {
 	});
 
 	const router = mock<Router>();
-	router.post.mockImplementation((path: string, callback: Application): Router => {
+	router.post.mockImplementation((path: any, callback: Application): Router => {
 	    expect(path).toBe('/register');
 
 	    callback(req, res);
@@ -122,7 +122,7 @@ describe('OnPost', () => {
 	});
 
 	const router = mock<Router>();
-	router.post.mockImplementation((path: string, callback: Application): Router => {
+	router.post.mockImplementation((path: any, callback: Application): Router => {
 	    expect(path).toBe('/register');
 
 	    callback(req, res);
@@ -155,7 +155,7 @@ describe('OnPost', () => {
 	});
 
 	const router = mock<Router>();
-	router.post.mockImplementation((path: string, callback: Application): Router => {
+	router.post.mockImplementation((path: any, callback: Application): Router => {
 	    expect(path).toBe('/register');
 
 	    callback(req, res);
@@ -188,7 +188,7 @@ describe('OnPost', () => {
 	});
 
 	const router = mock<Router>();
-	router.post.mockImplementation((path: string, callback: Application): Router => {
+	router.post.mockImplementation((path: any, callback: Application): Router => {
 	    expect(path).toBe('/register');
 
 	    callback(req, res);
@@ -221,7 +221,7 @@ describe('OnPost', () => {
 	});
 
 	const router = mock<Router>();
-	router.post.mockImplementation((path: string, callback: Application): Router => {
+	router.post.mockImplementation((path: any, callback: Application): Router => {
 	    expect(path).toBe('/register');
 
 	    callback(req, res);
@@ -254,7 +254,7 @@ describe('OnPost', () => {
 	});
 
 	const router = mock<Router>();
-	router.post.mockImplementation((path: string, callback: Application): Router => {
+	router.post.mockImplementation((path: any, callback: Application): Router => {
 	    expect(path).toBe('/register');
 
 	    callback(req, res);
