@@ -22,6 +22,12 @@ export class New extends Page {
 
             const project = await Project.CreateProject(name, description, taskPrefix, req.session.User);
 
+            if (!project) {
+                req.session.error = "There was an error creating the project";
+                res.redirect('/projects/list');
+                return;
+            }
+
             req.session.success = "Successfully created project";
             res.redirect(`/projects/view/${project.Id}`);
         });
