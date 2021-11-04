@@ -1,37 +1,36 @@
 import { mock } from "jest-mock-extended";
 
 import { Application, Request, Response, Router } from "express";
-import { UserProjectRole } from "../../../src/constants/UserProjectRole";
+import { View } from "../../../src/routes/projects/view";
+import { User } from "../../../src/entity/User";
 import { Project } from "../../../src/entity/Project";
 import { ProjectUser } from "../../../src/entity/ProjectUser";
-import { Task } from "../../../src/entity/Task";
-import { User } from "../../../src/entity/User";
-
-import { Tasks } from "../../../src/routes/projects/tasks";
+import { UserProjectRole } from "../../../src/constants/UserProjectRole";
 
 describe('OnGet', () => {
-    test('Given project exists, expect page rendered', async (done) => {
+    test('Given user has permission to view, expect project page rendered', async (done) => {
         const user = mock<User>();
-
-        const task = mock<Task>();
 
         const project = mock<Project>();
         project.Id = 'projectId';
-        project.Tasks = [task];
+        
+        const projectUser = mock<ProjectUser>();
+        projectUser.Project = project;
+        project.ProjectUsers = [projectUser];
 
         const req = mock<Request>();
         req.params = {
             projectId: 'projectId',
-        }
+        };
         req.session.User = user;
 
         const res = mock<Response>();
         res.locals.viewData = {};
         res.render.mockImplementationOnce((path: string, viewData: any) => {
-            expect(path).toBe('projects/tasks');
+            expect(path).toBe('projects/view');
             expect(viewData.project).toBe(project);
-            expect(viewData.tasks.length).toBe(1);
-            expect(viewData.tasks[0]).toBe(task);
+            expect(viewData.projectUsers.length).toBe(1);
+            expect(viewData.projectUsers[0]).toBe(projectUser);
             expect(viewData.userProjectRole).toBe(UserProjectRole.Member);
             expect(viewData.canCreateTask).toBeTruthy();
 
@@ -40,7 +39,7 @@ describe('OnGet', () => {
 
         const router = mock<Router>();
         router.get.mockImplementationOnce((path: any, ...callback: Array<Application>): Router => {
-            expect(path).toBe('/view/:projectId/tasks');
+            expect(path).toBe('/view/:projectId');
 
             callback[1](req, res);
 
@@ -48,25 +47,21 @@ describe('OnGet', () => {
         });
 
         Project.GetProject = jest.fn().mockResolvedValueOnce(project);
-
         ProjectUser.GetRole = jest.fn().mockResolvedValueOnce(UserProjectRole.Member);
-
         ProjectUser.HasPermission = jest.fn().mockResolvedValueOnce(true);
 
-        const tasks = new Tasks(router);
+        const view = new View(router);
 
-        tasks.OnGet();
+        view.OnGet();
     });
 
     test('Given project does not exist, expect failure', async (done) => {
         const user = mock<User>();
 
-        const task = mock<Task>();
-
         const req = mock<Request>();
         req.params = {
             projectId: 'projectId',
-        }
+        };
         req.session.User = user;
 
         const res = mock<Response>();
@@ -80,7 +75,7 @@ describe('OnGet', () => {
 
         const router = mock<Router>();
         router.get.mockImplementationOnce((path: any, ...callback: Array<Application>): Router => {
-            expect(path).toBe('/view/:projectId/tasks');
+            expect(path).toBe('/view/:projectId');
 
             callback[1](req, res);
 
@@ -88,29 +83,28 @@ describe('OnGet', () => {
         });
 
         Project.GetProject = jest.fn().mockResolvedValueOnce(null);
-
         ProjectUser.GetRole = jest.fn().mockResolvedValueOnce(UserProjectRole.Member);
-
         ProjectUser.HasPermission = jest.fn().mockResolvedValueOnce(true);
 
-        const tasks = new Tasks(router);
+        const view = new View(router);
 
-        tasks.OnGet();
+        view.OnGet();
     });
 
     test('Given user does not have permission to view, expect failure', async (done) => {
         const user = mock<User>();
 
-        const task = mock<Task>();
-
         const project = mock<Project>();
         project.Id = 'projectId';
-        project.Tasks = [task];
+        
+        const projectUser = mock<ProjectUser>();
+        projectUser.Project = project;
+        project.ProjectUsers = [projectUser];
 
         const req = mock<Request>();
         req.params = {
             projectId: 'projectId',
-        }
+        };
         req.session.User = user;
 
         const res = mock<Response>();
@@ -124,7 +118,7 @@ describe('OnGet', () => {
 
         const router = mock<Router>();
         router.get.mockImplementationOnce((path: any, ...callback: Array<Application>): Router => {
-            expect(path).toBe('/view/:projectId/tasks');
+            expect(path).toBe('/view/:projectId');
 
             callback[1](req, res);
 
@@ -132,13 +126,11 @@ describe('OnGet', () => {
         });
 
         Project.GetProject = jest.fn().mockResolvedValueOnce(project);
-
         ProjectUser.GetRole = jest.fn().mockResolvedValueOnce(null);
-
         ProjectUser.HasPermission = jest.fn().mockResolvedValueOnce(true);
 
-        const tasks = new Tasks(router);
+        const view = new View(router);
 
-        tasks.OnGet();
+        view.OnGet();
     });
 });
