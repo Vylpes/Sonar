@@ -6,14 +6,6 @@ import { Application, Request, Response, Router } from "express";
 import { Project } from "../../../src/entity/Project";
 import { Task } from "../../../src/entity/Task";
 
-declare module 'express-session' {
-    interface Session {
-        User?: User;
-        error?: string;
-        success?: string;
-    }
-}
-
 describe('OnPost', () => {
     test('Given fields are valid, expect success', async (done) => {
         const user = mock<User>();

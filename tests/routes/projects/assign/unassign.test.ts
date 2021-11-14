@@ -6,14 +6,6 @@ import { User } from "../../../../src/entity/User";
 import { Project } from "../../../../src/entity/Project";
 import { ProjectUser } from "../../../../src/entity/ProjectUser";
 
-declare module 'express-session' {
-	export interface SessionData {
-		User: { [key: string]: any };
-		error: { [key:string]: any };
-		success: { [key:string]: any };
-	}
-}
-
 describe('OnGet', () => {
     test('Given user has permissions to view, expect page rendered', async (done) => {
         const user = mock<User>();

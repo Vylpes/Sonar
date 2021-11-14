@@ -5,14 +5,6 @@ import { Application, Request, Response, Router } from "express";
 import { User } from "../../../src/entity/User";
 import { Task } from "../../../src/entity/Task";
 
-declare module 'express-session' {
-    interface Session {
-        User?: User;
-        error?: string;
-        success?: string;
-    }
-}
-
 describe('OnGet', () => {
     test('Expect page rendered', async (done) => {
         const user = mock<User>();
