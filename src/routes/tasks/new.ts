@@ -22,8 +22,8 @@ export class New extends Page {
                 return;
             }
 
-            if (!name || !createdBy) {
-                req.session.error = "All fields are required";
+            if (!name) {
+                req.session.error = "Name is required";
                 res.redirect(`/projects/view/${projectId}`);
                 return;
             }
