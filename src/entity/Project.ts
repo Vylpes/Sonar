@@ -148,6 +148,10 @@ export class Project {
 
         const project = await projectRepository.findOne(projectId);
 
+        if (!project) {
+            return null;
+        }
+
         const taskNumber = project.NextTask;
 
         project.EditNextTask(taskNumber + 1);

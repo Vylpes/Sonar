@@ -20,7 +20,20 @@ export class Register extends Page {
                 return;
             }
 
-            if (User.RegisterUser(username, email, password, passwordRepeat)) {
+	    if (password.length < 7) {
+		req.session.error = "Password must be greater than 7 characters in length";
+		res.redirect('/auth/login');
+		return;
+	    }
+
+
+	    if (password != passwordRepeat) {
+		req.session.error = "Passwords do not match";
+		res.redirect('/auth/login');
+		return;
+	    }
+	    
+            if (await User.RegisterUser(username, email, password, passwordRepeat)) {
                 req.session.success = "You are now registered";
                 res.redirect('/auth/login');
                 return;

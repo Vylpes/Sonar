@@ -86,6 +86,10 @@ export class ProjectUser {
         const project = await projectRepository.findOne(projectId);
         const user = await userRepository.findOne(userId);
 
+        if (!project || !user) {
+            return null;
+        }
+
         const projectUser = await projectUserRepository.findOne({ Project: project, User: user}, { relations: ["Project", "User"] });
 
         if (typeof projectUser != "number" && !projectUser) {
@@ -111,6 +115,10 @@ export class ProjectUser {
         const project = await Project.GetProject(projectId, currentUser);
         const user = await User.GetUser(userId);
 
+        if (!project || !user) {
+            return null;
+        }
+
         const projectUser = new ProjectUser(uuid(), UserProjectRole.Member, project, user);
         await projectUserRepository.save(projectUser);
 
@@ -131,7 +139,15 @@ export class ProjectUser {
         const project = await Project.GetProject(projectId, currentUser);
         const user = await User.GetUser(userId);
 
+        if (!project || !user) {
+            return false;
+        }
+
         const projectUser = await projectUserRepository.findOne({ Project: project, User: user }, { relations: ["Project", "User"] });
+
+        if (!projectUser) {
+            return false;
+        }
         
         await projectUserRepository.remove(projectUser);
 
@@ -153,7 +169,8 @@ export class ProjectUser {
             const project = await projectRepository.findOne(projectId, { relations: ["ProjectUsers", "ProjectUsers.User"] });
 
             if (!project) {
-                return [];
+                resolve([]);
+                return;
             }
 
             const users = await userRepository.find();
@@ -185,6 +202,10 @@ export class ProjectUser {
 
         const project = await Project.GetProject(projectId, currentUser);
         const user = await User.GetUser(userId);
+
+        if (!project || !user) {
+            return false;
+        }
         
         const projectUser = await projectUserRepository.findOne({ Project: project, User: user }, { relations: ["Project", "User"]});
 

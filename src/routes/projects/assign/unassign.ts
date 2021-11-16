@@ -13,7 +13,7 @@ export class Unassign extends Page {
 
     OnGet() {
         super.router.get('/assign/unassign/:projectId/:userId', UserMiddleware.Authorise, async (req: Request, res: Response) => {
-            if (!ProjectUser.HasPermission(req.params.projectId, req.session.User.Id, UserProjectPermissions.Assign)) {
+            if (!(await ProjectUser.HasPermission(req.params.projectId, req.session.User.Id, UserProjectPermissions.Assign))) {
                 req.session.error = "Unauthorised";
                 res.redirect("/projects/list");
                 return;
@@ -28,9 +28,20 @@ export class Unassign extends Page {
 
     OnPost() {
         super.router.post('/assign/unassign/:projectId/:userId', UserMiddleware.Authorise, async (req: Request, res: Response) => {
-            await ProjectUser.UnassignUserFromProject(req.params.projectId, req.params.userId, req.session.User);
+            if (!(await ProjectUser.HasPermission(req.params.projectId, req.session.User.Id, UserProjectPermissions.Assign))) {
+                req.session.error = "Unauthorised";
+                res.redirect("/projects/list");
+                return;
+            }
 
-            req.session.success = "Unassigned user from project";
+            if (await ProjectUser.UnassignUserFromProject(req.params.projectId, req.params.userId, req.session.User)) {
+                req.session.success = "Unassigned user from project";
+                res.redirect('/projects/view/' + req.params.projectId);
+
+                return;
+            }
+
+            req.session.error = "There was an error";
             res.redirect('/projects/view/' + req.params.projectId);
         });
     }
