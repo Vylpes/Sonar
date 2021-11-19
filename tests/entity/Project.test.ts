@@ -222,7 +222,7 @@ describe('CreateProject', () => {
 
         expect(savedProjectUser.Project).toBe(savedProject);
         expect(savedProjectUser.User).toBe(currentUser);
-        expect(savedProjectUser.Role).toBe(UserProjectRole.Admin);
+        expect(savedProjectUser.Role).toBe(UserProjectRole.Owner);
     });
 });
 

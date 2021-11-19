@@ -60,6 +60,10 @@ block content
                                             .badge.rounded-pill.bg-primary.mb-3.ms-1
                                                 i.fas.fa-shield-alt
                                                 span.ms-1 Admin
+                                        if row.Role == 2
+                                            .badge.rounded-pill.bg-primary.mb-3.ms-1
+                                                i.fas.fa-crown
+                                                span.ms-1 Owner
                                     td
                                         a(href="/projects/assign/unassign/" + project.Id + "/" + row.User.Id).btn.text-primary
                                             i.fas.fa-user-slash
