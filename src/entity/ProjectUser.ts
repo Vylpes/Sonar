@@ -71,6 +71,17 @@ export class ProjectUser {
                     UserProjectPermissions.TaskUpdate |
                     UserProjectPermissions.TaskDelete
                 );
+	    case UserProjectRole.Owner:
+		permissions |= (
+              	    UserProjectPermissions.View |
+		    UserProjectPermissions.Update |
+		    UserProjectPermissions.Assign |
+		    UserProjectPermissions.Promote |
+		    UserProjectPermissions.TaskView |
+		    UserProjectPermissions.TaskCreate |
+		    UserProjectPermissions.TaskUpdate |
+		    UserProjectPermissions.TaskDelete
+		);
         }
 
         return permissions;
@@ -145,9 +156,15 @@ export class ProjectUser {
 
         const projectUser = await projectUserRepository.findOne({ Project: project, User: user }, { relations: ["Project", "User"] });
 
-        if (!projectUser) {
+	const currentProjectUser = await projectUserRepository.findOne({ Project: project, User: currentUser }, { relations: ["Project", "User"] });
+
+        if (!projectUser || !currentProjectUser) {
             return false;
         }
+
+	if (projectUser.Role == UserProjectRole.Admin && currentProjectUser.Role == UserProjectRole.Admin) {
+	    return false;
+	}
         
         await projectUserRepository.remove(projectUser);
 

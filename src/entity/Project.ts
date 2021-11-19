@@ -109,7 +109,7 @@ export class Project {
         const project = new Project(uuid(), name, description, taskPrefix, new Date(), false, currentUser);
         await projectRepository.save(project);
 
-        const projectUser = new ProjectUser(uuid(), UserProjectRole.Admin, project, currentUser);
+        const projectUser = new ProjectUser(uuid(), UserProjectRole.Owner, project, currentUser);
         await projectUserRepository.save(projectUser);
 
         return project;
