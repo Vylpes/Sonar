@@ -76,6 +76,23 @@ describe('Constructor', () => {
     });
 });
 
+describe('EditBasicValues', () => {
+	test('Expect values to be edited', async () => {
+		const date = new Date();
+		const user = {} as unknown as User;
+		const project = mock<Project>();
+		const parentTask = mock<Task>();
+
+		const task = new Task('taskId', 1, 'name', 'description', user, date, false, false, project,
+		user, parentTask);
+
+		task.EditBasicValues('newName', 'newDescription');
+
+		expect(task.Name).toBe('newName');
+		expect(task.Description).toBe('newDescription');
+	});
+});
+
 describe('GetAllTasks', () => {
     test('Expect all visible tasks to be returned', async () => {
 		const currentUser = mock<User>();
@@ -286,5 +303,127 @@ describe('GetTaskByTaskString', () => {
 		const result = await Task.GetTaskByTaskString('2', user);
 
 		expect(result).toBeNull();
+	});
+});
+
+describe('EditTask', () => {
+	test('Given user has permission, expect task edited', async () => {
+		const currentUser = mock<User>();
+		currentUser.Id = 'userId';
+
+		const project = mock<Project>();
+		project.Id = 'projectId';
+
+		const task = mock<Task>();
+		task.Id = 'taskId';
+		task.Name = 'name';
+		task.Description = 'description';
+		task.Project = project;
+
+		repositoryMock.findOne
+			.mockResolvedValueOnce(task);
+
+		ProjectUser.HasPermission = jest.fn().mockResolvedValueOnce(true);
+
+		const result = await Task.EditTask('taskId', 'newName', 'newDescription', currentUser);
+
+		expect(result).toBeTruthy();
+		expect(task.EditBasicValues).toBeCalledWith('newName', 'newDescription');
+	});
+
+	test('Given user does not have permission, expect false returned', async () => {
+		const currentUser = mock<User>();
+		currentUser.Id = 'userId';
+
+		const project = mock<Project>();
+		project.Id = 'projectId';
+
+		const task = mock<Task>();
+		task.Id = 'taskId';
+		task.Name = 'name';
+		task.Description = 'description';
+		task.Project = project;
+
+		repositoryMock.findOne
+			.mockResolvedValueOnce(task);
+
+		ProjectUser.HasPermission = jest.fn().mockResolvedValueOnce(false);
+
+		const result = await Task.EditTask('taskId', 'name', 'description', currentUser);
+
+		expect(result).toBeFalsy();
+		expect(task.EditBasicValues).not.toBeCalled();
+	});
+
+	test('Given taskId is null, expect false returned', async () => {
+		const currentUser = mock<User>();
+		currentUser.Id = 'userId';
+
+		const project = mock<Project>();
+		project.Id = 'projectId';
+
+		const task = mock<Task>();
+		task.Id = 'taskId';
+		task.Name = 'name';
+		task.Description = 'description';
+		task.Project = project;
+
+		repositoryMock.findOne
+			.mockResolvedValueOnce(task);
+
+		ProjectUser.HasPermission = jest.fn().mockResolvedValueOnce(true);
+
+		const result = await Task.EditTask(null, 'name', 'description', currentUser);
+
+		expect(result).toBeFalsy();
+		expect(task.EditBasicValues).not.toBeCalled();
+	});
+
+	test('Given name is null, expect false returned', async () => {
+		const currentUser = mock<User>();
+		currentUser.Id = 'userId';
+
+		const project = mock<Project>();
+		project.Id = 'projectId';
+
+		const task = mock<Task>();
+		task.Id = 'taskId';
+		task.Name = 'name';
+		task.Description = 'description';
+		task.Project = project;
+
+		repositoryMock.findOne
+			.mockResolvedValueOnce(task);
+
+		ProjectUser.HasPermission = jest.fn().mockResolvedValueOnce(true);
+
+		const result = await Task.EditTask('taskId', null, 'description', currentUser);
+
+		expect(result).toBeFalsy();
+		expect(task.EditBasicValues).not.toBeCalled();
+	});
+
+	test('Given task can not be found, expect false returned', async () => {
+		const currentUser = mock<User>();
+		currentUser.Id = 'userId';
+
+		const project = mock<Project>();
+		project.Id = 'projectId';
+
+		const task = mock<Task>();
+		task.Id = 'taskId';
+		task.Name = 'name';
+		task.Description = 'description';
+		task.Project = project;
+
+		repositoryMock.findOne
+			.mockResolvedValueOnce(null);
+
+		ProjectUser.HasPermission = jest.fn().mockResolvedValueOnce(true);
+
+		const result = await Task.EditTask('taskId', 'name', 'description', currentUser);
+
+		expect(result).toBeFalsy();
+		expect(task.EditBasicValues).not.toBeCalled();
 	});
 });

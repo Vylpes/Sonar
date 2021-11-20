@@ -57,6 +57,11 @@ export class Task {
     @ManyToOne(_ => Task, task => task.ParentTask)
     ChildTasks: Task[];
 
+    public EditBasicValues(name: string, description: string) {
+        this.Name = name;
+        this.Description = description;
+    }
+
     public static async GetAllTasks(currentUser: User): Promise<Task[]> {
         const connection = getConnection();
         
@@ -138,5 +143,35 @@ export class Task {
         const task = project.Tasks.find(x => x.TaskNumber == Number.parseInt(taskNumber));
 
         return task;
+    }
+
+    public static async EditTask(taskId: string, name: string, description: string, currentUser: User): Promise<Boolean> {
+        if (!taskId || !name) {
+            return false;
+        }
+
+        const connection = getConnection();
+
+        const taskRepository = connection.getRepository(Task);
+
+        const task = await taskRepository.findOne(taskId, {
+            relations: [
+                "Project",
+            ]
+        });
+
+        if (!task) {
+            return false;
+        }
+
+        if (!(await ProjectUser.HasPermission(task.Project.Id, currentUser.Id, UserProjectPermissions.TaskUpdate))) {
+            return false;
+        }
+
+        task.EditBasicValues(name, description);
+
+        await taskRepository.save(task);
+
+        return true;
     }
 }
