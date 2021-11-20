@@ -156,15 +156,15 @@ export class ProjectUser {
 
         const projectUser = await projectUserRepository.findOne({ Project: project, User: user }, { relations: ["Project", "User"] });
 
-	const currentProjectUser = await projectUserRepository.findOne({ Project: project, User: currentUser }, { relations: ["Project", "User"] });
+        const currentProjectUser = await projectUserRepository.findOne({ Project: project, User: currentUser }, { relations: ["Project", "User"] });
 
         if (!projectUser || !currentProjectUser) {
             return false;
         }
 
-	if (projectUser.Role == UserProjectRole.Admin && currentProjectUser.Role == UserProjectRole.Admin) {
-	    return false;
-	}
+        if ((projectUser.Role == UserProjectRole.Admin || projectUser.Role == UserProjectRole.Owner) && currentProjectUser.Role == UserProjectRole.Admin) {
+            return false;
+        }
         
         await projectUserRepository.remove(projectUser);
 
