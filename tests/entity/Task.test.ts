@@ -152,9 +152,9 @@ describe('GetAssignedTasks', () => {
 
 		expect(result.length).toBe(1);
 		expect(result).toContain(task);
-		});
+	});
 
-		test('Given user does not exist, expect null returned', async () => {
+	test('Given user does not exist, expect null returned', async () => {
 		repositoryMock.findOne.mockResolvedValue(null);
 
 		const result = await Task.GetAssignedTasks('userId');
@@ -324,6 +324,7 @@ describe('EditTask', () => {
 			.mockResolvedValueOnce(task);
 
 		ProjectUser.HasPermission = jest.fn().mockResolvedValueOnce(true);
+		Task.GetTaskByTaskString = jest.fn().mockResolvedValueOnce(task);
 
 		const result = await Task.EditTask('taskId', 'newName', 'newDescription', currentUser);
 
@@ -348,6 +349,7 @@ describe('EditTask', () => {
 			.mockResolvedValueOnce(task);
 
 		ProjectUser.HasPermission = jest.fn().mockResolvedValueOnce(false);
+		Task.GetTaskByTaskString = jest.fn().mockResolvedValueOnce(task);
 
 		const result = await Task.EditTask('taskId', 'name', 'description', currentUser);
 
@@ -372,6 +374,7 @@ describe('EditTask', () => {
 			.mockResolvedValueOnce(task);
 
 		ProjectUser.HasPermission = jest.fn().mockResolvedValueOnce(true);
+		Task.GetTaskByTaskString = jest.fn().mockResolvedValueOnce(task);
 
 		const result = await Task.EditTask(null, 'name', 'description', currentUser);
 
@@ -396,6 +399,7 @@ describe('EditTask', () => {
 			.mockResolvedValueOnce(task);
 
 		ProjectUser.HasPermission = jest.fn().mockResolvedValueOnce(true);
+		Task.GetTaskByTaskString = jest.fn().mockResolvedValueOnce(task);
 
 		const result = await Task.EditTask('taskId', null, 'description', currentUser);
 
@@ -409,19 +413,23 @@ describe('EditTask', () => {
 
 		const project = mock<Project>();
 		project.Id = 'projectId';
+		project.TaskPrefix = 'taskString';
 
 		const task = mock<Task>();
-		task.Id = 'taskId';
+		task.TaskNumber = 1;
 		task.Name = 'name';
 		task.Description = 'description';
 		task.Project = project;
+
+		project.Tasks = [task];
 
 		repositoryMock.findOne
 			.mockResolvedValueOnce(null);
 
 		ProjectUser.HasPermission = jest.fn().mockResolvedValueOnce(true);
+		Task.GetTaskByTaskString = jest.fn().mockResolvedValueOnce(null);
 
-		const result = await Task.EditTask('taskId', 'name', 'description', currentUser);
+		const result = await Task.EditTask('taskString-1', 'name', 'description', currentUser);
 
 		expect(result).toBeFalsy();
 		expect(task.EditBasicValues).not.toBeCalled();

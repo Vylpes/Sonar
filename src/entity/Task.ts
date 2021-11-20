@@ -145,8 +145,8 @@ export class Task {
         return task;
     }
 
-    public static async EditTask(taskId: string, name: string, description: string, currentUser: User): Promise<Boolean> {
-        if (!taskId || !name) {
+    public static async EditTask(taskString: string, name: string, description: string, currentUser: User): Promise<Boolean> {
+        if (!taskString || !name) {
             return false;
         }
 
@@ -154,11 +154,7 @@ export class Task {
 
         const taskRepository = connection.getRepository(Task);
 
-        const task = await taskRepository.findOne(taskId, {
-            relations: [
-                "Project",
-            ]
-        });
+        const task = await Task.GetTaskByTaskString(taskString, currentUser);
 
         if (!task) {
             return false;
