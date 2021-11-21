@@ -1,5 +1,7 @@
 import { Request, Response, Router } from "express";
+import { UserProjectPermissions } from "../../constants/UserProjectRole";
 import { Page } from "../../contracts/Page";
+import { ProjectUser } from "../../entity/ProjectUser";
 import { Task } from "../../entity/Task";
 import { UserMiddleware } from "../../middleware/userMiddleware";
 
@@ -21,6 +23,7 @@ export class View extends Page {
             }
 
             res.locals.viewData.task = task;
+            res.locals.viewData.canEditTask = await ProjectUser.HasPermission(task.Project.Id, req.session.User.Id, UserProjectPermissions.TaskUpdate);
             
             res.render('tasks/view', res.locals.viewData);
         });
