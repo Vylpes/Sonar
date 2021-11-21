@@ -1,6 +1,7 @@
 export enum UserProjectRole {
     Member,
     Admin,
+    Owner,
 }
 
 export enum UserProjectPermissions {

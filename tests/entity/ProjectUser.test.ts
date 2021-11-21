@@ -338,13 +338,22 @@ describe('UnassignUserFromProject', () => {
         projectUser.Id = 'projectUserId';
         projectUser.Project = project;
         projectUser.User = user;
+        projectUser.Role = UserProjectRole.Member;
+
+        const currentProjectUser = mock<ProjectUser>();
+        currentProjectUser.Id = 'currentProjectUserId';
+        currentProjectUser.Project = project;
+        currentProjectUser.User = currentUser;
+        currentProjectUser.Role = UserProjectRole.Admin;
 
         ProjectUser.HasPermission = jest.fn().mockResolvedValue(true);
 
         Project.GetProject = jest.fn().mockResolvedValue(project);
         User.GetUser = jest.fn().mockResolvedValue(user);
 
-        repositoryMock.findOne.mockResolvedValue(projectUser);
+        repositoryMock.findOne
+	    .mockResolvedValueOnce(projectUser)
+	    .mockResolvedValue(currentProjectUser);
 
         const result = await ProjectUser.UnassignUserFromProject('projectId', 'userId', currentUser);
 
@@ -457,6 +466,110 @@ describe('UnassignUserFromProject', () => {
         User.GetUser = jest.fn().mockResolvedValue(user);
 
         repositoryMock.findOne.mockResolvedValue(null);
+
+        const result = await ProjectUser.UnassignUserFromProject('projectId', 'userId', currentUser);
+
+        expect(result).toBeFalsy();
+        expect(repositoryMock.remove).not.toBeCalled();
+    });
+    
+    test('Given currentProjectUser is not found, expect false to be returned', async () => {
+        const project = mock<Project>();
+        project.Id = 'projectId';
+
+        const user = mock<User>();
+        user.Id = 'userId';
+
+        const currentUser = mock<User>();
+        currentUser.Id = 'currentUserId';
+
+        const projectUser = mock<ProjectUser>();
+        projectUser.Id = 'projectUserId';
+        projectUser.Project = project;
+        projectUser.User = user;
+
+        ProjectUser.HasPermission = jest.fn().mockResolvedValue(true);
+
+        Project.GetProject = jest.fn().mockResolvedValue(project);
+        User.GetUser = jest.fn().mockResolvedValue(user);
+
+        repositoryMock.findOne
+	    .mockResolvedValueOnce(projectUser)
+	    .mockResolvedValue(null);
+
+        const result = await ProjectUser.UnassignUserFromProject('projectId', 'userId', currentUser);
+
+        expect(result).toBeFalsy();
+        expect(repositoryMock.remove).not.toBeCalled();
+    });
+
+    test('Given admin is trying to unassign an admin, expect false to be returned', async () => {
+        const project = mock<Project>();
+        project.Id = 'projectId';
+
+        const user = mock<User>();
+        user.Id = 'userId';
+
+        const currentUser = mock<User>();
+        currentUser.Id = 'currentUserId';
+
+        const projectUser = mock<ProjectUser>();
+        projectUser.Id = 'projectUserId';
+        projectUser.Project = project;
+        projectUser.User = user;
+        projectUser.Role = UserProjectRole.Admin;
+
+        const currentProjectUser = mock<ProjectUser>();
+        currentProjectUser.Id = 'currentProjectUserId';
+        currentProjectUser.Project = project;
+        currentProjectUser.User = user;
+        currentProjectUser.Role = UserProjectRole.Admin;
+
+        ProjectUser.HasPermission = jest.fn().mockResolvedValue(true);
+
+        Project.GetProject = jest.fn().mockResolvedValue(project);
+        User.GetUser = jest.fn().mockResolvedValue(user);
+
+        repositoryMock.findOne
+            .mockResolvedValueOnce(projectUser)
+            .mockResolvedValue(currentProjectUser);
+
+        const result = await ProjectUser.UnassignUserFromProject('projectId', 'userId', currentUser);
+
+        expect(result).toBeFalsy();
+        expect(repositoryMock.remove).not.toBeCalled();
+    });
+
+    test('Given admin is trying to unassign the owner, expect false to be returned', async () => {
+        const project = mock<Project>();
+        project.Id = 'projectId';
+
+        const user = mock<User>();
+        user.Id = 'userId';
+
+        const currentUser = mock<User>();
+        currentUser.Id = 'currentUserId';
+
+        const projectUser = mock<ProjectUser>();
+        projectUser.Id = 'projectUserId';
+        projectUser.Project = project;
+        projectUser.User = user;
+        projectUser.Role = UserProjectRole.Owner;
+
+        const currentProjectUser = mock<ProjectUser>();
+        currentProjectUser.Id = 'currentProjectUserId';
+        currentProjectUser.Project = project;
+        currentProjectUser.User = user;
+        currentProjectUser.Role = UserProjectRole.Admin;
+
+        ProjectUser.HasPermission = jest.fn().mockResolvedValue(true);
+
+        Project.GetProject = jest.fn().mockResolvedValue(project);
+        User.GetUser = jest.fn().mockResolvedValue(user);
+
+        repositoryMock.findOne
+            .mockResolvedValueOnce(projectUser)
+            .mockResolvedValue(currentProjectUser);
 
         const result = await ProjectUser.UnassignUserFromProject('projectId', 'userId', currentUser);
 
