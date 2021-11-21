@@ -8,33 +8,21 @@ export class Edit extends Page {
         super(router);
     }
 
-    public OnGet() {
-        super.router.get('/edit/:taskString', UserMiddleware.Authorise, async (req: Request, res: Response) => {
-            const taskString = req.params.taskString;
-
-            const task = await Task.GetTaskByTaskString(taskString, req.session.User);
-
-            if (!task) {
-                req.session.error = "Task not found";
-                res.redirect('/tasks/list');
-                return;
-            }
-
-            res.locals.viewData.task = task;
-
-            res.render('tasks/edit', res.locals.viewData);
-        });
-    }
-
     public OnPost() {
-        super.router.post('/edit/:taskString', UserMiddleware.Authorise, async (req: Request, res: Response) => {
-            const taskString = req.params.taskString;
+        super.router.post('/edit', UserMiddleware.Authorise, async (req: Request, res: Response) => {
+            const taskString = req.body.taskString;
             const name = req.body.name;
             const description = req.body.description;
 
+            if (!taskString) {
+                req.session.error = "Task not found";
+                res.redirect(`/tasks/list`);
+                return;
+            }
+
             if (!name) {
                 req.session.error = "Name is required";
-                res.redirect(`/tasks/edit/${taskString}`);
+                res.redirect(`/tasks/view/${taskString}`);
                 return;
             }
 

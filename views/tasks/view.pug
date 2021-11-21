@@ -23,6 +23,12 @@ block content
                 .badge.round-pill.bg-secondary.mb-3.me-1
                     i.far.fa-circle
                     span.ms-1 Incomplete
+        .col
+            .d-grid.gap-2.d-md-flex.justify-content-md-end
+                if canEditTask
+                    button(data-bs-toggle='modal' data-bs-target='#edit-task-modal').btn.text-primary
+                        i.fas.fa-edit
+                        span.ms-1 Edit
     .row
         .col-4
             .card
@@ -43,3 +49,23 @@ block content
                     .mb-2
                         p.mb-0.text-secondary Created At
                         p= task.CreatedAt
+    if canEditTask
+        form(method='POST' action='/tasks/edit').modal.fade#edit-task-modal
+            .modal-dialog.modal-dialog-scrollable
+                .modal-content
+                    .modal-header
+                        h5.modal-title Edit Task
+                        button(type='button' data-bs-dismiss='modal').btn-close
+                    .modal-body
+                        .form-group
+                            input(type='hidden' name='taskString' value=task.Project.TaskPrefix + '-' + task.TaskNumber).form-control
+                        .form-group.mb-3
+                            label Name
+                            input(type='text' name='name' value=task.Name).form-control
+                        .form-group.mb-3
+                            label Description
+                            input(type='text' name='description' value=task.Description).form-control
+                        .form-group.text-center
+                            button(type='submit').btn.text-primary
+                                i.fas.fa-check-square
+                                span.ms-1 Edit
