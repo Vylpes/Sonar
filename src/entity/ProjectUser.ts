@@ -57,7 +57,8 @@ export class ProjectUser {
                     UserProjectPermissions.View |
                     UserProjectPermissions.TaskView |
                     UserProjectPermissions.TaskCreate |
-                    UserProjectPermissions.TaskUpdate
+                    UserProjectPermissions.TaskUpdate |
+                    UserProjectPermissions.TaskAssign
                 );
                 break;
             case UserProjectRole.Admin:
@@ -69,19 +70,21 @@ export class ProjectUser {
                     UserProjectPermissions.TaskView |
                     UserProjectPermissions.TaskCreate |
                     UserProjectPermissions.TaskUpdate |
-                    UserProjectPermissions.TaskDelete
+                    UserProjectPermissions.TaskDelete |
+                    UserProjectPermissions.TaskAssign
                 );
-	    case UserProjectRole.Owner:
-		permissions |= (
-              	    UserProjectPermissions.View |
-		    UserProjectPermissions.Update |
-		    UserProjectPermissions.Assign |
-		    UserProjectPermissions.Promote |
-		    UserProjectPermissions.TaskView |
-		    UserProjectPermissions.TaskCreate |
-		    UserProjectPermissions.TaskUpdate |
-		    UserProjectPermissions.TaskDelete
-		);
+            case UserProjectRole.Owner:
+            permissions |= (
+                        UserProjectPermissions.View |
+                UserProjectPermissions.Update |
+                UserProjectPermissions.Assign |
+                UserProjectPermissions.Promote |
+                UserProjectPermissions.TaskView |
+                UserProjectPermissions.TaskCreate |
+                UserProjectPermissions.TaskUpdate |
+                UserProjectPermissions.TaskDelete |
+                UserProjectPermissions.TaskAssign
+            );
         }
 
         return permissions;

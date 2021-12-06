@@ -77,7 +77,7 @@ describe('Constructor', () => {
 });
 
 describe('EditBasicValues', () => {
-	test('Expect values to be edited', async () => {
+	test('Expect values to be edited', () => {
 		const date = new Date();
 		const user = {} as unknown as User;
 		const project = mock<Project>();
@@ -92,6 +92,38 @@ describe('EditBasicValues', () => {
 		expect(task.Description).toBe('newDescription');
 	});
 });
+
+describe('AssignUser', () => {
+	test('Expect values to be set', async () => {
+		const date = new Date();
+		const user = {} as unknown as User;
+		const project = mock<Project>();
+		const parentTask = mock<Task>();
+
+		const task = new Task('taskId', 1, 'name', 'description', user, date, false, false, project,
+		null, parentTask);
+
+		task.AssignUser(user);
+
+		expect(task.AssignedTo).toBe(user);
+	});
+});
+
+describe('UnassignUser', () => {
+	test('Expect values to be set', () => {
+		const date = new Date();
+		const user = {} as unknown as User;
+		const project = mock<Project>();
+		const parentTask = mock<Task>();
+
+		const task = new Task('taskId', 1, 'name', 'description', user, date, false, false, project,
+		user, parentTask);
+
+		task.UnassignUser();
+
+		expect(task.AssignedTo).toBeNull();
+	});
+})
 
 describe('GetAllTasks', () => {
     test('Expect all visible tasks to be returned', async () => {
@@ -433,5 +465,218 @@ describe('EditTask', () => {
 
 		expect(result).toBeFalsy();
 		expect(task.EditBasicValues).not.toBeCalled();
+	});
+});
+
+describe('AssignUserToTask', () => {
+	test('Given user has permission, expect user to be assigned', async () => {
+		const currentUser = mock<User>();
+		currentUser.Id = 'currentUserId';
+
+		const assignedUser = mock<User>();
+		assignedUser.Id = 'assignedUserId';
+
+		const project = mock<Project>();
+		project.Id = 'projectId';
+		project.TaskPrefix = 'taskString';
+
+		const task = mock<Task>();
+		task.TaskNumber = 1;
+		task.Name = 'name';
+		task.Description = 'description';
+		task.Project = project;
+
+		project.Tasks = [task];
+
+		repositoryMock.findOne
+			.mockResolvedValueOnce(task);
+
+		ProjectUser.HasPermission = jest.fn().mockResolvedValueOnce(true);
+		Task.GetTaskByTaskString = jest.fn().mockResolvedValueOnce(task);
+
+		const result = await Task.AssignUserToTask('taskString-1', assignedUser, currentUser);
+
+		expect(result).toBeTruthy();
+		expect(task.AssignUser).toBeCalledWith(assignedUser);
+	});
+
+	test('Given user does not have permission, expect false returned', async () => {
+		const currentUser = mock<User>();
+		currentUser.Id = 'currentUserId';
+
+		const assignedUser = mock<User>();
+		assignedUser.Id = 'assignedUserId';
+
+		const project = mock<Project>();
+		project.Id = 'projectId';
+		project.TaskPrefix = 'taskString';
+
+		const task = mock<Task>();
+		task.TaskNumber = 1;
+		task.Name = 'name';
+		task.Description = 'description';
+		task.Project = project;
+
+		repositoryMock.findOne
+			.mockResolvedValueOnce(task);
+
+		ProjectUser.HasPermission = jest.fn().mockResolvedValueOnce(false);
+		Task.GetTaskByTaskString = jest.fn().mockResolvedValueOnce(task);
+
+		const result = await Task.AssignUserToTask('taskString-1', assignedUser, currentUser);
+
+		expect(result).toBeFalsy();
+		expect(task.AssignUser).not.toBeCalled();
+	});
+
+	test('Given task is not found, expect false returned', async () => {
+		const currentUser = mock<User>();
+		currentUser.Id = 'currentUserId';
+
+		const assignedUser = mock<User>();
+		assignedUser.Id = 'assignedUserId';
+
+		const project = mock<Project>();
+		project.Id = 'projectId';
+		project.TaskPrefix = 'taskString';
+
+		const task = mock<Task>();
+		task.TaskNumber = 1;
+		task.Name = 'name';
+		task.Description = 'description';
+		task.Project = project;
+
+		repositoryMock.findOne
+			.mockResolvedValueOnce(null);
+
+		ProjectUser.HasPermission = jest.fn().mockResolvedValueOnce(true);
+		Task.GetTaskByTaskString = jest.fn().mockResolvedValueOnce(null);
+
+		const result = await Task.AssignUserToTask('taskString-1', assignedUser, currentUser);
+
+		expect(result).toBeFalsy();
+		expect(task.AssignUser).not.toBeCalled();
+	});
+});
+
+describe('UnassignUserFromTask', () => {
+	test('Given user has permission, expect user to be assigned', async () => {
+		const currentUser = mock<User>();
+		currentUser.Id = 'currentUserId';
+
+		const assignedUser = mock<User>();
+		assignedUser.Id = 'assignedUserId';
+
+		const project = mock<Project>();
+		project.Id = 'projectId';
+		project.TaskPrefix = 'taskString';
+
+		const task = mock<Task>();
+		task.TaskNumber = 1;
+		task.Name = 'name';
+		task.Description = 'description';
+		task.Project = project;
+		task.AssignedTo = assignedUser;
+
+		repositoryMock.findOne
+			.mockResolvedValueOnce(task);
+
+		ProjectUser.HasPermission = jest.fn().mockResolvedValueOnce(true);
+		Task.GetTaskByTaskString = jest.fn().mockResolvedValueOnce(task);
+
+		const result = await Task.UnassignUserFromTask('taskString-1', currentUser);
+
+		expect(result).toBeTruthy();
+		expect(task.UnassignUser).toBeCalled();
+	});
+
+	test('Given user does not have permission, expect false returned', async () => {
+		const currentUser = mock<User>();
+		currentUser.Id = 'currentUserId';
+
+		const assignedUser = mock<User>();
+		assignedUser.Id = 'assignedUserId';
+
+		const project = mock<Project>();
+		project.Id = 'projectId';
+		project.TaskPrefix = 'taskString';
+
+		const task = mock<Task>();
+		task.TaskNumber = 1;
+		task.Name = 'name';
+		task.Description = 'description';
+		task.Project = project;
+		task.AssignedTo = assignedUser;
+
+		repositoryMock.findOne
+			.mockResolvedValueOnce(task);
+
+		ProjectUser.HasPermission = jest.fn().mockResolvedValueOnce(false);
+		Task.GetTaskByTaskString = jest.fn().mockResolvedValueOnce(task);
+
+		const result = await Task.UnassignUserFromTask('taskString-1', currentUser);
+
+		expect(result).toBeFalsy();
+		expect(task.UnassignUser).not.toBeCalled();
+	});
+
+	test('Given task is not found, expect false returned', async () => {
+		const currentUser = mock<User>();
+		currentUser.Id = 'currentUserId';
+
+		const assignedUser = mock<User>();
+		assignedUser.Id = 'assignedUserId';
+
+		const project = mock<Project>();
+		project.Id = 'projectId';
+		project.TaskPrefix = 'taskString';
+
+		const task = mock<Task>();
+		task.TaskNumber = 1;
+		task.Name = 'name';
+		task.Description = 'description';
+		task.Project = project;
+		task.AssignedTo = assignedUser;
+
+		repositoryMock.findOne
+			.mockResolvedValueOnce(null);
+
+		ProjectUser.HasPermission = jest.fn().mockResolvedValueOnce(true);
+		Task.GetTaskByTaskString = jest.fn().mockResolvedValueOnce(null);
+
+		const result = await Task.UnassignUserFromTask('taskString-1', currentUser);
+
+		expect(result).toBeFalsy();
+		expect(task.UnassignUser).not.toBeCalled();
+	});
+
+	test('Given no one is assigned, expect false returned', async () => {
+		const currentUser = mock<User>();
+		currentUser.Id = 'currentUserId';
+
+		const assignedUser = mock<User>();
+		assignedUser.Id = 'assignedUserId';
+
+		const project = mock<Project>();
+		project.Id = 'projectId';
+		project.TaskPrefix = 'taskString';
+
+		const task = mock<Task>();
+		task.TaskNumber = 1;
+		task.Name = 'name';
+		task.Description = 'description';
+		task.Project = project;
+		task.AssignedTo = null;
+
+		repositoryMock.findOne
+			.mockResolvedValueOnce(task);
+
+		ProjectUser.HasPermission = jest.fn().mockResolvedValueOnce(true);
+		Task.GetTaskByTaskString = jest.fn().mockResolvedValueOnce(task);
+
+		const result = await Task.UnassignUserFromTask('taskString-1', currentUser);
+
+		expect(result).toBeFalsy();
+		expect(task.UnassignUser).not.toBeCalled();
 	});
 });
