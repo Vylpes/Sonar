@@ -135,6 +135,8 @@ export class Task {
             relations: [
                 "Tasks",
                 "Tasks.Project",
+                "Tasks.Project.ProjectUsers",
+                "Tasks.Project.ProjectUsers.User",
                 "Tasks.CreatedBy",
                 "Tasks.AssignedTo",
             ]

@@ -24,6 +24,7 @@ export class View extends Page {
 
             res.locals.viewData.task = task;
             res.locals.viewData.canEditTask = await ProjectUser.HasPermission(task.Project.Id, req.session.User.Id, UserProjectPermissions.TaskUpdate);
+            res.locals.viewData.canAssignTask = await ProjectUser.HasPermission(task.Project.Id, req.session.User.Id, UserProjectPermissions.TaskAssign);
             
             res.render('tasks/view', res.locals.viewData);
         });

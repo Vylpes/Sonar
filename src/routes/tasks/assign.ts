@@ -1,8 +1,8 @@
 import { Request, Response, Router } from "express";
-import { Page } from "../../../contracts/Page";
-import { Task } from "../../../entity/Task";
-import { User } from "../../../entity/User";
-import { UserMiddleware } from "../../../middleware/userMiddleware";
+import { Page } from "../../contracts/Page";
+import { Task } from "../../entity/Task";
+import { User } from "../../entity/User";
+import { UserMiddleware } from "../../middleware/userMiddleware";
 
 export default class Assign extends Page {
     constructor(router: Router) {
@@ -26,16 +26,22 @@ export default class Assign extends Page {
                 res.redirect(`/tasks/view/${taskString}`);
                 return;
             }
-            
-            const user = await User.GetUser(userId);
 
-            if (!user) {
-                req.session.error = "Cannot find user";
-                res.redirect(`/tasks/view/${taskString}`);
-                return;
+            let result: Boolean = false;
+
+            if (userId == '{UNASSIGN}') {
+                result = await Task.UnassignUserFromTask(taskString, currentUser);
+            } else {
+                const user = await User.GetUser(userId);
+
+                if (!user) {
+                    req.session.error = "Cannot find user";
+                    res.redirect(`/tasks/view/${taskString}`);
+                    return;
+                }
+
+                result = await Task.AssignUserToTask(taskString, user, currentUser);
             }
-
-            const result = await Task.AssignUserToTask(taskString, user, currentUser);
 
             if (result) {
                 req.session.success = "Assigned user to task";    
