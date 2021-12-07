@@ -8,14 +8,14 @@ export default class Unassign extends Page {
         super(router);
     }
 
-    public override OnPost() {
+    public OnPost() {
         super.router.post('/assign/unassign', UserMiddleware.Authorise, async (req: Request, res: Response) => {
             const taskString = req.body.taskString;
             const user = req.session.User;
 
             if (!taskString) {
                 req.session.error = "Not found";
-                res.redirect('/tssks/list');
+                res.redirect('/tasks/list');
                 return;
             }
 
@@ -27,7 +27,7 @@ export default class Unassign extends Page {
                 req.session.error = "Unable to unassign user from task";
             }
 
-            res.redirect(`/task/view/${taskString}`);
+            res.redirect(`/tasks/view/${taskString}`);
         });
     }
 }

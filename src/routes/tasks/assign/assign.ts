@@ -9,7 +9,7 @@ export default class Assign extends Page {
         super(router);
     }
 
-    public override OnPost() {
+    public OnPost() {
         super.router.post('/assign/assign', UserMiddleware.Authorise, async (req: Request, res: Response) => {
             const taskString = req.body.taskString;
             const userId = req.body.userId;
@@ -31,7 +31,7 @@ export default class Assign extends Page {
 
             if (!user) {
                 req.session.error = "Cannot find user";
-                res.redirect(`/task/view/${taskString}`);
+                res.redirect(`/tasks/view/${taskString}`);
                 return;
             }
 
@@ -43,7 +43,7 @@ export default class Assign extends Page {
                 req.session.error = "Unable to assign user to task";
             }
 
-            res.redirect(`/task/view/${taskString}`);
+            res.redirect(`/tasks/view/${taskString}`);
         });
     }
 }

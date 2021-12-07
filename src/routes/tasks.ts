@@ -1,5 +1,7 @@
 import { Router } from "express";
 import { Route } from "../contracts/Route";
+import Unassign from "./tasks/assign/unassign";
+import Assign from "./tasks/assign/assign";
 import { Assigned } from "./tasks/assigned";
 import { Edit } from "./tasks/edit";
 import { List } from "./tasks/list";
@@ -12,6 +14,8 @@ export class TasksRouter extends Route {
     private _new: New;
     private _view: View;
     private _edit: Edit;
+    private _assignAssign: Assign;
+    private _assignUnassign: Unassign;
 
     constructor() {
         super();
@@ -21,6 +25,8 @@ export class TasksRouter extends Route {
         this._new = new New(super.router);
         this._view = new View(super.router);
         this._edit = new Edit(super.router);
+        this._assignAssign = new Assign(super.router);
+        this._assignUnassign = new Unassign(super.router);
     }
 
     public Route(): Router {
@@ -29,6 +35,8 @@ export class TasksRouter extends Route {
         this._new.Route();
         this._view.Route();
         this._edit.Route();
+        this._assignAssign.Route();
+        this._assignUnassign.Route();
 
         return super.router;
     }
