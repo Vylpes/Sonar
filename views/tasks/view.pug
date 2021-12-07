@@ -87,6 +87,7 @@ block content
                             label User
                             select(name='userId').form-control
                                 option(value='{UNASSIGN}') Unassigned
+                                option(disabled) ===== 
                                 each row in task.Project.ProjectUsers
                                     if (task.AssignedTo)
                                         if (task.AssignedTo.Id == row.User.Id)
