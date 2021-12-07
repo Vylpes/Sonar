@@ -25,6 +25,10 @@ block content
                     span.ms-1 Incomplete
         .col
             .d-grid.gap-2.d-md-flex.justify-content-md-end
+                if canAssignTask
+                    button(data-bs-toggle='modal' data-bs-target='#assign-task-modal').btn.text-secondary
+                        i.fas.fa-user-plus
+                        span.ms-1 Assign
                 if canEditTask
                     button(data-bs-toggle='modal' data-bs-target='#edit-task-modal').btn.text-primary
                         i.fas.fa-edit
@@ -69,3 +73,30 @@ block content
                             button(type='submit').btn.text-primary
                                 i.fas.fa-check-square
                                 span.ms-1 Edit
+    if canAssignTask
+        form(method='POST' action='/tasks/assign/assign').modal.fade#assign-task-modal
+            .modal-dialog.modal-dialog-scrollable
+                .modal-content
+                    .modal-header
+                        h5.modal-title Assign Task To User
+                        button(type='button' data-bs-dismiss='modal').btn-close
+                    .modal-body
+                        .form-group
+                            input(type='hidden' name='taskString' value=task.Project.TaskPrefix + '-' + task.TaskNumber).form-control
+                        .form-group.mb-3
+                            label User
+                            select(name='userId').form-control
+                                option(value='{UNASSIGN}') Unassigned
+                                option(disabled) ===== 
+                                each row in task.Project.ProjectUsers
+                                    if (task.AssignedTo)
+                                        if (task.AssignedTo.Id == row.User.Id)
+                                            option(value=row.User.Id selected)=row.User.Username
+                                        else
+                                            option(value=row.User.Id)=row.User.Username
+                                    else
+                                        option(value=row.User.Id)=row.User.Username
+                        .form-group.text-center
+                            button(type='submit').btn.text-primary
+                                i.fas.fa-check-square
+                                span.ms-1 Submit

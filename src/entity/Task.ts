@@ -62,6 +62,14 @@ export class Task {
         this.Description = description;
     }
 
+    public AssignUser(user: User) {
+        this.AssignedTo = user;
+    }
+
+    public UnassignUser() {
+        this.AssignedTo = null;
+    }
+
     public static async GetAllTasks(currentUser: User): Promise<Task[]> {
         const connection = getConnection();
         
@@ -127,6 +135,8 @@ export class Task {
             relations: [
                 "Tasks",
                 "Tasks.Project",
+                "Tasks.Project.ProjectUsers",
+                "Tasks.Project.ProjectUsers.User",
                 "Tasks.CreatedBy",
                 "Tasks.AssignedTo",
             ]
@@ -165,6 +175,54 @@ export class Task {
         }
 
         task.EditBasicValues(name, description);
+
+        await taskRepository.save(task);
+
+        return true;
+    }
+
+    public static async AssignUserToTask(taskString: string, user: User, currentUser: User): Promise<Boolean> {
+        const connection = getConnection();
+
+        const taskRepository = connection.getRepository(Task);
+
+        const task = await Task.GetTaskByTaskString(taskString, currentUser);
+
+        if (!task) {
+            return false;
+        }
+
+        if (!(await ProjectUser.HasPermission(task.Project.Id, currentUser.Id, UserProjectPermissions.TaskAssign))) {
+            return false;
+        }
+
+        task.AssignUser(user);
+
+        await taskRepository.save(task);
+
+        return true;
+    }
+
+    public static async UnassignUserFromTask(taskString: string, currentUser: User): Promise<Boolean> {
+        const connection = getConnection();
+
+        const taskRepository = connection.getRepository(Task);
+
+        const task = await Task.GetTaskByTaskString(taskString, currentUser);
+
+        if (!task) {
+            return false;
+        }
+
+        if (!task.AssignedTo) {
+            return false;
+        }
+
+        if (!(await ProjectUser.HasPermission(task.Project.Id, currentUser.Id, UserProjectPermissions.TaskAssign))) {
+            return false;
+        }
+
+        task.UnassignUser();
 
         await taskRepository.save(task);
 

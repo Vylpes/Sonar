@@ -14,4 +14,5 @@ export enum UserProjectPermissions {
     TaskCreate = 1 << 6,
     TaskUpdate = 1 << 7,
     TaskDelete = 1 << 8,
+    TaskAssign = 1 << 9,
 }
