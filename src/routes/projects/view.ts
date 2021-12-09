@@ -22,7 +22,7 @@ export class View extends Page {
 
             const role = await ProjectUser.GetRole(project.Id, req.session.User.Id);
 
-            if (typeof role != "number" && !role) {
+            if (!(await ProjectUser.HasPermission(req.params.projectId, req.session.User.Id, UserProjectPermissions.View))) {
                 req.session.error = "Project not found";
                 res.redirect('/projects/list');
                 return;

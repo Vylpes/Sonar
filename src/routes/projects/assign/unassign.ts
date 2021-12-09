@@ -27,22 +27,38 @@ export class Unassign extends Page {
     }
 
     OnPost() {
-        super.router.post('/assign/unassign/:projectId/:userId', UserMiddleware.Authorise, async (req: Request, res: Response) => {
-            if (!(await ProjectUser.HasPermission(req.params.projectId, req.session.User.Id, UserProjectPermissions.Assign))) {
-                req.session.error = "Unauthorised";
+        super.router.post('/assign/unassign', UserMiddleware.Authorise, async (req: Request, res: Response) => {
+            const projectId = req.body.projectId;
+            const unassignUserId = req.body.userId;
+            const currentUser = req.session.User;
+
+            if (!projectId) {
+                req.session.error = "Project not found or you do not have permission to see it";
+                res.redirect('/projects/list');
+                return;
+            }
+
+            if (!(await ProjectUser.HasPermission(projectId, currentUser.Id, UserProjectPermissions.Assign))) {
+                req.session.error = "Project not found or you do not have permission to see it";
                 res.redirect("/projects/list");
                 return;
             }
 
-            if (await ProjectUser.UnassignUserFromProject(req.params.projectId, req.params.userId, req.session.User)) {
-                req.session.success = "Unassigned user from project";
-                res.redirect('/projects/view/' + req.params.projectId);
-
+            if (!unassignUserId) {
+                req.session.error = "All fields are required";
+                res.redirect(`/projects/settings/assigned/${projectId}`);
                 return;
             }
 
-            req.session.error = "There was an error";
-            res.redirect('/projects/view/' + req.params.projectId);
+            const result = await ProjectUser.UnassignUserFromProject(projectId, unassignUserId, currentUser);
+
+            if (result) {
+                req.session.success = "Unassigned user from project";
+            } else {
+                req.session.error = "There was an error";
+            }
+
+            res.redirect(`/projects/settings/assigned/${projectId}`);
         });
     }
 }

@@ -8,14 +8,14 @@ block content
         .col
             h1= project.Name
             if project.Archived
-                .badge.rounded-pill-bg-warning.mb-3.me-1
+                .badge.rounded-pill.bg-warning.mb-3.me-1
                     i.fas.fa-archive
                     span.ms-1 Archived
     ul.nav.nav-tabs.mb-3
         li.nav-item
             a.nav-link.active(href="/projects/settings/general/" + project.Id) General
         li.nav-item
-            a.nav-link.disabled(href="#") Users
+            a.nav-link(href="/projects/settings/assigned/" + project.Id) Users
     .row
         .col-12
             form(method='POST' action='/projects/settings/general/' + project.Id)
@@ -30,6 +30,6 @@ block content
                     label Description
                     input(type='text' name='description' value=project.Description).form-control
                 .form-group.text-center
-                    button(type='submit').btn.text-success
+                    button(type='submit').btn.btn-success
                         i.fas.fa-check-square
                         span.ms-1 Save changes

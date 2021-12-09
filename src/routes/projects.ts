@@ -8,6 +8,7 @@ import { Unassign } from "./projects/assign/unassign";
 import { Update } from "./projects/assign/update";
 import { Tasks } from "./projects/tasks";
 import General from "./projects/settings/general";
+import Assigned from "./projects/settings/assigned";
 
 export class ProjectsRouter extends Route {
     private _list: List;
@@ -18,6 +19,7 @@ export class ProjectsRouter extends Route {
     private _assignUpdate: Update;
     private _tasks: Tasks;
     private _settingsGeneral: General;
+    private _settingsAssigned: Assigned;
 
     constructor() {
         super();
@@ -30,6 +32,7 @@ export class ProjectsRouter extends Route {
         this._assignUpdate = new Update(super.router);
         this._tasks = new Tasks(super.router);
         this._settingsGeneral = new General(super.router);
+        this._settingsAssigned = new Assigned(super.router);
     }
 
     public Route(): Router {
@@ -41,6 +44,7 @@ export class ProjectsRouter extends Route {
         this._assignUpdate.Route();
         this._tasks.Route();
         this._settingsGeneral.Route();
+        this._settingsAssigned.Route();
 
         return super.router;
     }

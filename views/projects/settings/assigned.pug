@@ -1,0 +1,68 @@
+extends ../../layout
+
+block content
+    a(href="/projects/view/" + project.Id).btn.text-primary
+        i.fas.fa-chevron-circle-left
+        span.ms-1 Back to Project
+    .row
+        .col
+            h1= project.Name
+            if project.Archived
+                .badge.rounded-pill.bg-warning.mb-3.me-1
+                    i.fas.fa-archive
+                    span.ms-1 Archived
+    ul.nav.nav-tabs.mb-3
+        li.nav-item
+            a.nav-link(href="/projects/settings/general/" + project.Id) General
+        li.nav-item
+            a.nav-link.active(href="/projects/settings/assigned/" + project.Id) Users
+    .row
+        .col-12
+            table#assigned-users-table
+                thead
+                    tr
+                        th Name
+                        th Actions
+                tbody
+                    each row in project.ProjectUsers
+                        tr
+                            td
+                                span= row.User.Username
+                                if row.Role == 1
+                                    .badge.rounded-pill.bg-primary.mb-3.ms-1
+                                        i.fas.fa-shield-alt
+                                        span.ms-1 Admin
+                                if row.Role == 2
+                                    .badge.rounded-pill.bg-primary.mb-3.ms-1
+                                        i.fas.fa-crown
+                                        span.ms-1 Owner
+                            td
+                                form(method='POST' action='/projects/assign/unassign').d-inline
+                                    input(type='hidden' name='projectId' value=project.Id)
+                                    input(type='hidden' name='userId' value=row.User.Id)
+                                    button(type='submit').btn.text-primary
+                                        i.fas.fa-user-slash
+                                        span.ms-1 Unassign
+                                form(method='POST' action='/projects/assign/update').d-inline
+                                    input(type='hidden' name='projectId' value=project.Id)
+                                    input(type='hidden' name='userId' value=row.User.Id)
+                                    button(type='submit').btn.text-primary
+                                        i.fas.fa-user-edit
+                                        span.ms-1 Update
+                if canAssignUser
+                    tbody
+                        tr
+                            form(method='POST' action='/projects/assign/assign')
+                                input(type='hidden' name='projectId' value=project.Id)
+                                th
+                                    select(name='userId').form-control
+                                        option(disabled value='-1' selected) Select user...
+                                        option(disabled value='-1') =====
+                                        each row in unassignedUsers
+                                            option(value=row.Id)= row.Username
+                                th
+                                    button(type='submit').btn.text-primary
+                                        i.fas.fa-eye
+                                        span.ms-1 Assign
+block scripts
+    script(src='/js/project-settings-assigned.js')
