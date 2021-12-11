@@ -20,13 +20,13 @@ export class View extends Page {
                 return;
             }
 
-            const role = await ProjectUser.GetRole(project.Id, req.session.User.Id);
-
             if (!(await ProjectUser.HasPermission(req.params.projectId, req.session.User.Id, UserProjectPermissions.View))) {
                 req.session.error = "Project not found";
                 res.redirect('/projects/list');
                 return;
             }
+            
+            const role = await ProjectUser.GetRole(project.Id, req.session.User.Id);
 
             res.locals.viewData.project = project;
             res.locals.viewData.projectUsers = project.ProjectUsers;
