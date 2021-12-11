@@ -80,7 +80,24 @@ describe('UpdateRole', () => {
 });
 
 describe('GetPermissions', () => {
-    test('Given user is found, expect permissions to be returned', async () => {
+    test('Given user is member, expect permissions to be returned', async () => {
+        const project = mock<Project>();
+        project.Id = 'projectId';
+
+        const user = mock<User>();
+        user.Id = 'userId';
+
+        const projectUser = new ProjectUser('projectUserId', UserProjectRole.Member, project, user);
+
+        repositoryMock.findOne.mockResolvedValueOnce(project).mockResolvedValueOnce(user).mockResolvedValue(projectUser);
+
+        const result = await ProjectUser.GetPermissions('projectId', 'userId');
+
+        expect(result).not.toBe(UserProjectPermissions.None);
+        expect(result).toBe(738);
+    });
+
+    test('Given user is admin, expect permissions to be returned', async () => {
         const project = mock<Project>();
         project.Id = 'projectId';
 
@@ -94,7 +111,26 @@ describe('GetPermissions', () => {
         const result = await ProjectUser.GetPermissions('projectId', 'userId');
 
         expect(result).not.toBe(UserProjectPermissions.None);
+        expect(result).toBe(1022);
     });
+
+    test('Given user is owner, expect permissions to be returned', async () => {
+        const project = mock<Project>();
+        project.Id = 'projectId';
+
+        const user = mock<User>();
+        user.Id = 'userId';
+
+        const projectUser = new ProjectUser('projectUserId', UserProjectRole.Owner, project, user);
+
+        repositoryMock.findOne.mockResolvedValueOnce(project).mockResolvedValueOnce(user).mockResolvedValue(projectUser);
+
+        const result = await ProjectUser.GetPermissions('projectId', 'userId');
+
+        expect(result).not.toBe(UserProjectPermissions.None);
+        expect(result).toBe(1022);
+    });
+
 
     test('Given project is not found, expect no permissions to be returned', async () => {
         const project = mock<Project>();
@@ -941,5 +977,20 @@ describe('ToggleAdmin', () => {
         expect(result).toBeFalsy();
         expect(repositoryMock.save).not.toBeCalled();
         expect(projectUser.Role).toBe(UserProjectRole.Member);
+    });
+
+    test('Given currentUser is the same user as the selected user, expect false returned', async () => {
+        const project = mock<Project>();
+        project.Id = 'projectId';
+
+        const user = mock<User>();
+        user.Id = 'userId';
+
+        ProjectUser.HasPermission = jest.fn().mockResolvedValue(true);
+
+        const result = await ProjectUser.ToggleAdmin('projectId', user.Id, user);
+
+        expect(result).toBeFalsy();
+        expect(repositoryMock.save).not.toBeCalled();
     });
 });
