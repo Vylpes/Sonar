@@ -57,7 +57,6 @@ block content
                                 th
                                     select(name='userId').form-control
                                         option(disabled value='-1' selected) Select user...
-                                        option(disabled value='-1') =====
                                         each row in unassignedUsers
                                             option(value=row.Id)= row.Username
                                 th
