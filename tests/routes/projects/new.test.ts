@@ -178,4 +178,36 @@ describe('OnPost', () => {
 
         page.OnPost();
     });
+
+    test('Given project can not be found, expect error redirect', (done) => {
+        const req = mock<Request>();
+        req.body = {
+            name: 'name',
+            description: 'description',
+            taskPrefix: 'taskPrefix'
+        }
+
+        const res = mock<Response>();
+        res.redirect.mockImplementationOnce((path: string) => {
+            expect(path).toBe('/projects/list');
+            expect(req.session.error).toBe('There was an error creating the project');
+
+            done();
+        });
+
+        const router = mock<Router>();
+        router.post.mockImplementationOnce((path: any, ...callback: Array<Application>): Router => {
+            expect(path).toBe('/new');
+
+            callback[1](req, res);
+
+            return router;
+        });
+
+        Project.CreateProject = jest.fn().mockResolvedValueOnce(false);
+
+        const page = new New(router);
+
+        page.OnPost();
+    });
 });

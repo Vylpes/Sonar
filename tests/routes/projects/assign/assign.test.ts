@@ -132,4 +132,70 @@ describe('OnPost', () => {
 
 	assign.OnPost();
     });
+	
+	test('Given projectId is null, expect error redirect', (done) => {
+		const user = mock<User>();
+		user.Id = 'userId';
+
+		const req = mock<Request>();
+		req.body = {
+			assignUserId: 'assignUserId'
+		}
+		req.session.User = user;
+
+		const res = mock<Response>();
+		res.redirect.mockImplementationOnce((path: string) => {
+			expect(path).toBe('/projects/list');
+			expect(req.session.error).toBe("Project not found or you do not have permission to view it");
+
+			done();
+		});
+
+		const router = mock<Router>();
+		router.post.mockImplementationOnce((path: any, ...callback: Array<Application>): Router => {
+			expect(path).toBe('/assign/assign');
+
+			callback[1](req, res);
+
+			return router;
+		});
+
+		const assign = new Assign(router);
+
+		assign.OnPost();
+	});
+
+	test('Given assignUserId is null, exect error redirect', (done) => {
+		const user = mock<User>();
+		user.Id = 'userId';
+
+		const req = mock<Request>();
+		req.body = {
+			projectId: 'projectId'
+		};
+		req.session.User = user;
+
+		const res = mock<Response>();
+		res.redirect.mockImplementationOnce((path: string) => {
+			expect(path).toBe('/projects/settings/assigned/projectId');
+			expect(req.session.error).toBe('All fields are required');
+
+			done();
+		});
+
+		const router = mock<Router>();
+		router.post.mockImplementationOnce((path: any, ...callback: Array<Application>): Router => {
+			expect(path).toBe('/assign/assign');
+
+			callback[1](req, res);
+
+			return router;
+		});
+
+		ProjectUser.HasPermission = jest.fn().mockResolvedValue(true);
+
+		const assign = new Assign(router);
+
+		assign.OnPost();
+	});
 });
