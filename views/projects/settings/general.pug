@@ -1,0 +1,35 @@
+extends ../../layout
+
+block content
+    a(href="/projects/view/" + project.Id).btn.text-primary
+        i.fas.fa-chevron-circle-left
+        span.ms-1 Back to Project
+    .row
+        .col
+            h1= project.Name
+            if project.Archived
+                .badge.rounded-pill.bg-warning.mb-3.me-1
+                    i.fas.fa-archive
+                    span.ms-1 Archived
+    ul.nav.nav-tabs.mb-3
+        li.nav-item
+            a.nav-link.active(href="/projects/settings/general/" + project.Id) General
+        li.nav-item
+            a.nav-link(href="/projects/settings/assigned/" + project.Id) Users
+    .row
+        .col-12
+            form(method='POST' action='/projects/settings/general/' + project.Id)
+                .form-group.mb-3
+                    label Task Prefix
+                    input(type='text' value=project.TaskPrefix disabled).form-control
+                    span Next task will be #{project.TaskPrefix}-#{project.NextTask}
+                .form-group.mb-3
+                    label Name
+                    input(type='text' name='name' value=project.Name).form-control
+                .form-group.mb-3
+                    label Description
+                    input(type='text' name='description' value=project.Description).form-control
+                .form-group.text-center
+                    button(type='submit').btn.btn-success
+                        i.fas.fa-check-square
+                        span.ms-1 Save changes

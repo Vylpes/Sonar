@@ -12,7 +12,7 @@ export class New extends Page {
     public OnPost() {
         super.router.post('/new', UserMiddleware.Authorise, async (req: Request, res: Response) => {
             const name = req.body.name;
-            const description = req.body.description || "";
+            const description = req.body.description;
             const createdBy = req.session.User;
             const projectId = req.body.projectId;
 

@@ -33,6 +33,7 @@ describe('OnGet', () => {
             expect(viewData.projectUsers[0]).toBe(projectUser);
             expect(viewData.userProjectRole).toBe(UserProjectRole.Member);
             expect(viewData.canCreateTask).toBeTruthy();
+            expect(viewData.canEditProject).toBeTruthy();
 
             done();
         });
@@ -48,7 +49,9 @@ describe('OnGet', () => {
 
         Project.GetProject = jest.fn().mockResolvedValueOnce(project);
         ProjectUser.GetRole = jest.fn().mockResolvedValueOnce(UserProjectRole.Member);
-        ProjectUser.HasPermission = jest.fn().mockResolvedValueOnce(true);
+        ProjectUser.HasPermission = jest.fn().mockResolvedValueOnce(true) // To view
+            .mockResolvedValueOnce(true) // CanCreateTask
+            .mockResolvedValueOnce(true); // CanEditProject
 
         const view = new View(router);
 
@@ -84,7 +87,9 @@ describe('OnGet', () => {
 
         Project.GetProject = jest.fn().mockResolvedValueOnce(null);
         ProjectUser.GetRole = jest.fn().mockResolvedValueOnce(UserProjectRole.Member);
-        ProjectUser.HasPermission = jest.fn().mockResolvedValueOnce(true);
+        ProjectUser.HasPermission = jest.fn().mockResolvedValueOnce(true) // To view
+            .mockResolvedValueOnce(true) // CanCreateTask
+            .mockResolvedValueOnce(true); // CanEditProject
 
         const view = new View(router);
 
@@ -127,7 +132,9 @@ describe('OnGet', () => {
 
         Project.GetProject = jest.fn().mockResolvedValueOnce(project);
         ProjectUser.GetRole = jest.fn().mockResolvedValueOnce(null);
-        ProjectUser.HasPermission = jest.fn().mockResolvedValueOnce(true);
+        ProjectUser.HasPermission = jest.fn().mockResolvedValueOnce(false) // To view
+            .mockResolvedValueOnce(true) // CanCreateTask
+            .mockResolvedValueOnce(true); // CanEditProject
 
         const view = new View(router);
 

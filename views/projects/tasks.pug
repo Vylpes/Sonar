@@ -16,9 +16,10 @@ block content
                 if canCreateTask
                     button(data-bs-toggle='modal' data-bs-target='#create-task-modal').btn.text-secondary
                         span New Task
-                button(data-bs-toggle='modal' data-bs-target='#edit-project-modal').btn.text-primary
-                    i.fas.fa-edit
-                    span.ms-1 Edit
+                if canEditProject
+                    a(href='/projects/settings/general/' + project.Id).btn.text-primary
+                        i.fas.fa-cog
+                        span.ms-1 Settings
     ul.nav.nav-tabs.mb-3
         li.nav-item
             a.nav-link(href="/projects/view/" + project.Id) Details
@@ -50,25 +51,6 @@ block content
                         a(href="/tasks/view/" + project.TaskPrefix + "-" + row.TaskNumber).btn.text-primary
                             i.fas.fa-eye
                             span.ms-1 View
-    form(method='POST' action='/projects/edit').modal.fade#edit-project-modal
-        .modal-dialog.modal-dialog-scrollable
-            .modal-content
-                .modal-header
-                    h5.modal-title Edit Project
-                    button(type='button' data-bs-dismiss='modal').btn-close
-                .modal-body
-                    .form-group
-                        input(type='hidden' name='projectId' value=project.Id).form-control
-                    .form-group.mb-3
-                        label Project Name
-                        input(type='text' name='name' value=project.Name).form-control
-                    .form-group.mb-3
-                        label Description
-                        input(type='text' name='description' value=project.Description).form-control
-                    .form-group.text-center
-                        button(type='submit').btn.text-primary
-                            i.fas.fa-check-square
-                            span.ms-1 Edit
     if canCreateTask
         form(method='POST' action='/tasks/new').modal.fade#create-task-modal
             .modal-dialog.modal-dialog-scrollable
