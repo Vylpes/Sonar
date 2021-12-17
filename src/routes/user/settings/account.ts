@@ -47,10 +47,13 @@ export default class Account extends Page {
 
             const result = await User.UpdateUserDetails(user, email, username, newPassword ? newPassword : currentPassword);
 
-            if (!result.IsSuccess) {
-                req.session.error = result.Message;
-            } else {
+            if (result.IsSuccess) {
+                const newUser = await User.GetUser(user.Id);
+                req.session.User = newUser;
+
                 req.session.success = "Saved successfully";
+            } else {
+                req.session.error = result.Message;
             }
 
             res.redirect('/user/settings/account');

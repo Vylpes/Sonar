@@ -3,6 +3,7 @@ import { mock } from "jest-mock-extended";
 import Account from "../../../../src/routes/user/settings/account";
 import { Application, Router, Request, Response } from "express";
 import { User } from "../../../../src/entity/User";
+import { GenerateResponse, IBasicResponse } from "../../../../src/contracts/IBasicResponse";
 
 describe('OnGet', () => {
     test('Expect page to be rendered with current user', (done) => {
@@ -40,22 +41,28 @@ describe('OnPost', () => {
     test('Given body is valid, expect successful redirect', (done) => {
         const user = mock<User>();
         user.Id = 'userId';
+        user.Email = 'email';
+        user.Username = 'username';
+        user.Password = 'oldPassword';
 
         const req = mock<Request>();
         req.session.User = user;
         req.body = {
-            email: 'email',
+            email: 'newEmail',
             currentPassword: 'currentPassword',
             newPassword: 'newPassword',
             passwordConfirm: 'newPassword',
-            username: 'username'
+            username: 'newUsername'
         };
 
         const res = mock<Response>();
         res.redirect.mockImplementation((path: string) => {
             expect(path).toBe('/user/settings/account');
             expect(req.session.success).toBe('Saved successfully');
-            expect(User.UpdateUserDetails).toBeCalledWith(user, 'email', 'username', 'newPassword');
+            expect(User.UpdateUserDetails).toBeCalledWith(user, 'newEmail', 'newUsername', 'newPassword');
+            expect(req.session.User.Email).toBe('newEmail');
+            expect(req.session.User.Username).toBe('newUsername');
+            expect(req.session.User.Password).toBe('newPassword');
 
             done();
         });
@@ -70,9 +77,14 @@ describe('OnPost', () => {
         });
 
         User.IsLoginCorrect = jest.fn().mockResolvedValue(true);
-        User.UpdateUserDetails = jest.fn().mockResolvedValue({
-            IsSuccess: true
+        User.UpdateUserDetails = jest.fn().mockImplementation((user: User, email: string, username: string, password: string): IBasicResponse => {
+            user.Email = email;
+            user.Username = username;
+            user.Password = password;
+
+            return GenerateResponse();
         });
+        User.GetUser = jest.fn().mockResolvedValue(user);
 
         const account = new Account(router);
         account.OnPost();
