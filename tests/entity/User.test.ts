@@ -336,8 +336,21 @@ describe('UpdateUserDetails', () => {
 
 		const result = await User.UpdateUserDetails(user, 'newEmail', 'newUsername', 'newPassword');
 
-
 		expect(result.IsSuccess).toBeFalsy();
 		expect(result.Message).toBe('Username already in use');
+	});
+
+	test('Given password is too short, expect failure', async () => {
+		const user = mock<User>();
+		user.Id = 'userId';
+
+		repositoryMock.findOne.mockResolvedValue(user);
+		User.GetUserByEmailAddress = jest.fn().mockResolvedValue(null);
+		User.GetUserByUsername = jest.fn().mockResolvedValue(null);
+
+		const result = await User.UpdateUserDetails(user, 'newEmail', 'newUsername', 'short');
+
+		expect(result.IsSuccess).toBeFalsy();
+		expect(result.Message).toBe('Password must be at least 7 characters long');
 	});
 });

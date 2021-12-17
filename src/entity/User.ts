@@ -157,6 +157,10 @@ export class User {
             return GenerateResponse(false, "Username already in use");
         }
 
+        if (password.length < 7) {
+            return GenerateResponse(false, "Password must be at least 7 characters long");
+        }
+
         const hashedPassword = await hash(password, 10);
 
         user.EditBasicDetails(email, username, hashedPassword);
