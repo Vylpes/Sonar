@@ -37,7 +37,7 @@ import { Project } from "../../src/entity/Project";
 import { ProjectUser } from "../../src/entity/ProjectUser";
 import { User } from "../../src/entity/User";
 import { Task } from "../../src/entity/Task";
-import { hash } from "bcrypt";
+import bcrypt, { hash } from "bcrypt";
 
 beforeEach(() => {
     // Repository Mock
@@ -65,6 +65,18 @@ describe('Constructor', () => {
         expect(user.Admin).toBeTruthy();
         expect(user.Active).toBeTruthy();
     });
+});
+
+describe('EditBasicDetails', () => {
+	test('Expect properties are updated', () => {
+		const user = new User('userId', 'email', 'username', 'password', true, true, true);
+
+		user.EditBasicDetails('newEmail', 'newUsername', 'newPassword');
+
+		expect(user.Email).toBe('newEmail');
+		expect(user.Username).toBe('newUsername');
+		expect(user.Password).toBe('newPassword');
+	});
 });
 
 describe('IsLoginCorrect', () => {
@@ -234,5 +246,95 @@ describe('GetUserByEmailAddress', () => {
 
 	expect(result).toBeNull();
     });
+});
 
+describe('GetUserByUsername', () => {
+	test('Given user can be found, expect user returned', async () => {
+		const user = mock<User>();
+		user.Id = 'userId';
+		user.Username = 'username';
+
+		repositoryMock.findOne.mockResolvedValue(user);
+
+		const result = await User.GetUserByUsername('username');
+
+		expect(result).toBe(user);
+		expect(repositoryMock.findOne).toBeCalledWith({ Username: 'username' });
+	});
+
+	test('Given user can not be found, expect null returned', async () => {
+		repositoryMock.findOne.mockResolvedValue(null);
+
+		const result = await User.GetUserByUsername('username');
+
+		expect(result).toBe(null);
+		expect(repositoryMock.findOne).toBeCalledWith({ Username: 'username' });
+	});
+});
+
+describe('UpdateUserDetails', () => {
+	test('Given user can be found AND values do not exist, expect success', async () => {
+		const user = mock<User>();
+		user.Id = 'userId';
+		user.Email = 'email';
+		user.Username = 'username';
+		user.Password = 'password';
+		
+		repositoryMock.findOne.mockResolvedValue(user);
+		repositoryMock.save.mockResolvedValue(user);
+		bcrypt.hash = jest.fn().mockResolvedValue('hashedPassword');
+		User.GetUserByEmailAddress = jest.fn().mockResolvedValue(null);
+		User.GetUserByUsername = jest.fn().mockResolvedValue(null);
+		
+		const result = await User.UpdateUserDetails('userId', 'newEmail', 'newUsername', 'newPassword');
+
+		expect(result.IsSuccess).toBeTruthy();
+		expect(repositoryMock.findOne).toBeCalledWith('userId');
+		expect(bcrypt.hash).toBeCalledWith('newPassword', 10);
+		expect(user.EditBasicDetails).toBeCalledWith('newEmail', 'newUsername', 'hashedPassword');
+		expect(repositoryMock.save).toBeCalledWith(user);
+	});
+
+	test('Given user can not be found, expect failure', async () => {
+		repositoryMock.findOne.mockResolvedValue(null);
+		
+		const result = await User.UpdateUserDetails('userId', 'newEmail', 'newUsername', 'newPassword');
+
+		expect(result.IsSuccess).toBeFalsy();
+		expect("user not found");
+	});
+
+	test('Given email is already used, expect failure', async () => {
+		const user = mock<User>();
+		user.Id = 'userId';
+		user.Email = 'email';
+		user.Username = 'username';
+		user.Password = 'password';
+		
+		repositoryMock.findOne.mockResolvedValue(user);
+		User.GetUserByEmailAddress = jest.fn().mockResolvedValue(user);
+		
+		const result = await User.UpdateUserDetails('userId', 'newEmail', 'newUsername', 'newPassword');
+
+		expect(result.IsSuccess).toBeFalsy();
+		expect(result.Message).toBe('Email already in use');
+	});
+
+	test('Given username is already used, expect failure', async () => {
+		const user = mock<User>();
+		user.Id = 'userId';
+		user.Email = 'email';
+		user.Username = 'username';
+		user.Password = 'password';
+
+		repositoryMock.findOne.mockResolvedValue(user);
+		User.GetUserByEmailAddress = jest.fn().mockResolvedValue(null);
+		User.GetUserByUsername = jest.fn().mockResolvedValue(user);
+
+		const result = await User.UpdateUserDetails('userId', 'newEmail', 'newUsername', 'newPassword');
+
+
+		expect(result.IsSuccess).toBeFalsy();
+		expect(result.Message).toBe('Username already in use');
+	});
 });

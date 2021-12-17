@@ -4,6 +4,7 @@ import { Project } from "./Project";
 import { ProjectUser } from "./ProjectUser";
 import { Task } from "./Task";
 import { v4 as uuid } from "uuid";
+import { IBasicResponse, GenerateResponse } from "../contracts/IBasicResponse";
 
 @Entity()
 export class User {
@@ -49,6 +50,12 @@ export class User {
 
     @OneToMany(_ => Task, task => task.AssignedTo)
     AssignedTasks: Task[];
+
+    public EditBasicDetails(email: string, username: string, password: string) {
+        this.Email = email;
+        this.Username = username;
+        this.Password = password;
+    }
 
     public static async IsLoginCorrect(email: string, password: string): Promise<boolean> {
         const connection = getConnection();
@@ -118,5 +125,41 @@ export class User {
         const userRepository = connection.getRepository(User);
 
         return await userRepository.findOne({ Email: email });
+    }
+
+    public static async GetUserByUsername(username: string): Promise<User> {
+        const connection = getConnection();
+
+        const userRepository = connection.getRepository(User);
+
+        return await userRepository.findOne({ Username: username });
+    }
+
+    public static async UpdateUserDetails(userId: string, email: string, username: string, password: string): Promise<IBasicResponse> {
+        const connection = getConnection();
+
+        const userRepo = connection.getRepository(User);
+
+        const user = await userRepo.findOne(userId);
+
+        if (!user) {
+            return GenerateResponse(false, "User not found");
+        }
+
+        if (await User.GetUserByEmailAddress(email) != null) {
+            return GenerateResponse(false, "Email already in use");
+        }
+
+        if (await User.GetUserByUsername(username) != null) {
+            return GenerateResponse(false, "Username already in use");
+        }
+
+        const hashedPassword = await hash(password, 10);
+
+        user.EditBasicDetails(email, username, hashedPassword);
+
+        await userRepo.save(user);
+
+        return GenerateResponse();
     }
 }
