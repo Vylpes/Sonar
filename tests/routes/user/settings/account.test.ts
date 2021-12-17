@@ -55,7 +55,7 @@ describe('OnPost', () => {
         res.redirect.mockImplementation((path: string) => {
             expect(path).toBe('/user/settings/account');
             expect(req.session.success).toBe('Saved successfully');
-            expect(User.UpdateUserDetails).toBeCalledWith('userId', 'email', 'username', 'newPassword');
+            expect(User.UpdateUserDetails).toBeCalledWith(user, 'email', 'username', 'newPassword');
 
             done();
         });
@@ -94,7 +94,7 @@ describe('OnPost', () => {
         res.redirect.mockImplementation((path: string) => {
             expect(path).toBe('/user/settings/account');
             expect(req.session.success).toBe('Saved successfully');
-            expect(User.UpdateUserDetails).toBeCalledWith('userId', 'email', 'username', 'currentPassword');
+            expect(User.UpdateUserDetails).toBeCalledWith(user, 'email', 'username', 'currentPassword');
 
             done();
         });

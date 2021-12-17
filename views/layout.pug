@@ -25,7 +25,10 @@ html
                         ul.navbar-nav.ms-auto.mb-2.mb-lg-0.float-right
                             li.nav-item
                                 a.nav-link(href="/auth/logout") Logout
-                        span.navbar-text Logged in as #{user.Username}
+                            li.nav-item
+                                a.nav-link(href="/user/settings/account")
+                                    i.fas.fa-cog
+                        span.navbar-text.ms-1 Logged in as #{user.Username}
         else
             nav.navbar.navbar-expand-lg.navbar-light.bg-light
                 .container-fluid

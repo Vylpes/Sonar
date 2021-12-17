@@ -15,6 +15,7 @@ import { DashboardRouter } from "./routes/dashboard";
 import { IndexRouter } from "./routes";
 import { ProjectsRouter } from "./routes/projects";
 import { TasksRouter } from "./routes/tasks";
+import UserRouter from "./routes/user";
 
 export class App {
     private _app: Express;
@@ -24,6 +25,7 @@ export class App {
     private _indexRouter: IndexRouter;
     private _projectsRouter: ProjectsRouter;
     private _tasksRouter: TasksRouter;
+    private _userRouter: UserRouter;
 
     constructor() {
         this._app = express();
@@ -33,6 +35,7 @@ export class App {
         this._indexRouter = new IndexRouter();
         this._projectsRouter = new ProjectsRouter();
         this._tasksRouter = new TasksRouter();
+        this._userRouter = new UserRouter();
     }
 
     public Start(port: number) {
@@ -79,6 +82,7 @@ export class App {
         this._app.use('/dashboard', this._dashboardRouter.Route());
         this._app.use('/projects', this._projectsRouter.Route());
         this._app.use('/tasks', this._tasksRouter.Route());
+        this._app.use('/user', this._userRouter.Route());
     }
 
     private SetupErrors() {

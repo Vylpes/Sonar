@@ -32,11 +32,8 @@ jest.mock('typeorm', () => {
     }
 });
 
-import { Connection, FindConditions, Repository, SelectQueryBuilder } from "typeorm";
-import { Project } from "../../src/entity/Project";
-import { ProjectUser } from "../../src/entity/ProjectUser";
+import { Connection, Repository, SelectQueryBuilder } from "typeorm";
 import { User } from "../../src/entity/User";
-import { Task } from "../../src/entity/Task";
 import bcrypt, { hash } from "bcrypt";
 
 beforeEach(() => {
@@ -286,7 +283,7 @@ describe('UpdateUserDetails', () => {
 		User.GetUserByEmailAddress = jest.fn().mockResolvedValue(null);
 		User.GetUserByUsername = jest.fn().mockResolvedValue(null);
 		
-		const result = await User.UpdateUserDetails('userId', 'newEmail', 'newUsername', 'newPassword');
+		const result = await User.UpdateUserDetails(user, 'newEmail', 'newUsername', 'newPassword');
 
 		expect(result.IsSuccess).toBeTruthy();
 		expect(repositoryMock.findOne).toBeCalledWith('userId');
@@ -296,9 +293,15 @@ describe('UpdateUserDetails', () => {
 	});
 
 	test('Given user can not be found, expect failure', async () => {
+		const user = mock<User>();
+		user.Id = 'userId';
+		user.Email = 'email';
+		user.Username = 'username';
+		user.Password = 'password';
+
 		repositoryMock.findOne.mockResolvedValue(null);
 		
-		const result = await User.UpdateUserDetails('userId', 'newEmail', 'newUsername', 'newPassword');
+		const result = await User.UpdateUserDetails(user, 'newEmail', 'newUsername', 'newPassword');
 
 		expect(result.IsSuccess).toBeFalsy();
 		expect("user not found");
@@ -314,7 +317,7 @@ describe('UpdateUserDetails', () => {
 		repositoryMock.findOne.mockResolvedValue(user);
 		User.GetUserByEmailAddress = jest.fn().mockResolvedValue(user);
 		
-		const result = await User.UpdateUserDetails('userId', 'newEmail', 'newUsername', 'newPassword');
+		const result = await User.UpdateUserDetails(user, 'newEmail', 'newUsername', 'newPassword');
 
 		expect(result.IsSuccess).toBeFalsy();
 		expect(result.Message).toBe('Email already in use');
@@ -331,7 +334,7 @@ describe('UpdateUserDetails', () => {
 		User.GetUserByEmailAddress = jest.fn().mockResolvedValue(null);
 		User.GetUserByUsername = jest.fn().mockResolvedValue(user);
 
-		const result = await User.UpdateUserDetails('userId', 'newEmail', 'newUsername', 'newPassword');
+		const result = await User.UpdateUserDetails(user, 'newEmail', 'newUsername', 'newPassword');
 
 
 		expect(result.IsSuccess).toBeFalsy();

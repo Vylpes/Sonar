@@ -45,7 +45,7 @@ export default class Account extends Page {
                 return;
             }
 
-            const result = await User.UpdateUserDetails(user.Id, email, username, newPassword ? newPassword : currentPassword);
+            const result = await User.UpdateUserDetails(user, email, username, newPassword ? newPassword : currentPassword);
 
             if (!result.IsSuccess) {
                 req.session.error = result.Message;

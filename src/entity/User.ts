@@ -135,22 +135,25 @@ export class User {
         return await userRepository.findOne({ Username: username });
     }
 
-    public static async UpdateUserDetails(userId: string, email: string, username: string, password: string): Promise<IBasicResponse> {
+    public static async UpdateUserDetails(currentUser: User, email: string, username: string, password: string): Promise<IBasicResponse> {
         const connection = getConnection();
 
         const userRepo = connection.getRepository(User);
 
-        const user = await userRepo.findOne(userId);
+        const user = await userRepo.findOne(currentUser.Id);
 
         if (!user) {
             return GenerateResponse(false, "User not found");
         }
 
-        if (await User.GetUserByEmailAddress(email) != null) {
+        const userByEmail = await User.GetUserByEmailAddress(email);
+        const userByUsername = await User.GetUserByUsername(username);
+
+        if (currentUser.Email != email && userByEmail) {
             return GenerateResponse(false, "Email already in use");
         }
 
-        if (await User.GetUserByUsername(username) != null) {
+        if (currentUser.Username != username && userByUsername) {
             return GenerateResponse(false, "Username already in use");
         }
 
