@@ -70,6 +70,10 @@ export class Task {
         this.AssignedTo = null;
     }
 
+    public ToggleDoneStatus() {
+        this.Done = !this.Done;
+    }
+
     public static async GetAllTasks(currentUser: User): Promise<Task[]> {
         const connection = getConnection();
         
@@ -225,6 +229,28 @@ export class Task {
         task.UnassignUser();
 
         await taskRepository.save(task);
+
+        return true;
+    }
+
+    public static async ToggleTaskCompleteStatus(taskString: string, currentUser: User): Promise<Boolean> {
+        const connection = getConnection();
+
+        const taskRepo = connection.getRepository(Task);
+
+        const task = await Task.GetTaskByTaskString(taskString, currentUser);
+
+        if (!task) {
+            return false;
+        }
+
+        if (!(await ProjectUser.HasPermission(task.Project.Id, currentUser.Id, UserProjectPermissions.TaskUpdate))) {
+            return false;
+        };
+
+        task.ToggleDoneStatus();
+
+        await taskRepo.save(task);
 
         return true;
     }

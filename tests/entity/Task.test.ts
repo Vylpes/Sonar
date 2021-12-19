@@ -116,14 +116,28 @@ describe('UnassignUser', () => {
 		const project = mock<Project>();
 		const parentTask = mock<Task>();
 
-		const task = new Task('taskId', 1, 'name', 'description', user, date, false, false, project,
-		user, parentTask);
+		const task = new Task('taskId', 1, 'name', 'description', user, date, false, false, project, user, parentTask);
 
 		task.UnassignUser();
 
 		expect(task.AssignedTo).toBeNull();
 	});
-})
+});
+
+describe('ToggleDoneStatus', () => {
+	test('Expect value to be inverted', () => {
+		const date = new Date();
+		const user = mock<User>();
+		const project = mock<Project>();
+		const parentTask = mock<Task>();
+
+		const task = new Task('taskId', 1, 'name', 'description', user, date, false, false, project, user, parentTask);
+
+		task.ToggleDoneStatus();
+
+		expect(task.Done).toBeTruthy();
+	});
+});
 
 describe('GetAllTasks', () => {
     test('Expect all visible tasks to be returned', async () => {
@@ -678,5 +692,64 @@ describe('UnassignUserFromTask', () => {
 
 		expect(result).toBeFalsy();
 		expect(task.UnassignUser).not.toBeCalled();
+	});
+});
+
+describe('ToggleTaskCompleteStatus', () => {
+	test('Given user has permission, expect value toggled', async () => {
+		const currentUser = mock<User>();
+		currentUser.Id = 'userId';
+
+		const task = mock<Task>();
+		task.Id = 'taskId';
+		task.TaskNumber = 1;
+
+		Task.prototype.ToggleDoneStatus = jest.fn();
+		Task.GetTaskByTaskString = jest.fn().mockResolvedValue(task);
+		ProjectUser.HasPermission = jest.fn().mockResolvedValue(true);
+
+		const result = await Task.ToggleTaskCompleteStatus('taskString-1', currentUser);
+
+		expect(result).toBeTruthy();
+		expect(task.ToggleDoneStatus).toBeCalledTimes(1);
+		expect(repositoryMock.save).toBeCalledWith(task);
+	});
+
+	test('Given task does not exist, expect false returned', async () => {
+		const currentUser = mock<User>();
+		currentUser.Id = 'userId';
+
+		const task = mock<Task>();
+		task.Id = 'taskId';
+		task.TaskNumber = 1;
+
+		Task.prototype.ToggleDoneStatus = jest.fn();
+		Task.GetTaskByTaskString = jest.fn().mockResolvedValue(null);
+		ProjectUser.HasPermission = jest.fn().mockResolvedValue(true);
+
+		const result = await Task.ToggleTaskCompleteStatus('taskString-1', currentUser);
+
+		expect(result).toBeFalsy();
+		expect(task.ToggleDoneStatus).toBeCalledTimes(0);
+		expect(repositoryMock.save).toBeCalledTimes(0);
+	});
+
+	test('Given user does not have permission, expect false returned', async () => {
+		const currentUser = mock<User>();
+		currentUser.Id = 'userId';
+
+		const task = mock<Task>();
+		task.Id = 'taskId';
+		task.TaskNumber = 1;
+
+		Task.prototype.ToggleDoneStatus = jest.fn();
+		Task.GetTaskByTaskString = jest.fn().mockResolvedValue(task);
+		ProjectUser.HasPermission = jest.fn().mockResolvedValue(false);
+
+		const result = await Task.ToggleTaskCompleteStatus('taskString-1', currentUser);
+
+		expect(result).toBeFalsy();
+		expect(task.ToggleDoneStatus).toBeCalledTimes(0);
+		expect(repositoryMock.save).toBeCalledTimes(0);
 	});
 });

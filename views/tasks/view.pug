@@ -18,7 +18,7 @@ block content
             if task.Done
                 .badge.round-pill.bg-success.mb-3.me-1
                     i.fas.fa-check-circle
-                    span.ms-1 Done
+                    span.ms-1 Complete
             else
                 .badge.round-pill.bg-secondary.mb-3.me-1
                     i.far.fa-circle
@@ -30,6 +30,16 @@ block content
                         i.fas.fa-user-plus
                         span.ms-1 Assign
                 if canEditTask
+                    form(method='POST' action='/tasks/done')
+                        input(type='hidden' name='taskString' value=task.Project.TaskPrefix + '-' + task.TaskNumber)
+                        if task.Done
+                            button(type='submit').btn.text-primary
+                                i.fas.fa-times-circle
+                                span.ms-1 Mark as Incomplete
+                        else
+                            button(type='submit').btn.text-primary
+                                i.fas.fa-check-circle
+                                span.ms-1 Mark as Complete
                     button(data-bs-toggle='modal' data-bs-target='#edit-task-modal').btn.text-primary
                         i.fas.fa-edit
                         span.ms-1 Edit
