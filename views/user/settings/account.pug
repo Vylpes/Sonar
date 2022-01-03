@@ -11,10 +11,10 @@ block content
         .col-12
             form(method='POST' action='/user/settings/account')
                 .form-group.mb-3
-                    label Email
+                    label.required Email
                     input(type='text' name='email' value=user.Email).form-control
                 .form-group.mb-3
-                    label Username
+                    label.required Username
                     input(type='text' name='username' value=user.Username).form-control
                 hr
                 .form-group.mb-3
@@ -25,7 +25,7 @@ block content
                     input(type='password' name='passwordConfirm').form-control
                 hr
                 .form-group.mb-3
-                    label Please confirm your current password to continue
+                    label.required Please confirm your current password to continue
                     input(type='password' name='currentPassword').form-control
                 .form-group.text-center
                     button(type='submit').btn.btn-success

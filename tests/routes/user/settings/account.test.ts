@@ -59,7 +59,7 @@ describe('OnPost', () => {
         res.redirect.mockImplementation((path: string) => {
             expect(path).toBe('/user/settings/account');
             expect(req.session.success).toBe('Saved successfully');
-            expect(User.UpdateUserDetails).toBeCalledWith(user, 'newEmail', 'newUsername', 'newPassword');
+            expect(User.UpdateCurrentUserDetails).toBeCalledWith(user, 'newEmail', 'newUsername', 'newPassword');
             expect(req.session.User.Email).toBe('newEmail');
             expect(req.session.User.Username).toBe('newUsername');
             expect(req.session.User.Password).toBe('newPassword');
@@ -77,7 +77,7 @@ describe('OnPost', () => {
         });
 
         User.IsLoginCorrect = jest.fn().mockResolvedValue(true);
-        User.UpdateUserDetails = jest.fn().mockImplementation((user: User, email: string, username: string, password: string): IBasicResponse => {
+        User.UpdateCurrentUserDetails = jest.fn().mockImplementation((user: User, email: string, username: string, password: string): IBasicResponse => {
             user.Email = email;
             user.Username = username;
             user.Password = password;
@@ -106,7 +106,7 @@ describe('OnPost', () => {
         res.redirect.mockImplementation((path: string) => {
             expect(path).toBe('/user/settings/account');
             expect(req.session.success).toBe('Saved successfully');
-            expect(User.UpdateUserDetails).toBeCalledWith(user, 'email', 'username', 'currentPassword');
+            expect(User.UpdateCurrentUserDetails).toBeCalledWith(user, 'email', 'username', 'currentPassword');
 
             done();
         });
@@ -121,7 +121,46 @@ describe('OnPost', () => {
         });
 
         User.IsLoginCorrect = jest.fn().mockResolvedValue(true);
-        User.UpdateUserDetails = jest.fn().mockResolvedValue({
+        User.UpdateCurrentUserDetails = jest.fn().mockResolvedValue({
+            IsSuccess: true
+        });
+
+        const account = new Account(router);
+        account.OnPost();
+    });
+
+    test('Given email is null, expect failure redirect', (done) => {
+        const user = mock<User>();
+        user.Id = 'userId';
+
+        const req = mock<Request>();
+        req.session.User = user;
+        req.body = {
+            currentPassword: 'currentPassword',
+            newPassword: 'newPassword',
+            passwordConfirm: 'newPassword',
+            username: 'username'
+        };
+
+        const res = mock<Response>();
+        res.redirect.mockImplementation((path: string) => {
+            expect(path).toBe('/user/settings/account');
+            expect(req.session.error).toBe('Email, Current Password, and Username are required');
+
+            done();
+        });
+
+        const router = mock<Router>();
+        router.post.mockImplementation((path: any, ...callback: Array<Application>): Router => {
+            expect(path).toBe('/settings/account');
+
+            callback[1](req, res);
+
+            return router;
+        });
+
+        User.IsLoginCorrect = jest.fn().mockResolvedValue(true);
+        User.UpdateCurrentUserDetails = jest.fn().mockResolvedValue({
             IsSuccess: true
         });
 
@@ -145,7 +184,7 @@ describe('OnPost', () => {
         const res = mock<Response>();
         res.redirect.mockImplementation((path: string) => {
             expect(path).toBe('/user/settings/account');
-            expect(req.session.error).toBe('Current password is required');
+            expect(req.session.error).toBe('Email, Current Password, and Username are required');
 
             done();
         });
@@ -160,7 +199,46 @@ describe('OnPost', () => {
         });
 
         User.IsLoginCorrect = jest.fn().mockResolvedValue(true);
-        User.UpdateUserDetails = jest.fn().mockResolvedValue({
+        User.UpdateCurrentUserDetails = jest.fn().mockResolvedValue({
+            IsSuccess: true
+        });
+
+        const account = new Account(router);
+        account.OnPost();
+    });
+
+    test('Given username is null, expect failure redirect', (done) => {
+        const user = mock<User>();
+        user.Id = 'userId';
+
+        const req = mock<Request>();
+        req.session.User = user;
+        req.body = {
+            email: 'email',
+            currentPassword: 'currentPassword',
+            newPassword: 'newPassword',
+            passwordConfirm: 'newPassword'
+        };
+
+        const res = mock<Response>();
+        res.redirect.mockImplementation((path: string) => {
+            expect(path).toBe('/user/settings/account');
+            expect(req.session.error).toBe('Email, Current Password, and Username are required');
+
+            done();
+        });
+
+        const router = mock<Router>();
+        router.post.mockImplementation((path: any, ...callback: Array<Application>): Router => {
+            expect(path).toBe('/settings/account');
+
+            callback[1](req, res);
+
+            return router;
+        });
+
+        User.IsLoginCorrect = jest.fn().mockResolvedValue(true);
+        User.UpdateCurrentUserDetails = jest.fn().mockResolvedValue({
             IsSuccess: true
         });
 
@@ -200,7 +278,7 @@ describe('OnPost', () => {
         });
 
         User.IsLoginCorrect = jest.fn().mockResolvedValue(false);
-        User.UpdateUserDetails = jest.fn().mockResolvedValue({
+        User.UpdateCurrentUserDetails = jest.fn().mockResolvedValue({
             IsSuccess: true
         });
 
@@ -240,7 +318,7 @@ describe('OnPost', () => {
         });
 
         User.IsLoginCorrect = jest.fn().mockResolvedValue(true);
-        User.UpdateUserDetails = jest.fn().mockResolvedValue({
+        User.UpdateCurrentUserDetails = jest.fn().mockResolvedValue({
             IsSuccess: true
         });
 
@@ -280,7 +358,7 @@ describe('OnPost', () => {
         });
 
         User.IsLoginCorrect = jest.fn().mockResolvedValue(true);
-        User.UpdateUserDetails = jest.fn().mockResolvedValue({
+        User.UpdateCurrentUserDetails = jest.fn().mockResolvedValue({
             IsSuccess: false,
             Message: 'message'
         });

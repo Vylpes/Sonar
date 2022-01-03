@@ -269,7 +269,7 @@ describe('GetUserByUsername', () => {
 	});
 });
 
-describe('UpdateUserDetails', () => {
+describe('UpdateCurrentUserDetails', () => {
 	test('Given user can be found AND values do not exist, expect success', async () => {
 		const user = mock<User>();
 		user.Id = 'userId';
@@ -283,7 +283,7 @@ describe('UpdateUserDetails', () => {
 		User.GetUserByEmailAddress = jest.fn().mockResolvedValue(null);
 		User.GetUserByUsername = jest.fn().mockResolvedValue(null);
 		
-		const result = await User.UpdateUserDetails(user, 'newEmail', 'newUsername', 'newPassword');
+		const result = await User.UpdateCurrentUserDetails(user, 'newEmail', 'newUsername', 'newPassword');
 
 		expect(result.IsSuccess).toBeTruthy();
 		expect(repositoryMock.findOne).toBeCalledWith('userId');
@@ -301,7 +301,7 @@ describe('UpdateUserDetails', () => {
 
 		repositoryMock.findOne.mockResolvedValue(null);
 		
-		const result = await User.UpdateUserDetails(user, 'newEmail', 'newUsername', 'newPassword');
+		const result = await User.UpdateCurrentUserDetails(user, 'newEmail', 'newUsername', 'newPassword');
 
 		expect(result.IsSuccess).toBeFalsy();
 		expect("user not found");
@@ -317,7 +317,7 @@ describe('UpdateUserDetails', () => {
 		repositoryMock.findOne.mockResolvedValue(user);
 		User.GetUserByEmailAddress = jest.fn().mockResolvedValue(user);
 		
-		const result = await User.UpdateUserDetails(user, 'newEmail', 'newUsername', 'newPassword');
+		const result = await User.UpdateCurrentUserDetails(user, 'newEmail', 'newUsername', 'newPassword');
 
 		expect(result.IsSuccess).toBeFalsy();
 		expect(result.Message).toBe('Email already in use');
@@ -334,7 +334,7 @@ describe('UpdateUserDetails', () => {
 		User.GetUserByEmailAddress = jest.fn().mockResolvedValue(null);
 		User.GetUserByUsername = jest.fn().mockResolvedValue(user);
 
-		const result = await User.UpdateUserDetails(user, 'newEmail', 'newUsername', 'newPassword');
+		const result = await User.UpdateCurrentUserDetails(user, 'newEmail', 'newUsername', 'newPassword');
 
 		expect(result.IsSuccess).toBeFalsy();
 		expect(result.Message).toBe('Username already in use');
@@ -348,7 +348,7 @@ describe('UpdateUserDetails', () => {
 		User.GetUserByEmailAddress = jest.fn().mockResolvedValue(null);
 		User.GetUserByUsername = jest.fn().mockResolvedValue(null);
 
-		const result = await User.UpdateUserDetails(user, 'newEmail', 'newUsername', 'short');
+		const result = await User.UpdateCurrentUserDetails(user, 'newEmail', 'newUsername', 'short');
 
 		expect(result.IsSuccess).toBeFalsy();
 		expect(result.Message).toBe('Password must be at least 7 characters long');

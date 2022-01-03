@@ -27,8 +27,8 @@ export default class Account extends Page {
             const passwordConfirm = req.body.passwordConfirm;
             const username = req.body.username;
 
-            if (!currentPassword) {
-                req.session.error = "Current password is required";
+            if (!email || !currentPassword || !username) {
+                req.session.error = "Email, Current Password, and Username are required";
                 res.redirect('/user/settings/account');
                 return;
             }
@@ -45,7 +45,7 @@ export default class Account extends Page {
                 return;
             }
 
-            const result = await User.UpdateUserDetails(user, email, username, newPassword ? newPassword : currentPassword);
+            const result = await User.UpdateCurrentUserDetails(user, email, username, newPassword ? newPassword : currentPassword);
 
             if (result.IsSuccess) {
                 const newUser = await User.GetUser(user.Id);

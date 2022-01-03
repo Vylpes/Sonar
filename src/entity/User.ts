@@ -135,7 +135,7 @@ export class User {
         return await userRepository.findOne({ Username: username });
     }
 
-    public static async UpdateUserDetails(currentUser: User, email: string, username: string, password: string): Promise<IBasicResponse> {
+    public static async UpdateCurrentUserDetails(currentUser: User, email: string, username: string, password: string): Promise<IBasicResponse> {
         const connection = getConnection();
 
         const userRepo = connection.getRepository(User);

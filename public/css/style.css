@@ -6,3 +6,9 @@ body {
 a {
     color: #00B7FF
 }
+
+.required::after {
+    content: "*";
+    color: red;
+    padding-left: 2px;
+}
