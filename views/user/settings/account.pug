@@ -1,0 +1,33 @@
+extends ../../layout
+
+block content
+    .row
+        .col
+            h1 User Settings
+    ul.nav.nav-tabs.mb-3
+        li.nav-item
+            a.nav-link.active(href="/user/settings/account") Account
+    .row
+        .col-12
+            form(method='POST' action='/user/settings/account')
+                .form-group.mb-3
+                    label.required Email
+                    input(type='text' name='email' value=user.Email).form-control
+                .form-group.mb-3
+                    label.required Username
+                    input(type='text' name='username' value=user.Username).form-control
+                hr
+                .form-group.mb-3
+                    label New Password
+                    input(type='password' name='newPassword').form-control
+                .form-group.mb-3
+                    label Confirm New Password
+                    input(type='password' name='passwordConfirm').form-control
+                hr
+                .form-group.mb-3
+                    label.required Please confirm your current password to continue
+                    input(type='password' name='currentPassword').form-control
+                .form-group.text-center
+                    button(type='submit').btn.btn-success
+                        i.fas.fa-check-square
+                        span.ms-1 Save changes
