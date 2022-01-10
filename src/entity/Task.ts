@@ -75,7 +75,7 @@ export class Task {
     }
 
     public ToggleArchiveStatus() {
-	this.Archived = !this.Archived;
+	    this.Archived = !this.Archived;
     }
 
     public static async GetAllTasks(currentUser: User): Promise<Task[]> {
@@ -260,24 +260,24 @@ export class Task {
     }
 
     public static async ToggleTaskArchiveStatus(taskString: string, currentUser: User): Promise<Boolean> {
-	const connection = getConnection();
+        const connection = getConnection();
 
-	const taskRepo = connection.getRepository(Task);
+        const taskRepo = connection.getRepository(Task);
 
-	const task = await Task.GetTaskByTaskString(taskString, currentUser);
+        const task = await Task.GetTaskByTaskString(taskString, currentUser);
 
-	if (!task) {
-	    return false;
-	}
+        if (!task) {
+            return false;
+        }
 
-	if (!(await ProjectUser.HasPermission(task.Project.Id, currentUser.Id, UserProjectPermissions.TaskUpdate))) {
-	    return false;
-	}
+        if (!(await ProjectUser.HasPermission(task.Project.Id, currentUser.Id, UserProjectPermissions.TaskUpdate))) {
+            return false;
+        }
 
-	task.ToggleArchiveStatus();
+        task.ToggleArchiveStatus();
 
-	await taskRepo.save(task);
+        await taskRepo.save(task);
 
-	return true;
+        return true;
     }
 }

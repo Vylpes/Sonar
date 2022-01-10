@@ -23,8 +23,16 @@ export class View extends Page {
             }
 
             res.locals.viewData.task = task;
-            res.locals.viewData.canEditTask = await ProjectUser.HasPermission(task.Project.Id, req.session.User.Id, UserProjectPermissions.TaskUpdate);
-            res.locals.viewData.canAssignTask = await ProjectUser.HasPermission(task.Project.Id, req.session.User.Id, UserProjectPermissions.TaskAssign);
+            
+            if (task.Archived) {
+                res.locals.viewData.canEditTask = false;
+                res.locals.viewData.canAssignTask = false;
+                res.locals.viewData.canArchiveTask = true;
+            } else {
+                res.locals.viewData.canEditTask = await ProjectUser.HasPermission(task.Project.Id, req.session.User.Id, UserProjectPermissions.TaskUpdate);
+                res.locals.viewData.canAssignTask = await ProjectUser.HasPermission(task.Project.Id, req.session.User.Id, UserProjectPermissions.TaskAssign);
+                res.locals.viewData.canArchiveTask = res.locals.viewData.canEditTask;
+            }
             
             res.render('tasks/view', res.locals.viewData);
         });
