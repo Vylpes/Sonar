@@ -19,7 +19,6 @@ describe('OnPost', () => {
         const res = mock<Response>();
         res.redirect.mockImplementation((path: string) => {
             expect(path).toBe('/tasks/view/taskString-1');
-            expect(req.session.success).toBe('Successfully set archive status');
             expect(Task.ToggleTaskArchiveStatus).toBeCalledWith('taskString-1', user);
 
             done();
