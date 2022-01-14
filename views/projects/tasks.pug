@@ -25,6 +25,13 @@ block content
             a.nav-link(href="/projects/view/" + project.Id) Details
         li.nav-item
             a.nav-link.active(href="/projects/view/" + project.Id + "/tasks") Tasks
+    .row.mb-3
+        if showArchived
+            .col
+                a(href="/projects/view/" + project.Id + "/tasks").btn.btn-primary#toggleArchived Hide Archived Tasks
+        else
+            .col
+                a(href="/projects/view/" + project.Id + "/tasks?archived=true").btn.btn-primary#toggleArchived Show Archived Tasks
     table#task-list-table
         thead
             tr
@@ -35,22 +42,23 @@ block content
                 th Actions
         tbody
             each row in tasks
-                tr
-                    td
-                        span= project.TaskPrefix
-                        span -
-                        span= row.TaskNumber
-                    td= row.Name
-                    td
-                        if row.AssignedTo
-                            span= row.AssignedTo.Username
-                        else
-                            span Unassigned
-                    td= row.CreatedAt
-                    td
-                        a(href="/tasks/view/" + project.TaskPrefix + "-" + row.TaskNumber).btn.text-primary
-                            i.fas.fa-eye
-                            span.ms-1 View
+                if (showArchived) || (!showArchived && !row.Archived)
+                    tr
+                        td
+                            span= project.TaskPrefix
+                            span -
+                            span= row.TaskNumber
+                        td= row.Name
+                        td
+                            if row.AssignedTo
+                                span= row.AssignedTo.Username
+                            else
+                                span Unassigned
+                        td= row.CreatedAt
+                        td
+                            a(href="/tasks/view/" + project.TaskPrefix + "-" + row.TaskNumber).btn.text-primary
+                                i.fas.fa-eye
+                                span.ms-1 View
     if canCreateTask
         form(method='POST' action='/tasks/new').modal.fade#create-task-modal
             .modal-dialog.modal-dialog-scrollable
