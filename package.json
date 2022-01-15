@@ -4,7 +4,7 @@
   "description": "Project Management Web Application",
   "main": "dist/index.js",
   "repository": "https://github.com/vylpes/sonar.git",
-  "author": "Ethan Lane <vylpes@outlook.com>",
+  "author": "Ethan Lane <ethan@vylpes.com>",
   "license": "MIT",
   "dependencies": {
     "@types/bcryptjs": "^2.4.2",
