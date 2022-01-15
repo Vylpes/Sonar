@@ -139,6 +139,21 @@ describe('ToggleDoneStatus', () => {
 	});
 });
 
+describe('ToggleArchiveStatus', () => {
+	test('Expect value to be inverted', () => {
+		const date = new Date();
+		const user = mock<User>();
+		const project = mock<Project>();
+		const parentTask = mock<Task>();
+
+		const task = new Task('taskId', 1, 'name', 'description', user, date, false, false, project, user, parentTask);
+
+		task.ToggleArchiveStatus();
+
+		expect(task.Archived).toBeTruthy();
+	});
+});
+
 describe('GetAllTasks', () => {
     test('Expect all visible tasks to be returned', async () => {
 		const currentUser = mock<User>();
@@ -751,5 +766,66 @@ describe('ToggleTaskCompleteStatus', () => {
 		expect(result).toBeFalsy();
 		expect(task.ToggleDoneStatus).toBeCalledTimes(0);
 		expect(repositoryMock.save).toBeCalledTimes(0);
+	});
+});
+
+describe('ToggleTaskArchiveStatus', () => {
+	test('Given user has permission, expect true returned', async () => {
+		const currentUser = mock<User>();
+		currentUser.Id = 'userId';
+
+		const task = mock<Task>();
+		task.Id = 'taskId';
+		task.TaskNumber = 1;
+
+		Task.prototype.ToggleArchiveStatus = jest.fn();
+		Task.GetTaskByTaskString = jest.fn().mockResolvedValue(task);
+		ProjectUser.HasPermission = jest.fn().mockResolvedValue(true);
+
+		const result = await Task.ToggleTaskArchiveStatus('taskString-1', currentUser);
+
+		expect(result).toBeTruthy();
+		expect(task.ToggleArchiveStatus).toBeCalledTimes(1);
+		expect(repositoryMock.save).toBeCalledTimes(1);
+	});
+
+	test('Given task does not exist, expect false returned', async () => {
+		const currentUser = mock<User>();
+		currentUser.Id = 'userId';
+
+		const task = mock<Task>();
+		task.Id = 'taskId';
+		task.TaskNumber = 1;
+
+		Task.prototype.ToggleArchiveStatus = jest.fn();
+		Task.GetTaskByTaskString = jest.fn().mockResolvedValue(null);
+		ProjectUser.HasPermission = jest.fn().mockResolvedValue(true);
+
+		const result = await Task.ToggleTaskArchiveStatus('taskString-1', currentUser);
+
+		expect(result).toBeFalsy();
+		expect(task.ToggleArchiveStatus).not.toBeCalled();
+		expect(repositoryMock.save).not.toBeCalled();
+
+	});
+
+	test('Given user does not have permission, expect false returned', async () => {
+		const currentUser = mock<User>();
+		currentUser.Id = 'userId';
+
+		const task = mock<Task>();
+		task.Id = 'taskId';
+		task.TaskNumber = 1;
+
+		Task.prototype.ToggleArchiveStatus = jest.fn();
+		Task.GetTaskByTaskString = jest.fn().mockResolvedValue(task);
+		ProjectUser.HasPermission = jest.fn().mockResolvedValue(false);
+
+		const result = await Task.ToggleTaskArchiveStatus('taskString-1', currentUser);
+
+		expect(result).toBeFalsy();
+		expect(task.ToggleArchiveStatus).not.toBeCalled();
+		expect(repositoryMock.save).not.toBeCalled();
+
 	});
 });

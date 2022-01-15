@@ -12,7 +12,7 @@ block content
                 span= task.TaskNumber
             h1= task.Name
             if task.Archived
-                .badge.rounded-pill.bg-warning.mb-3.me-1
+                .badge.round-pill.bg-warning.mb-3.me-1
                     i.fas.fa-archive
                     span.ms-1 Archived
             if task.Done
@@ -29,15 +29,26 @@ block content
                     button(data-bs-toggle='modal' data-bs-target='#assign-task-modal').btn.text-secondary
                         i.fas.fa-user-plus
                         span.ms-1 Assign
+                if canArchiveTask
+                    form(method='POST' action='/tasks/archive')
+                        input(type='hidden' name='taskString' value=task.Project.TaskPrefix + '-' + task.TaskNumber)
+                        if task.Archived
+                            button(type='submit').btn.text-secondary
+                                i.fas.fa-archive
+                                span.ms-1 Unarchive Task
+                        else
+                            button(type='submit').btn.text-secondary
+                                i.fas.fa-archive
+                                span.ms-1 Archive Task
                 if canEditTask
                     form(method='POST' action='/tasks/done')
                         input(type='hidden' name='taskString' value=task.Project.TaskPrefix + '-' + task.TaskNumber)
                         if task.Done
-                            button(type='submit').btn.text-primary
+                            button(type='submit').btn.text-secondary
                                 i.fas.fa-times-circle
                                 span.ms-1 Mark as Incomplete
                         else
-                            button(type='submit').btn.text-primary
+                            button(type='submit').btn.text-secondary
                                 i.fas.fa-check-circle
                                 span.ms-1 Mark as Complete
                     button(data-bs-toggle='modal' data-bs-target='#edit-task-modal').btn.text-primary

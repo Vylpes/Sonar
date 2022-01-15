@@ -1,4 +1,4 @@
-import { compare, hash } from "bcrypt";
+import { compare, hash } from "bcryptjs";
 import {Entity, Column, PrimaryColumn, OneToMany, getConnection} from "typeorm";
 import { Project } from "./Project";
 import { ProjectUser } from "./ProjectUser";

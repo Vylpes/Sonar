@@ -34,7 +34,7 @@ jest.mock('typeorm', () => {
 
 import { Connection, Repository, SelectQueryBuilder } from "typeorm";
 import { User } from "../../src/entity/User";
-import bcrypt, { hash } from "bcrypt";
+import bcrypt, { hash } from "bcryptjs";
 
 beforeEach(() => {
     // Repository Mock

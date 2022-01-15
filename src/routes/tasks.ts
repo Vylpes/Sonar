@@ -7,6 +7,7 @@ import { List } from "./tasks/list";
 import { New } from "./tasks/new";
 import { View } from "./tasks/view";
 import Done from "./tasks/done";
+import Archive from "./tasks/archive";
 
 export class TasksRouter extends Route {
     private _list: List;
@@ -16,6 +17,7 @@ export class TasksRouter extends Route {
     private _edit: Edit;
     private _assign: Assign;
     private _done: Done;
+    private _archive: Archive;
 
     constructor() {
         super();
@@ -27,6 +29,7 @@ export class TasksRouter extends Route {
         this._edit = new Edit(super.router);
         this._assign = new Assign(super.router);
         this._done = new Done(super.router);
+        this._archive = new Archive(super.router);
     }
 
     public Route(): Router {
@@ -37,6 +40,7 @@ export class TasksRouter extends Route {
         this._edit.Route();
         this._assign.Route();
         this._done.Route();
+        this._archive.Route();
 
         return super.router;
     }
